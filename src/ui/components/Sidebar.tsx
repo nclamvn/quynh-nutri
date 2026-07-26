@@ -24,7 +24,7 @@ function ChevronsIcon({ dir }: { dir: "left" | "right" }) {
 export function Sidebar() {
   const pathname = usePathname();
   const { t } = useI18n();
-  const { household } = useStore();
+  const { household, hydrated } = useStore();
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -112,9 +112,9 @@ export function Sidebar() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-medium">{t("household.family", { n: household.size })}</p>
-              <p className="flex items-center gap-1 text-[10px] text-accent">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                {t("sync.online")}
+              <p className={`flex items-center gap-1 text-[10px] ${hydrated ? "text-accent" : "text-amber"}`}>
+                <span className={`inline-block h-1.5 w-1.5 rounded-full ${hydrated ? "bg-accent" : "animate-pulse bg-amber"}`} />
+                {hydrated ? t("sync.online") : t("sync.syncing")}
               </p>
             </div>
             <UserButton appearance={{ elements: { avatarBox: "h-7 w-7" } }} />

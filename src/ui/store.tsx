@@ -9,6 +9,14 @@ import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
 import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
 import { getHouseholdState, persistState } from "@/app/actions";
+import { toast } from "@/ui/toast";
+
+const SYNC_FAIL_MSG = "Không tải được dữ liệu — đang dùng bản mặc định.";
+const SAVE_FAIL_MSG = "Chưa lưu được thay đổi. Kiểm tra kết nối.";
+
+/** Persist without swallowing failures — surface them as a toast. */
+const safePersist = (patch: Parameters<typeof persistState>[0]) =>
+  persistState(patch).catch(() => toast(SAVE_FAIL_MSG, "error"));
 
 // Phase 1 data source: the typed seed, in-memory. When Postgres is wired the
 // repo layer swaps in here without touching domain or UI.
@@ -18,6 +26,7 @@ const repertoire: Dish[] = REPERTOIRE;
 const B1_KEY = "qk-b1-dishes";
 
 interface StoreValue {
+  hydrated: boolean;
   household: Household;
   plan: WeekPlan;
   notes: string[];
@@ -56,6 +65,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Per-piece "touched" flags so late-arriving DB hydration never clobbers an
   // optimistic edit the user made before it resolved.
   const touched = useRef({ household: false, favorites: false, notes: false, pantry: false });
+  const [hydrated, setHydrated] = useState(false);
   const [seed, setSeed] = useState(1);
   const [manualPlan, setManualPlan] = useState<WeekPlan | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
@@ -82,7 +92,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }
         if (!tp.pantry) setPantry(s.pantry);
       })
-      .catch(() => {}); // offline / no DB → keep defaults
+      .catch(() => toast(SYNC_FAIL_MSG, "error")) // surface, don't swallow
+      .finally(() => setHydrated(true));
   }, []);
 
   // B1 dishes (forks + imports) persist on-device. DB-persist is a later migration.
@@ -179,7 +190,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const updateHousehold = useCallback((patch: Partial<Household>) => {
     touched.current.household = true;
     setHousehold((h) => ({ ...h, ...patch }));
-    persistState({
+    safePersist({
       size: patch.size,
       marketMode: patch.marketMode,
       busyDays: patch.busyDays,
@@ -194,7 +205,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ...h,
       members: h.members.map((m) => (m.id === memberId ? { ...m, healthProfile: profile ?? undefined } : m)),
     }));
-    import("@/app/actions").then(({ persistMemberHealthProfile }) => persistMemberHealthProfile(memberId, profile)).catch(() => {});
+    import("@/app/actions").then(({ persistMemberHealthProfile }) => persistMemberHealthProfile(memberId, profile)).catch(() => toast(SAVE_FAIL_MSG, "error"));
   }, []);
 
   const updateMemberAllergies = useCallback((memberId: string, allergies: Allergen[]) => {
@@ -203,7 +214,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ...h,
       members: h.members.map((m) => (m.id === memberId ? { ...m, allergies } : m)),
     }));
-    import("@/app/actions").then(({ persistMemberAllergies }) => persistMemberAllergies(memberId, allergies)).catch(() => {});
+    import("@/app/actions").then(({ persistMemberAllergies }) => persistMemberAllergies(memberId, allergies)).catch(() => toast(SAVE_FAIL_MSG, "error"));
   }, []);
 
   const addNote = useCallback((text: string) => {
@@ -212,13 +223,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     touched.current.notes = true;
     const next = [{ id: noteId.current++, text: t }, ...userNotes];
     setUserNotes(next);
-    persistState({ notes: next });
+    safePersist({ notes: next });
   }, [userNotes]);
   const deleteNote = useCallback((id: number) => {
     touched.current.notes = true;
     const next = userNotes.filter((x) => x.id !== id);
     setUserNotes(next);
-    persistState({ notes: next });
+    safePersist({ notes: next });
   }, [userNotes]);
 
   const addPantry = useCallback((commodityId: string, qty: number, unit: string) => {
@@ -227,13 +238,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const i = pantry.findIndex((x) => x.commodityId === commodityId);
     const next = i >= 0 ? pantry.map((x, j) => (j === i ? { ...x, qty: x.qty + qty } : x)) : [...pantry, { commodityId, qty, unit }];
     setPantry(next);
-    persistState({ pantry: next });
+    safePersist({ pantry: next });
   }, [pantry]);
   const removePantry = useCallback((commodityId: string) => {
     touched.current.pantry = true;
     const next = pantry.filter((x) => x.commodityId !== commodityId);
     setPantry(next);
-    persistState({ pantry: next });
+    safePersist({ pantry: next });
   }, [pantry]);
 
   // ── Favorites (B1-lite): keyed by dish id shown on the card ──
@@ -242,7 +253,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     touched.current.favorites = true;
     const next = { ...favorites, [id]: !favorites[id] };
     setFavorites(next);
-    persistState({ favorites: Object.keys(next).filter((k) => next[k]) });
+    safePersist({ favorites: Object.keys(next).filter((k) => next[k]) });
   }, [favorites]);
   const favoriteDishes = useMemo(
     () => Object.keys(favorites).filter((id) => favorites[id]).map(resolve).filter((d): d is Dish => Boolean(d)),
@@ -277,6 +288,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value: StoreValue = {
+    hydrated,
     household,
     plan,
     notes,

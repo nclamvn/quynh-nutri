@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { BottomSheet } from "./BottomSheet";
 import { FlowerLogo } from "./FlowerLogo";
 import { RichText } from "./RichText";
+import { Skeleton } from "./Skeleton";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -123,7 +124,16 @@ export function AssistantSheet() {
         {messages.map((m, i) => (
           <div key={i} className={m.role === "user" ? "flex justify-end" : ""}>
             <div className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm ${m.role === "user" ? "whitespace-pre-wrap bg-brand text-white" : "bg-surface"}`}>
-              {m.role === "user" ? m.content : m.content ? <RichText text={m.content} /> : <span className="text-muted">…</span>}
+              {m.role === "user" ? (
+                m.content
+              ) : m.content ? (
+                <RichText text={m.content} />
+              ) : (
+                <div className="flex w-40 flex-col gap-1.5 py-0.5">
+                  <Skeleton className="h-2.5 w-full" />
+                  <Skeleton className="h-2.5 w-4/5" />
+                </div>
+              )}
             </div>
           </div>
         ))}

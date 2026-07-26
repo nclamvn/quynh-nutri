@@ -5,6 +5,7 @@ import { SWRegister } from "./SWRegister";
 import { MobileTopBar } from "./MobileTopBar";
 import { AssistantSheet } from "./AssistantSheet";
 import { AmbientBackground } from "./AmbientBackground";
+import { Toaster } from "./Toaster";
 
 /**
  * Responsive app shell (Blueprint §4–5).
@@ -30,6 +31,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <TabBar />
       </div>
       <AssistantSheet />
+      <Toaster />
     </div>
   );
 }

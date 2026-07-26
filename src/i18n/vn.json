@@ -223,5 +223,6 @@
   "restriction.vegetarian": "Ăn chay",
   "restriction.pescatarian": "Chay + cá/hải sản",
   "restriction.no_pork": "Không thịt heo",
-  "restriction.no_beef": "Không thịt bò"
+  "restriction.no_beef": "Không thịt bò",
+  "sync.syncing": "Đang đồng bộ…"
 }

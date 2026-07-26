@@ -223,5 +223,6 @@
   "restriction.vegetarian": "Vegetarian",
   "restriction.pescatarian": "Pescatarian",
   "restriction.no_pork": "No pork",
-  "restriction.no_beef": "No beef"
+  "restriction.no_beef": "No beef",
+  "sync.syncing": "Syncing…"
 }
