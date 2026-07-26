@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import { NoteIcon } from "@/ui/components/icons";
+import { Blossom } from "@/ui/components/Blossom";
 
 export default function NotesPage() {
   const { userNotes, addNote, deleteNote } = useStore();
@@ -40,8 +41,9 @@ export default function NotesPage() {
         </div>
 
         {userNotes.length === 0 ? (
-          <div className="flex flex-col items-center py-20 text-center">
-            <span className="mb-3 text-tertiary">
+          <div className="relative flex flex-col items-center py-20 text-center">
+            <Blossom size={120} className="pointer-events-none absolute -top-2 text-brand/10" />
+            <span className="relative mb-3 text-tertiary">
               <NoteIcon className="h-12 w-12" />
             </span>
             <p className="text-sm text-muted">{t("notes.empty")}</p>

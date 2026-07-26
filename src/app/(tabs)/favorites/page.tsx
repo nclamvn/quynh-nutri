@@ -11,6 +11,7 @@ import { HeartButton } from "@/ui/components/HeartButton";
 import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
 import { DishDetailSheet } from "@/ui/components/DishDetailSheet";
 import { HeartIcon } from "@/ui/components/icons";
+import { Blossom } from "@/ui/components/Blossom";
 
 const dishName = (d: Dish, lang: Lang) => (lang === "en" && d.enLabel ? d.enLabel : d.vnName);
 
@@ -26,8 +27,9 @@ export default function FavoritesPage() {
       </header>
 
       {favoriteDishes.length === 0 ? (
-        <div className="flex flex-col items-center px-4 py-20 text-center">
-          <span className="mb-3 text-brand/40">
+        <div className="relative flex flex-col items-center px-4 py-20 text-center">
+          <Blossom size={120} className="pointer-events-none absolute -top-2 text-brand/10" />
+          <span className="relative mb-3 text-brand/50">
             <HeartIcon className="h-12 w-12" />
           </span>
           <p className="text-sm font-medium">{t("fav.empty")}</p>
@@ -44,7 +46,7 @@ export default function FavoritesPage() {
                 onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDetailId(d.sourceRepertoireId ?? d.id)}
                 className="flex cursor-pointer items-center gap-3 rounded-[14px] border border-hairline bg-surface/40 p-3 transition-colors active:bg-surface"
               >
-                <DishThumb dish={d} size={56} />
+                <DishThumb dish={d} size={60} shape="rounded" />
                 <div className="min-w-0 flex-1">
                   <h2 className="mb-1 truncate text-sm font-semibold">{dishName(d, lang)}</h2>
                   <ProvenanceChip display={dishDisplay(d, household, commodity)} field="kcal" unit="kcal" />

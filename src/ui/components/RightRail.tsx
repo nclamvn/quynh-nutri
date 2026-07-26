@@ -9,6 +9,7 @@ import { dayDishes, dayNutrition } from "@/ui/derive";
 import { ProvenanceChip, ProvenanceDot } from "./ProvenanceChip";
 import { AdequacyStrip } from "./AdequacyStrip";
 import { DishThumb } from "./DishThumb";
+import { Blossom } from "./Blossom";
 
 const dishName = (d: Dish | undefined, lang: Lang) => (!d ? "—" : lang === "en" && d.enLabel ? d.enLabel : d.vnName);
 
@@ -44,26 +45,34 @@ function TodayRail() {
   const nut = dayNutrition(dishes, household, commodity);
   return (
     <>
-      <RailCard title={t("ov.tonight")}>
-        <div className="mb-3 space-y-2">
-          <ProvenanceChip display={nut.display} field="kcal" unit="kcal" />
-          <AdequacyStrip adequacy={nut.adequacy} />
+      <section className="card mb-4 overflow-hidden">
+        {/* Gradient hero header + blossom (authority §2.3 zone: hero/corner) */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand to-brand-hover px-4 py-3.5 text-white">
+          <Blossom size={72} className="pointer-events-none absolute -right-3 -top-5 text-white/25" />
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-white/80">{t("rail.today")}</p>
+          <p className="text-sm font-semibold">{t("ov.tonight")}</p>
         </div>
-        <ul className="space-y-2">
-          {dishes.map((d) => (
-            <li key={d.id} className="flex items-center gap-2.5 text-sm">
-              <DishThumb dish={d} size={32} />
-              <div className="min-w-0 flex-1">
-                <span className="block truncate">{dishName(d, lang)}</span>
-                <span className="text-[10px] uppercase tracking-wide text-tertiary">{t(`slot.${d.slot}`)}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <button className="mt-3 w-full rounded-full bg-brand py-2 text-sm font-medium text-white active:bg-brand-hover">
-          {t("ov.startCooking")}
-        </button>
-      </RailCard>
+        <div className="p-4">
+          <div className="mb-3 space-y-2">
+            <ProvenanceChip display={nut.display} field="kcal" unit="kcal" />
+            <AdequacyStrip adequacy={nut.adequacy} />
+          </div>
+          <ul className="space-y-2">
+            {dishes.map((d) => (
+              <li key={d.id} className="flex items-center gap-2.5 text-sm">
+                <DishThumb dish={d} size={34} shape="rounded" />
+                <div className="min-w-0 flex-1">
+                  <span className="block truncate">{dishName(d, lang)}</span>
+                  <span className="text-[10px] uppercase tracking-wide text-tertiary">{t(`slot.${d.slot}`)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <button className="cta-primary mt-4 w-full rounded-full py-2.5 text-sm font-medium text-white">
+            {t("ov.startCooking")}
+          </button>
+        </div>
+      </section>
 
       {/* Uống nước — SHELL: no water-tracking engine yet, so NO fake number (L-1) */}
       <RailCard title={t("ov.water")}>

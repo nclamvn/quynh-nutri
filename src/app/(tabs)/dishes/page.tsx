@@ -55,7 +55,7 @@ export default function DishesPage() {
               onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDetailId(d.id)}
               className="flex cursor-pointer items-center gap-3 rounded-[14px] border border-hairline bg-surface/40 p-3 transition-colors active:bg-surface"
             >
-              <DishThumb dish={d} size={56} />
+              <DishThumb dish={d} size={60} shape="rounded" />
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <h2 className="truncate text-sm font-semibold">{dishName(d, lang)}</h2>

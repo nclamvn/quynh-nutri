@@ -1,11 +1,22 @@
-# Dish illustrations — credits
+# Dish photos — credits
 
-**Source:** internal SVG illustrations from the Q's Kitchen design system
-(`design/assets/*.svg`). Consistent house style, no licensing risk.
+Source: TheMealDB (https://www.themealdb.com) — free food-photo database.
+Self-hosted (no runtime hotlink). Mapped by category; consistency-of-tone > exact match.
 
-**Decision (TIP-UI-8):** SVG nội bộ cho v1. Real photography (Unsplash-first,
-self-hosted here with per-image credit) only when a curated, tone-consistent set
-exists — "nhất quán tông hơn khớp-đúng-món". No un-licensed stock.
-
-Mapping dish → asset lives in `src/ui/dish-image.ts` (explicit id map + slot/
-protein fallback).
+| file | search term | source meal |
+|---|---|---|
+| kho.jpg | braised | Braised Beef Chilli |
+| canh.jpg | ramen | Ramen Noodles with Boiled Egg |
+| rau.jpg | stir fry | Chinese Tomato Egg Stir Fry |
+| com.jpg | fried rice | Chicken Fried Rice |
+| ga.jpg | chicken | Chicken Handi |
+| bo.jpg | beef | Beef pho |
+| ca.jpg | salmon | Salmon noodle soup |
+| tom.jpg | prawn | Kung Po Prawns |
+| cua.jpg | crab | Fried Crab |
+| heo.jpg | pork | Tonkatsu pork |
+| trung.jpg | egg | Egg Drop Soup |
+| dau.jpg | tofu | Ma Po Tofu |
+| nuong.jpg | teriyaki | Honey Teriyaki Salmon |
+| traicay.jpg | mango | Mango chow |
+| man.jpg | curry | Thai Green Curry |

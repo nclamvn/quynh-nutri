@@ -1,48 +1,62 @@
 "use client";
 
+export interface DonutSegment {
+  color: string; // CSS color (chart token)
+  on: boolean; // present → full opacity; absent → faded
+  label?: string;
+}
+
 /**
- * Single-value ring. The filled fraction is a REAL metric (e.g. % of core food
- * groups present) — no fabricated multi-segment breakdown (L-1). Colour carries
- * adequacy meaning: accent (botanical) when good, honey when short (never red).
+ * Multi-segment ring — one arc per food group, coloured by its chart token,
+ * BRIGHT if that group is present / faded if not. This gives the mock's colourful
+ * donut HONESTLY: it's qualitative presence (R-NUT-4), not a fabricated per-group
+ * %. Center stays "4/4 · nhóm có mặt" (denominator precedent intact).
  */
 export function Donut({
-  value,
+  segments,
   label,
   sublabel,
-  tone = "accent",
-  size = 92,
-  stroke = 9,
+  size = 96,
+  stroke = 10,
 }: {
-  value: number; // 0..100
+  segments: DonutSegment[];
   label: string;
   sublabel?: string;
-  tone?: "accent" | "amber";
   size?: number;
   stroke?: number;
 }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const pct = Math.max(0, Math.min(100, value));
-  const dash = (pct / 100) * c;
-  const color = tone === "accent" ? "var(--accent)" : "var(--amber)";
+  const n = segments.length;
+  const gapDeg = 6;
+  const segDeg = 360 / n - gapDeg;
+  const segLen = (segDeg / 360) * c;
+  const allOn = segments.every((s) => s.on);
 
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--surface)" strokeWidth={stroke} />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={`${dash} ${c - dash}`}
-        />
+        {segments.map((s, i) => {
+          const rot = (i * 360) / n + gapDeg / 2;
+          return (
+            <circle
+              key={i}
+              cx={size / 2}
+              cy={size / 2}
+              r={r}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={stroke}
+              strokeLinecap="round"
+              strokeDasharray={`${segLen} ${c - segLen}`}
+              transform={`rotate(${rot} ${size / 2} ${size / 2})`}
+              style={{ opacity: s.on ? 1 : 0.16, transition: "opacity var(--dur-normal) var(--ease-standard)" }}
+            />
+          );
+        })}
       </svg>
       <div className="absolute flex flex-col items-center leading-none">
-        <span className="tnum text-lg font-semibold" style={{ color }}>
+        <span className="tnum text-lg font-semibold" style={{ color: allOn ? "var(--accent)" : "var(--ink)" }}>
           {label}
         </span>
         {sublabel && <span className="mt-0.5 text-[9px] text-muted">{sublabel}</span>}

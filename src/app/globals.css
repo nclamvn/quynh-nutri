@@ -36,8 +36,22 @@
   --danger: #c4485d;
   --danger-weak: #fff0f2;
 
-  --shadow-card: 0 3px 10px rgba(45, 31, 38, 0.05), 0 1px 2px rgba(45, 31, 38, 0.035);
-  --shadow-float: 0 18px 44px rgba(239, 87, 117, 0.19);
+  /* Elevation tiers (authority §3.6) — restraint: card=sm, hover/important=md,
+     floating CTA/modal=float (rose-tinted). No shadow on rows/tables. */
+  --shadow-xs: 0 1px 2px rgba(45, 31, 38, 0.045);
+  --shadow-sm: 0 3px 10px rgba(45, 31, 38, 0.055), 0 1px 2px rgba(45, 31, 38, 0.035);
+  --shadow-md: 0 12px 30px rgba(63, 38, 49, 0.075), 0 2px 8px rgba(63, 38, 49, 0.04);
+  --shadow-lg: 0 22px 60px rgba(63, 38, 49, 0.11), 0 4px 14px rgba(63, 38, 49, 0.055);
+  --shadow-card: var(--shadow-sm);
+  --shadow-float: 0 18px 44px rgba(239, 87, 117, 0.19), 0 2px 8px rgba(55, 35, 44, 0.08);
+
+  /* Motion (authority §3.7) — "đặt nhẹ xuống", no bounce */
+  --dur-instant: 90ms;
+  --dur-fast: 160ms;
+  --dur-normal: 240ms;
+  --dur-slow: 360ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* chart colours (design-tokens §charts) — for nutrition group bars */
   --chart-protein: #6d8fe8;
@@ -71,7 +85,11 @@
   --danger-weak: #3b2028;
 
   /* shadows read as depth on dark via darker spread, not light glow */
-  --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 14px 34px rgba(0, 0, 0, 0.34), 0 2px 8px rgba(0, 0, 0, 0.26);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.42), 0 4px 14px rgba(0, 0, 0, 0.3);
+  --shadow-card: var(--shadow-sm);
   --shadow-float: 0 18px 44px rgba(239, 87, 117, 0.22), 0 2px 8px rgba(0, 0, 0, 0.28);
 }
 
@@ -112,7 +130,13 @@
 }
 
 body {
-  background: var(--bg);
+  /* Canvas wash (WS-3): a whisper-soft warm depth so cards float, not sit flat.
+     ≤5% tints — neutral stays dominant (authority §3.2), no rose wallpaper. */
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1100px 620px at 100% -8%, color-mix(in srgb, var(--brand) 5%, transparent), transparent 58%),
+    radial-gradient(900px 520px at -8% 2%, color-mix(in srgb, var(--accent) 4%, transparent), transparent 52%);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font-sans);
   letter-spacing: -0.008em;
@@ -139,11 +163,42 @@ body {
   box-shadow: var(--shadow-card);
 }
 .card-interactive {
-  transition: transform var(--dur, 160ms) cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow var(--dur, 160ms) cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard);
 }
 .card-interactive:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Primary hero CTA — restrained rose gradient + float bloom (authority: energy,
+   used sparingly on THE primary action of a view, not every button). */
+.cta-primary {
+  background-image: linear-gradient(135deg, var(--brand), var(--brand-hover));
   box-shadow: var(--shadow-float);
+  transition: transform var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard), filter var(--dur-fast) var(--ease-standard);
+}
+.cta-primary:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.05) brightness(1.02);
+}
+.cta-primary:active {
+  transform: translateY(0);
+}
+
+/* Sheet slide-up (authority §3.7: "đặt nhẹ xuống", no bounce). */
+@keyframes sheet-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-sheet {
+  animation: sheet-up var(--dur-slow) var(--ease-standard);
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade {
+  animation: fade-in var(--dur-normal) var(--ease-standard);
 }
 
 h1, h2, h3 {

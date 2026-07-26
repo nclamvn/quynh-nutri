@@ -33,7 +33,7 @@ export function DishDetailSheet({ dishId, onClose }: { dishId: string | null; on
       {d && display && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <DishThumb dish={d} size={56} />
+            <DishThumb dish={d} size={60} shape="rounded" />
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-base font-semibold">{name}</h2>
               <p className="text-xs text-muted">

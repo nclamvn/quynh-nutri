@@ -2,6 +2,7 @@ import { Sidebar } from "./Sidebar";
 import { RightRail } from "./RightRail";
 import { TabBar } from "./TabBar";
 import { SWRegister } from "./SWRegister";
+import { MobileTopBar } from "./MobileTopBar";
 
 /**
  * Responsive app shell (Blueprint §4–5).
@@ -17,7 +18,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex min-w-0 flex-1">
-          <main className="min-w-0 flex-1">{children}</main>
+          <main className="min-w-0 flex-1">
+            <MobileTopBar />
+            {children}
+          </main>
           <RightRail />
         </div>
         <TabBar />

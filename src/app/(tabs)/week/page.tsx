@@ -81,7 +81,7 @@ export default function WeekPage() {
                   const d = dish(s.dishId);
                   return (
                     <li key={s.slot} className="flex items-center gap-2 rounded-lg bg-bg px-2 py-1.5">
-                      <DishThumb dish={d} size={34} />
+                      <DishThumb dish={d} size={40} shape="rounded" />
                       <span className="w-9 shrink-0 text-[9px] font-medium uppercase tracking-wide text-tertiary">
                         {t(`slot.${s.slot}`)}
                       </span>

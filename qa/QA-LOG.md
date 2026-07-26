@@ -132,4 +132,42 @@ Method: `scripts/qa-ui35.mjs` — Playwright 390 × {light,dark}, mở detail sh
 
 **Meta-lesson (probe, không phải app):** hai lần probe ra số vô lý — `favorites count=14` (hard-nav `page.goto` reset React state) và `="Tổng quan"` (`ul>li` bắt trúng sidebar nav ở 1440). Cả hai là **probe đo nhầm**, sửa probe (client-nav + scope `main`) → PASS thật. Số vô lý = tín hiệu sửa kiểm-chứng trước khi khai FAIL. Cùng họ "bất đồng là dữ liệu".
 
-**Nợ mới (khai, không chặn):** trên mobile (<lg), các trang phụ (Yêu thích/Ghi chú/Báo cáo/Dinh dưỡng/Cài đặt) **chưa có đường vào từ bottom-nav** (chỉ 4 tab + FAB). Mock có "menu Thêm" — chưa dựng. Desktop vào đủ qua sidebar. Cần một "More" sheet cho mobile ở lượt sau.
+**Nợ mới (khai, không chặn):** trên mobile (<lg), các trang phụ (Yêu thích/Ghi chú/Báo cáo/Dinh dưỡng/Cài đặt) **chưa có đường vào từ bottom-nav** (chỉ 4 tab + FAB). Mock có "menu Thêm" — chưa dựng. Desktop vào đủ qua sidebar. Cần một "More" sheet cho mobile ở lượt sau. → **ĐÓNG bởi TIP-UI-MOBILE-NAV (dưới).**
+
+---
+
+## TIP-UI-MOBILE-NAV — đóng lỗ nav mobile (5/9 khu trước đây chỉ-desktop)
+
+`scripts/qa-mobilenav.mjs` — 390 × {light,dark}. Nav = **một nguồn** `src/ui/nav.tsx` (Sidebar + MobileMenu bám chung, chống drift). MobileTopBar (lg:hidden, in-flow) → hamburger mở MobileMenu (BottomSheet).
+
+| AC | Verdict | Bằng chứng |
+|---|---|---|
+| Mọi khu tới được trên mobile | **PASS** | menu = 10 mục (9 khu + Cài đặt), `menu-areas=9` links + settings. `mobile-menu__390__{light,dark}.png` |
+| Client-nav giữ state, sheet đóng | **PASS** | tap "Dinh dưỡng" → /nutrition, `nav-works=true` (dialog gone, state preserved via `<Link>`) |
+| Không thêm tab thứ 5 (4-tab no regress) | **PASS** | probe thô báo `13` (đếm cả **sidebar `display:none`** còn trong DOM) → scoped visible count = **4**. Surprising-WORSE nên nghi-probe hợp lệ; chứng minh bằng offsetParent filter. |
+| Sheet chồng TabBar/FAB? | **PASS (by image)** | geom-overlap (sheet z-40 che TabBar z-20) → ảnh sạch, không FAB lộ. Đúng nhánh "detector vs ảnh → ảnh phân xử". |
+| Light/dark + reduced-motion | **PASS** | cả hai theme sạch; reduced-motion block phủ mọi transition (BottomSheet không animation riêng). |
+
+**Phase 1 UI = mọi khu tới được trên CẢ desktop lẫn mobile.** Nợ nav đóng.
+
+---
+
+## POLISH pass — "cao cấp như mock" (WS-1..11)
+
+**Định hướng (authority §0):** premium = *tiết chế* — ảnh món · typography · nhịp · motion · nhất quán; KHÔNG hiệu ứng chồng chất. Né đúng §2.2 (không tech-gradient/glass-dày/script/radius>20).
+
+| WS | Làm | Bằng chứng |
+|---|---|---|
+| 1 · Ảnh thật | 15 ảnh food self-host (`public/dishes/photos/`, TheMealDB, tone-Á nhất-quán), photo primary + SVG fallback (`onError`), `scripts/fetch-photos.mjs` tái tạo | `qa/polish-overview__1440__{light,dark}.png` — grid/rail/card ngon mắt, hết "khung" |
+| 2 · Elevation | tầng shadow xs/sm/md/lg + float (authority §3.6); card=sm, hover=md, CTA=float | 14 tier refs trong globals |
+| 3 · Canvas | wash warm ≤5% → card *nổi* | overview shots |
+| 4 · Motif hoa | `Blossom.tsx` ở rail-header/hero/empty (vùng §2.3), tiết chế | rail + headline + empty states |
+| 5 · Rail | "Hôm nay" header gradient rose + blossom + CTA gradient | polish-overview rail |
+| 6 · Donut | multi-segment nhiều màu theo **nhóm-có-mặt** (chart tokens) — look mock, **honest** (label "4/4", không %) | donut 4/4 colourful |
+| 8 · Motion | tokens dur/ease (§3.7 "đặt nhẹ", no bounce); sheet slide-up + fade; reduced-motion phủ | BottomSheet |
+| 9 · CTA | `.cta-primary` rose gradient + float **chỉ** hero CTA; phụ giữ flat | AI gợi ý, Bắt đầu nấu, headline |
+| 11 · Grid/cards | ảnh lớn hơn + bo-góc, cell hover, card-interactive, metric hover | dishes/week/favorites |
+
+**Honesty precedents NGUYÊN VẸN sau polish:** donut "4/4" (không "%"/không "100%"), AdequacyStrip "≈X% nhu cầu ngày", nước = "chưa có dữ liệu · demo" (không 1.2 giả), không giá/rating giả, provenance mọi số. Polish chỉ đụng thị giác, không tầng ngữ nghĩa. **42 test xanh · build xanh.**
+
+**Deviation:** ảnh nguồn TheMealDB (Unsplash source-API deprecated + cần key) — ảnh thật, tone-Á, self-host; ảnh người (avatar) giữ initials (né license người). Ảnh lặp theo category (nhất-quán-tông > đúng-món, chốt với Human).

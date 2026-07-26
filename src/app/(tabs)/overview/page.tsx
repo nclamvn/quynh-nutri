@@ -10,6 +10,16 @@ import { dayDishes, dayNutrition } from "@/ui/derive";
 import { Donut } from "@/ui/components/Donut";
 import { DishThumb } from "@/ui/components/DishThumb";
 import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
+import { Blossom } from "@/ui/components/Blossom";
+import type { FoodGroup } from "@/domain/nutrition";
+
+const GROUP_COLORS: [FoodGroup, string][] = [
+  ["đạm", "var(--chart-protein)"],
+  ["tinh bột", "var(--chart-carb)"],
+  ["xơ", "var(--chart-fiber)"],
+  ["béo", "var(--chart-fat)"],
+  ["trái cây", "var(--chart-fruit)"],
+];
 
 const GRID_SLOTS: { slot: Slot; key: string }[] = [
   { slot: "MAN", key: "grid.man" },
@@ -30,8 +40,8 @@ export default function OverviewPage() {
   const nut = dayNutrition(today, household, commodity);
   const core = ["đạm", "tinh bột", "xơ", "béo"] as const;
   const presentCore = core.filter((g) => nut.groups.present.has(g)).length;
-  const groupsPct = Math.round((presentCore / 4) * 100);
   const vendors = new Set(shopping.map((i) => i.vendor)).size;
+  const groupSegments = GROUP_COLORS.map(([g, color]) => ({ color, on: nut.groups.present.has(g) }));
 
   const suggestion = useMemo(() => {
     const todayIds = new Set(today.map((d) => d.id));
@@ -45,11 +55,11 @@ export default function OverviewPage() {
       {/* Header (page owns it — no duplicate topbar) */}
       <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("ov.title")}</h1>
+          <h1 className="text-[26px] font-semibold -tracking-[0.02em] lg:text-[30px]">{t("ov.title")}</h1>
           <p className="text-sm text-muted">{t("greeting")} 👋 · {t("household.family", { n: household.size })}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-medium text-white active:bg-brand-hover">
+          <button className="cta-primary flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-white">
             ✨ {t("ov.aiSuggest")}
           </button>
           <button onClick={reroll} className="rounded-full border border-hairline px-3 py-2 text-sm text-muted active:bg-surface">
@@ -85,8 +95,11 @@ export default function OverviewPage() {
                   {Array.from({ length: 7 }, (_, d) => {
                     const dd = slotDish(d, slot);
                     return (
-                      <div key={d} className={`flex flex-col items-center gap-1 rounded-lg p-1.5 ${d === TODAY ? "bg-brand-weak" : ""}`}>
-                        <DishThumb dish={dd} size={34} />
+                      <div
+                        key={d}
+                        className={`flex flex-col items-center gap-1 rounded-xl p-1.5 transition-colors duration-150 hover:bg-surface ${d === TODAY ? "bg-brand-weak/70" : ""}`}
+                      >
+                        <DishThumb dish={dd} size={42} />
                         <span className="line-clamp-2 text-center text-[9px] leading-tight text-muted">{dishName(dd, lang)}</span>
                       </div>
                     );
@@ -99,10 +112,10 @@ export default function OverviewPage() {
           {/* Metric row */}
           <section className="mb-5 grid gap-4 md:grid-cols-3">
             {/* Nutrition today */}
-            <div className="card p-4">
+            <div className="card card-interactive p-4">
               <h2 className="mb-3 text-sm font-semibold">{t("ov.nutritionToday")}</h2>
               <div className="flex items-center gap-4">
-                <Donut value={groupsPct} label={`${presentCore}/4`} sublabel={t("ov.groupsMet")} tone={presentCore === 4 ? "accent" : "amber"} />
+                <Donut segments={groupSegments} label={`${presentCore}/4`} sublabel={t("ov.groupsMet")} />
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex flex-wrap gap-1">
                     {(["đạm", "tinh bột", "xơ", "béo", "trái cây"] as const).map((g) => {
@@ -124,7 +137,7 @@ export default function OverviewPage() {
             </div>
 
             {/* Need to buy today */}
-            <div className="flex flex-col card p-4">
+            <div className="card card-interactive flex flex-col p-4">
               <h2 className="mb-2 text-sm font-semibold">{t("ov.needToday")}</h2>
               <div className="flex items-baseline gap-2">
                 <span className="tnum text-4xl font-semibold text-brand">{shopping.length}</span>
@@ -137,11 +150,11 @@ export default function OverviewPage() {
             </div>
 
             {/* Suggestion */}
-            <div className="card p-4">
+            <div className="card card-interactive p-4">
               <h2 className="mb-3 text-sm font-semibold">{t("ov.suggestion")}</h2>
               {suggestion && (
                 <div className="flex items-center gap-3">
-                  <DishThumb dish={suggestion} size={52} />
+                  <DishThumb dish={suggestion} size={56} shape="rounded" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{dishName(suggestion, lang)}</p>
                     {suggestion.cookTimeMin && <p className="tnum text-xs text-muted">{suggestion.cookTimeMin} phút</p>}
@@ -154,17 +167,18 @@ export default function OverviewPage() {
             </div>
           </section>
 
-          {/* Headline suggestion card */}
-          <section className="overflow-hidden rounded-[16px] border border-hairline bg-gradient-to-br from-brand-weak to-accent-weak">
-            <div className="flex flex-col items-center gap-4 p-6 sm:flex-row sm:justify-between">
+          {/* Headline suggestion card — hero: gradient + blossom motif (§2.3 zone) */}
+          <section className="relative overflow-hidden rounded-[20px] border border-hairline bg-gradient-to-br from-brand-weak via-bg to-accent-weak shadow-[var(--shadow-sm)]">
+            <Blossom size={150} className="pointer-events-none absolute -right-6 -top-8 text-brand/15" />
+            <div className="relative flex flex-col items-center gap-5 p-6 sm:flex-row sm:justify-between">
               <div className="max-w-md">
                 <p className="mb-1.5 text-xs font-medium text-brand">✨ {t("ov.pantryHint")}</p>
-                <h2 className="mb-3 text-lg font-semibold leading-snug">{t("ov.suggestHeadline")}</h2>
-                <Link href="/week" className="inline-flex rounded-full bg-brand px-4 py-2 text-sm font-medium text-white active:bg-brand-hover">
+                <h2 className="mb-4 text-xl font-semibold leading-snug -tracking-[0.01em]">{t("ov.suggestHeadline")}</h2>
+                <Link href="/week" className="cta-primary inline-flex rounded-full px-5 py-2.5 text-sm font-medium text-white">
                   {t("ov.addToMenu")}
                 </Link>
               </div>
-              <DishThumb dish={suggestion} size={120} className="!rounded-3xl" />
+              <DishThumb dish={suggestion} size={128} shape="rounded" className="!rounded-[20px] shadow-[var(--shadow-md)]" />
             </div>
           </section>
         </>

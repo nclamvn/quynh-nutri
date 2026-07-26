@@ -23,8 +23,8 @@ export function BottomSheet({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal>
-      <button aria-label="Đóng" className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md rounded-t-2xl border border-hairline bg-bg p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl">
+      <button aria-label="Đóng" className="animate-fade absolute inset-0 bg-[var(--overlay-scrim,rgba(30,21,27,0.42))]" onClick={onClose} />
+      <div className="animate-sheet relative z-10 w-full max-w-md rounded-t-[20px] border border-hairline bg-bg p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[var(--shadow-lg)]">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hairline" />
         {title && <h2 className="mb-3 text-base font-semibold">{title}</h2>}
         <div className="max-h-[65dvh] overflow-y-auto">{children}</div>

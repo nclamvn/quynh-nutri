@@ -5,35 +5,9 @@ import { usePathname } from "next/navigation";
 import { useI18n } from "@/i18n/context";
 import { useStore } from "@/ui/store";
 import { useTheme } from "@/ui/theme";
-import {
-  CalendarIcon, BasketIcon, BowlIcon, ChartIcon, GearIcon,
-  OverviewIcon, ReportIcon, HeartIcon, NoteIcon, SunIcon, MoonIcon,
-} from "./icons";
+import { SunIcon, MoonIcon } from "./icons";
 import { FlowerLogo } from "./FlowerLogo";
-
-type Item = { href?: string; key: string; icon: (p: { className?: string }) => React.ReactElement; soon?: boolean };
-
-const GROUPS: { group: string; items: Item[] }[] = [
-  {
-    group: "group.main",
-    items: [
-      { href: "/overview", key: "nav.overview", icon: OverviewIcon },
-      { href: "/week", key: "nav.week", icon: CalendarIcon },
-      { href: "/shopping", key: "nav.shopping", icon: BasketIcon },
-      { href: "/dishes", key: "nav.dishes", icon: BowlIcon },
-      { href: "/nutrition", key: "nav.nutrition", icon: ChartIcon },
-    ],
-  },
-  {
-    group: "group.track",
-    items: [
-      { href: "/reports", key: "nav.reports", icon: ReportIcon },
-      { href: "/favorites", key: "nav.favorites", icon: HeartIcon },
-      { href: "/notes", key: "nav.notes", icon: NoteIcon },
-    ],
-  },
-  { group: "group.system", items: [{ href: "/settings", key: "nav.settings", icon: GearIcon }] },
-];
+import { NAV_GROUPS as GROUPS } from "@/ui/nav";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -64,24 +38,18 @@ export function Sidebar() {
             <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-tertiary">{t(group)}</p>
             <ul className="space-y-0.5">
               {items.map((it) => {
-                const active = it.href && (pathname === it.href || pathname.startsWith(it.href + "/"));
-                const cls = `flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-                  active ? "bg-brand-weak font-medium text-brand" : it.soon ? "text-tertiary" : "text-muted hover:bg-surface hover:text-ink"
-                }`;
-                const inner = (
-                  <>
-                    <it.icon className="h-[18px] w-[18px] shrink-0" />
-                    <span className="flex-1 truncate">{t(it.key)}</span>
-                    {it.soon && <span className="rounded-full bg-surface px-1.5 py-0.5 text-[9px] text-tertiary">{t("sidebar.soon")}</span>}
-                  </>
-                );
+                const active = pathname === it.href || pathname.startsWith(it.href + "/");
                 return (
                   <li key={it.key}>
-                    {it.href ? (
-                      <Link href={it.href} className={cls}>{inner}</Link>
-                    ) : (
-                      <span className={`${cls} cursor-default`} aria-disabled>{inner}</span>
-                    )}
+                    <Link
+                      href={it.href}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
+                        active ? "bg-brand-weak font-medium text-brand" : "text-muted hover:bg-surface hover:text-ink"
+                      }`}
+                    >
+                      <it.icon className="h-[18px] w-[18px] shrink-0" />
+                      <span className="flex-1 truncate">{t(it.key)}</span>
+                    </Link>
                   </li>
                 );
               })}
