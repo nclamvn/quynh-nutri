@@ -49,6 +49,8 @@ export interface Commodity extends Macro {
   edibleYield?: number;
   /** Allergen tags this ingredient carries (e.g. "shellfish", "fish", "egg"). */
   allergens?: Allergen[];
+  /** Pregnancy hazard tags — only set with a sourceRef (soft warnings, T1). */
+  pregnancyHazards?: { hazard: PregnancyHazard; source: ProvenanceLevel }[];
   /**
    * Reference retail price in VND per kg of PURCHASED weight (same basis as the
    * shopping list's grossed-up qty). Price is inherently a market estimate — it
@@ -62,6 +64,27 @@ export interface Commodity extends Macro {
 
 export type Allergen = "shellfish" | "fish" | "egg" | "soy" | "dairy" | "gluten" | "peanut";
 export type DietRestriction = "vegetarian" | "pescatarian" | "no_pork" | "no_beef";
+
+// ─── Special diets (T1) — see design/VISION-special-diets.md ───
+// App EXECUTES, does not PRESCRIBE. Clinical constraints (T2/T3) are modelled but
+// ship dormant (no UI); T1 uses `wellness` only.
+export type LifeStage =
+  | "none"
+  | "pregnant_t1" | "pregnant_t2" | "pregnant_t3"
+  | "lactating_0_6" | "lactating_7_12";
+
+/** Pregnancy hazard tags on a commodity — soft, sourced warnings (never a hard
+ *  exclusion for T1). Only set when a sourceRef backs it. */
+export type PregnancyHazard =
+  | "high_mercury" | "raw_undercooked" | "unpasteurized" | "liver_vit_a" | "alcohol" | "high_caffeine";
+
+export interface HealthProfile {
+  lifeStage: LifeStage;
+  mode: "wellness" | "clinical";
+  // ── T2/T3 seam — dormant, no UI in T1. clinical mode is only valid with expertSet. ──
+  constraints?: unknown[];
+  expertSet?: { by: string; at: string; ref: string };
+}
 
 /** One ingredient line inside a dish, qty for `baseServings`. */
 export interface DishLine {
@@ -99,6 +122,8 @@ export interface Member {
   activity: Activity;
   /** Allergens this member must avoid (dinner is shared → household-wide effect). */
   allergies?: Allergen[];
+  /** Life-stage / health profile (T1: pregnancy & postpartum, wellness mode). */
+  healthProfile?: HealthProfile;
 }
 
 export interface Household {

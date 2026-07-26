@@ -1,4 +1,5 @@
 import type { Member } from "@/domain/types";
+import { lifeStageUplift } from "./lifestage";
 
 // Nhu cầu Dinh dưỡng Khuyến nghị 2016 (QĐ 2615/QĐ-BYT) — P2 canonical.
 // Daily requirement per member, keyed by role/sex/age-band/activity.
@@ -43,11 +44,13 @@ export function dailyNeed(member: Member, lactating = false): DailyNeed {
   let kcal = base.kcal * pal;
   let proteinG = base.proteinG;
 
-  // Lactating uplift (P3, 0-6 months): +505 kcal, +19 g protein.
-  if (lactating && member.role === "adult" && member.sex === "F") {
-    kcal += 505;
-    proteinG += 19;
-  }
+  // Life-stage uplift — per-member profile wins; household `lactating` flag is a
+  // legacy fallback. Only SOURCED stages add a number (lactating 0–6 = P3); an
+  // unsourced stage (e.g. a pregnancy trimester) adds nothing here, and the UI
+  // shows honest_null rather than a fabricated value.
+  const uplift = lifeStageUplift(member, lactating);
+  kcal += uplift.kcal;
+  proteinG += uplift.proteinG;
 
   return { kcal: Math.round(kcal), proteinG: Math.round(proteinG) };
 }
