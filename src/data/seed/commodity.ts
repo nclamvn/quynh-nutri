@@ -301,6 +301,27 @@ const ALLERGENS: Record<string, Allergen[]> = {
 };
 for (const c of COMMODITIES) c.allergens = ALLERGENS[c.id];
 
+// Reference retail prices, VND per kg of PURCHASED weight (Phase D). Representative
+// 2026 HN/HCM market/supermarket levels — a market estimate, never precise, so the
+// UI shows them as "~ · giá tham khảo". Condiments are intentionally UNPRICED (sold
+// per bottle, negligible per-meal) → they lower price-coverage honestly instead of
+// being faked, so the basket total reads as an explicit lower bound.
+const PRICE_SOURCE = "Khảo giá bán lẻ tham khảo 2026 (chợ/siêu thị HN·HCM)";
+const PRICES: Record<string, number> = {
+  com_trang: 9000, bun: 15000,
+  thit_ba_chi: 130000, thit_heo_nac: 120000, suon_heo: 140000, thit_bo: 280000, thit_ga: 75000,
+  ca_dieu_hong: 70000, ca_thu: 120000, ca_loc: 90000,
+  tom: 220000, ghe: 350000, cua_dong: 90000, muc: 200000,
+  trung_ga: 55000, dau_hu: 25000,
+  rau_muong: 15000, cai_ngot: 18000, bong_cai: 40000, gia_do: 18000, bi_xanh: 15000,
+  su_su: 15000, rau_lang: 15000, rau_ngot: 20000, rau_day: 15000, mong_toi: 15000,
+  ca_chua: 25000, hanh_tay: 25000, can_tay: 30000, muop: 18000,
+  chuoi: 25000, cam: 40000, dua_hau: 12000, thanh_long: 35000,
+};
+for (const c of COMMODITIES) {
+  if (PRICES[c.id] != null) { c.priceVndPerKg = PRICES[c.id]; c.priceSource = PRICE_SOURCE; }
+}
+
 export const COMMODITY_BY_ID: Record<string, Commodity> = Object.fromEntries(
   COMMODITIES.map((c) => [c.id, c]),
 );

@@ -7,6 +7,8 @@ import { loadHouseholdState } from "@/data/repo/household";
 import { generateWeek } from "@/domain/rotation";
 import { dietaryRepertoire } from "@/domain/dish";
 import { cookFromPantry } from "@/domain/pantry";
+import { aggregateShopping } from "@/domain/shopping";
+import { costReport, formatVnd } from "@/domain/cost";
 import { substitute } from "@/lib/substitute";
 import { semanticSearch } from "@/lib/search";
 import { normalizeVn } from "@/lib/claude";
@@ -106,6 +108,30 @@ export const tools = {
         matches: hits
           .filter((h) => h.score > 0.4)
           .map((h) => ({ dish: REPERTOIRE_BY_ID[h.id]?.vnName, slot: REPERTOIRE_BY_ID[h.id]?.slot, match: Math.round(h.score * 100) })),
+      };
+    },
+  }),
+
+  grocery_cost: tool({
+    description: "Ước tính chi phí đi chợ cả tuần cho hộ. LUÔN nói đây là ước lượng theo giá tham khảo, LUÔN nêu coverage (độ phủ giá). Nếu coverage < 100% thì tổng là CẬN DƯỚI (còn mặt hàng chưa có giá) — không bịa số. Chỉ nói 'vượt ngân sách' khi cận-dưới đã vượt.",
+    inputSchema: z.object({ budgetVnd: z.number().int().positive().optional().describe("ngân sách tuần nếu người dùng nêu, VND") }),
+    execute: async ({ budgetVnd }) => {
+      const hh = await household();
+      const items = aggregateShopping(planFor(hh), (id) => REPERTOIRE_BY_ID[id], src, hh, [], []);
+      const r = costReport(items, src, budgetVnd);
+      return {
+        estimatedWeeklyVnd: r.totalVnd,
+        display: `~${formatVnd(r.totalVnd)}`,
+        isLowerBound: r.coveragePct < 100,
+        priceCoveragePct: r.coveragePct,
+        pricedItems: r.pricedCount,
+        totalItems: r.totalCount,
+        byGroup: r.byGroup.slice(0, 6).map((g) => ({ group: g.group, vnd: g.vnd })),
+        topItems: r.top.map((l) => ({ name: l.vnName, vnd: l.costVnd })),
+        budgetVnd: budgetVnd ?? null,
+        overBudget: r.overBudget,
+        remainingVnd: r.remainingVnd ?? null,
+        note: "Giá là mức tham khảo 2026, đổi theo chợ/mùa; gia vị chưa tính giá.",
       };
     },
   }),

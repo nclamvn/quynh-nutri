@@ -49,6 +49,15 @@ export interface Commodity extends Macro {
   edibleYield?: number;
   /** Allergen tags this ingredient carries (e.g. "shellfish", "fish", "egg"). */
   allergens?: Allergen[];
+  /**
+   * Reference retail price in VND per kg of PURCHASED weight (same basis as the
+   * shopping list's grossed-up qty). Price is inherently a market estimate — it
+   * varies by region/season/vendor — so it NEVER claims corroborated precision:
+   * the UI always renders it as "~ · giá tham khảo". Omitted when we have no
+   * reference, which lowers the basket's price coverage rather than being faked.
+   */
+  priceVndPerKg?: number;
+  priceSource?: string;
 }
 
 export type Allergen = "shellfish" | "fish" | "egg" | "soy" | "dairy" | "gluten" | "peanut";
@@ -103,6 +112,8 @@ export interface Household {
   members: Member[];
   /** Household-wide diet restrictions (vegetarian, no pork, …). */
   restrictions?: DietRestriction[];
+  /** Optional weekly grocery budget cap in VND (user-set → exact; spend is the estimate). */
+  budgetWeeklyVnd?: number;
 }
 
 /** A planned dish in a slot on a given day. */
