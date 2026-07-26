@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Refinery generated artifacts (regenerable)
+refinery/candidates-*.json
+refinery/REVIEW.md
+refinery/approved.txt
+refinery/approved-dishes.ts
