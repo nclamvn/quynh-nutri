@@ -171,17 +171,38 @@ export default function OverviewPage() {
           </section>
 
           {/* Headline suggestion card — hero: gradient + blossom motif (§2.3 zone) */}
-          <section className="relative overflow-hidden rounded-[20px] border border-hairline bg-gradient-to-br from-brand-weak via-bg to-accent-weak shadow-[var(--shadow-sm)]">
-            <Blossom size={150} className="pointer-events-none absolute -right-6 -top-8 text-brand/15" />
-            <div className="relative flex flex-col items-center gap-5 p-6 sm:flex-row sm:justify-between">
-              <div className="max-w-md">
-                <p className="mb-1.5 text-xs font-medium text-brand">✨ {t("ov.pantryHint")}</p>
-                <h2 className="mb-4 text-xl font-semibold leading-snug -tracking-[0.01em]">{t("ov.suggestHeadline")}</h2>
-                <Link href="/week" className="cta-primary inline-flex rounded-full px-5 py-2.5 text-sm font-medium text-white">
-                  {t("ov.addToMenu")}
-                </Link>
+          <section className="relative overflow-hidden rounded-[24px] border border-hairline bg-gradient-to-br from-brand-weak/70 via-bg to-accent-weak/60 shadow-[var(--shadow-sm)]">
+            {/* Soft blossom accent, tucked bottom-left so it never sits under the dish. */}
+            <Blossom size={190} className="pointer-events-none absolute -bottom-14 -left-12 -rotate-12 text-brand/10" />
+            <div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:gap-8">
+              <div className="min-w-0 flex-1">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-weak px-3 py-1 text-[11px] font-medium text-brand-ink">
+                  ✨ {t("ov.pantryHint")}
+                </span>
+                <h2 className="mt-3 text-[22px] font-semibold leading-snug -tracking-[0.01em] sm:text-2xl">
+                  {t("ov.suggestHeadline")}
+                </h2>
+                <p className="mt-1.5 truncate text-sm text-muted">
+                  {dishName(suggestion, lang)}
+                  {suggestion.cookTimeMin ? ` · ${suggestion.cookTimeMin} ${t("ov.min")}` : ""}
+                </p>
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <Link href="/week" className="cta-primary inline-flex rounded-full px-5 py-2.5 text-sm font-medium text-white">
+                    {t("ov.addToMenu")}
+                  </Link>
+                  <Link href="/dishes" className="text-sm font-medium text-brand">
+                    {t("ov.viewDish")} →
+                  </Link>
+                </div>
               </div>
-              <DishThumb dish={suggestion} size={128} shape="rounded" className="!rounded-[20px] shadow-[var(--shadow-md)]" />
+              <div className="shrink-0 self-center">
+                <DishThumb
+                  dish={suggestion}
+                  size={140}
+                  shape="rounded"
+                  className="!rounded-[20px] shadow-[var(--shadow-md)] ring-1 ring-black/5"
+                />
+              </div>
             </div>
           </section>
         </>
