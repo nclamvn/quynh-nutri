@@ -166,5 +166,7 @@
   "import.excluded": "Chưa có trong kho, không tính vào dinh dưỡng: {names}",
   "import.mock": "Tách bằng bản dự phòng (chưa có khoá AI) — hãy kiểm lại.",
   "import.save": "Lưu vào Nhà mình (B1)",
-  "import.saved": "Đã lưu · Nhà mình"
+  "import.saved": "Đã lưu · Nhà mình",
+  "sidebar.collapse": "Thu gọn",
+  "sidebar.expand": "Mở rộng"
 }
