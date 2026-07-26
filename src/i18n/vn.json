@@ -139,7 +139,7 @@
   "pantry.miss": "thiếu",
   "pantry.deductNote": "Đồ trong kho đã tự trừ khỏi danh sách đi chợ.",
   "shell.badge": "sắp có",
-  "dishes.search": "Tìm món theo ý… (vd món chua, nhiều đạm)",
+  "dishes.search": "Tìm món theo ý…",
   "reports.costTitle": "Chi phí đi chợ tuần",
   "reports.estimate": "ước lượng · giá tham khảo",
   "reports.lowerBound": "Tạm tính — còn {k} mặt hàng chưa có giá tham khảo",
