@@ -5,9 +5,10 @@ import { chromium } from "playwright";
 // into qa/ (QA constraint #1). Requires the dev server on :3000.
 
 const BASE = "http://localhost:3000";
-const ROUTES = ["overview", "week", "shopping", "dishes", "nutrition", "settings"];
+const ROUTES = ["overview", "week", "shopping", "dishes", "nutrition", "reports", "favorites", "pantry", "notes", "settings"];
 const VIEWPORTS = [
   { name: "390", width: 390, height: 844 },
+  { name: "1024", width: 1024, height: 800 },
   { name: "1440", width: 1440, height: 900 },
 ];
 const THEMES = ["light", "dark"];

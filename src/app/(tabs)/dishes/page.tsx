@@ -11,6 +11,9 @@ import { AddDishSheet } from "@/ui/components/AddDishSheet";
 import { DishThumb } from "@/ui/components/DishThumb";
 import { HeartButton } from "@/ui/components/HeartButton";
 import { DishDetailSheet } from "@/ui/components/DishDetailSheet";
+import { Blossom } from "@/ui/components/Blossom";
+import { PageContainer } from "@/ui/components/PageContainer";
+import { PageHeader } from "@/ui/components/PageHeader";
 
 const SLOTS: Slot[] = ["MAN", "RAU", "CANH", "TRANGMIENG", "COM"];
 const dishName = (d: Dish, lang: Lang) => (lang === "en" && d.enLabel ? d.enLabel : d.vnName);
@@ -28,7 +31,6 @@ export default function DishesPage() {
 
   const all = useMemo(() => SLOTS.flatMap((s) => optionsFor(s)), [optionsFor]);
   const byId = useMemo(() => new Map(all.map((d) => [d.id, d])), [all]);
-  // Semantic search results (ranked) override the filtered list when active.
   const list = searchIds
     ? searchIds.map((id) => byId.get(id)).filter((d): d is Dish => Boolean(d))
     : all.filter((d) => (slotFilter === "ALL" || d.slot === slotFilter) && (!quickOnly || d.quick));
@@ -45,82 +47,89 @@ export default function DishesPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col">
-      <header className="sticky top-0 z-10 border-b border-hairline bg-bg/95 px-4 py-3 backdrop-blur">
-        <h1 className="text-lg font-semibold">{t("dishes.title")}</h1>
-        <form
-          onSubmit={(e) => { e.preventDefault(); runSearch(query); }}
-          className="mt-2 flex items-center gap-2 rounded-full border border-hairline bg-surface/40 px-3.5 py-1.5 focus-within:border-brand"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0 text-tertiary"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" strokeLinecap="round" /></svg>
-          <input
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); if (!e.target.value.trim()) setSearchIds(null); }}
-            placeholder={t("dishes.search")}
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none"
-          />
-          {searching && <span className="text-[10px] text-muted">…</span>}
-          {searchIds && !searching && (
-            <button type="button" onClick={() => { setQuery(""); setSearchIds(null); }} aria-label="clear" className="text-tertiary active:text-danger">✕</button>
-          )}
-        </form>
-        {!searchIds && (
-          <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
-            <Chip active={slotFilter === "ALL"} onClick={() => setSlotFilter("ALL")}>{t("dishes.filterAll")}</Chip>
-            {SLOTS.map((s) => (
-              <Chip key={s} active={slotFilter === s} onClick={() => setSlotFilter(s)}>{t(`slot.${s}`)}</Chip>
-            ))}
-            <Chip active={quickOnly} onClick={() => setQuickOnly((q) => !q)}>⚡ {t("common.quick")}</Chip>
-          </div>
-        )}
-        {searchIds && <p className="mt-2 text-[11px] text-muted">Tìm theo ngữ nghĩa · {list.length} món khớp</p>}
-      </header>
-
-      <ul className="space-y-2 px-4 py-4">
-        {list.map((d) => (
-          <li key={d.id}>
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => setDetailId(d.id)}
-              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDetailId(d.id)}
-              className="flex cursor-pointer items-center gap-3 rounded-[14px] border border-hairline bg-surface/40 p-3 transition-colors active:bg-surface"
-            >
-              <DishThumb dish={d} size={60} shape="rounded" />
-              <div className="min-w-0 flex-1">
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <h2 className="truncate text-sm font-semibold">{dishName(d, lang)}</h2>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] ${
-                      isForked(d.id) ? "bg-brand-weak text-brand-ink" : "bg-surface text-muted"
-                    }`}
-                  >
-                    {isForked(d.id) ? t("origin.b1") : t("dishes.sample")}
-                  </span>
-                </div>
-                <p className="mb-1.5 text-[11px] text-muted">
-                  {d.proteinType} · {d.method}
-                  {d.cookTimeMin ? ` · ${d.cookTimeMin}′` : ""}
-                  {d.quick ? ` · ${t("common.quick")}` : ""}
-                </p>
-                <ProvenanceChip display={dishDisplay(d, household, commodity)} field="kcal" unit="kcal" />
-              </div>
-              <HeartButton dishId={d.id} />
+    <PageContainer size="full">
+      <PageHeader title={t("dishes.title")} subtitle={t("dishes.count", { n: all.length })} sticky>
+        <div className="space-y-2">
+          <form
+            onSubmit={(e) => { e.preventDefault(); runSearch(query); }}
+            className="flex items-center gap-2 rounded-full border border-hairline bg-surface/40 px-3.5 py-1.5 focus-within:border-brand"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0 text-tertiary"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" strokeLinecap="round" /></svg>
+            <input
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); if (!e.target.value.trim()) setSearchIds(null); }}
+              placeholder={t("dishes.search")}
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+            />
+            {searching && <span className="text-[10px] text-muted">…</span>}
+            {searchIds && !searching && (
+              <button type="button" onClick={() => { setQuery(""); setSearchIds(null); }} aria-label="clear" className="text-tertiary active:text-danger">✕</button>
+            )}
+          </form>
+          {!searchIds ? (
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
+              <Chip active={slotFilter === "ALL"} onClick={() => setSlotFilter("ALL")}>{t("dishes.filterAll")}</Chip>
+              {SLOTS.map((s) => (
+                <Chip key={s} active={slotFilter === s} onClick={() => setSlotFilter(s)}>{t(`slot.${s}`)}</Chip>
+              ))}
+              <Chip active={quickOnly} onClick={() => setQuickOnly((q) => !q)}>⚡ {t("common.quick")}</Chip>
             </div>
-          </li>
-        ))}
-      </ul>
+          ) : (
+            <p className="text-[11px] text-muted">{t("dishes.semanticHits", { n: list.length })}</p>
+          )}
+        </div>
+      </PageHeader>
+
+      {list.length === 0 ? (
+        <div className="grid min-h-[40vh] place-content-center justify-items-center text-center">
+          <Blossom size={96} className="text-brand/25" />
+          <p className="mt-3 text-sm text-muted">{t("dishes.noResults")}</p>
+        </div>
+      ) : (
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {list.map((d) => (
+            <li key={d.id}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setDetailId(d.id)}
+                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDetailId(d.id)}
+                className="card card-interactive flex h-full cursor-pointer items-center gap-3 p-3"
+              >
+                <DishThumb dish={d} size={72} shape="rounded" />
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-start justify-between gap-2">
+                    <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{dishName(d, lang)}</h2>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] ${isForked(d.id) ? "bg-brand-weak text-brand-ink" : "bg-surface text-muted"}`}>
+                      {isForked(d.id) ? t("origin.b1") : t("dishes.sample")}
+                    </span>
+                  </div>
+                  <p className="mb-1.5 truncate text-[11px] text-muted">
+                    {d.proteinType} · {d.method}
+                    {d.cookTimeMin ? ` · ${d.cookTimeMin}′` : ""}
+                    {d.quick ? ` · ${t("common.quick")}` : ""}
+                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <ProvenanceChip display={dishDisplay(d, household, commodity)} field="kcal" unit="kcal" />
+                    <HeartButton dishId={d.id} />
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <button
         onClick={() => setAddOpen(true)}
-        className="fixed bottom-24 right-5 z-30 rounded-full bg-brand px-5 py-3 text-sm font-medium text-white shadow-float active:bg-brand-hover lg:bottom-8 lg:right-8"
+        className="cta-primary fixed bottom-24 right-5 z-30 rounded-full px-5 py-3 text-sm font-medium text-white lg:bottom-8 lg:right-8"
       >
         + {t("dishes.add")}
       </button>
 
       <AddDishSheet open={addOpen} onClose={() => setAddOpen(false)} />
       <DishDetailSheet dishId={detailId} onClose={() => setDetailId(null)} />
-    </div>
+    </PageContainer>
   );
 }
 

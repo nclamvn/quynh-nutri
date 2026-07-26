@@ -11,6 +11,8 @@ import { Donut } from "@/ui/components/Donut";
 import { DishThumb } from "@/ui/components/DishThumb";
 import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
 import { Blossom } from "@/ui/components/Blossom";
+import { PageContainer } from "@/ui/components/PageContainer";
+import { PageHeader } from "@/ui/components/PageHeader";
 import type { FoodGroup } from "@/domain/nutrition";
 
 const GROUP_COLORS: [FoodGroup, string][] = [
@@ -51,30 +53,29 @@ export default function OverviewPage() {
   const slotDish = (day: number, slot: Slot) => dish(plan.slots.find((s) => s.day === day && s.slot === slot)?.dishId ?? "");
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-4 lg:px-8">
-      {/* Header (page owns it — no duplicate topbar) */}
-      <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-[26px] font-semibold -tracking-[0.02em] lg:text-[30px]">{t("ov.title")}</h1>
-          <p className="text-sm text-muted">{t("greeting")} 👋 · {t("household.family", { n: household.size })}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => window.dispatchEvent(new Event("open-assistant"))}
-            className="cta-primary flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-white"
-          >
-            ✨ {t("ov.aiSuggest")}
-          </button>
-          <button onClick={reroll} className="rounded-full border border-hairline px-3 py-2 text-sm text-muted active:bg-surface">
-            ↻ {t("common.reroll")}
-          </button>
-        </div>
-      </header>
+    <PageContainer>
+      <PageHeader
+        title={t("ov.title")}
+        subtitle={`${t("greeting")} 👋 · ${t("household.family", { n: household.size })}`}
+        actions={
+          <>
+            <button
+              onClick={() => window.dispatchEvent(new Event("open-assistant"))}
+              className="cta-primary flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-white"
+            >
+              ✨ {t("ov.aiSuggest")}
+            </button>
+            <button onClick={reroll} className="rounded-full border border-hairline px-3 py-2 text-sm text-muted active:bg-surface">
+              ↻ {t("common.reroll")}
+            </button>
+          </>
+        }
+      />
 
       {plan.slots.length === 0 ? (
-        <div className="rounded-[16px] border border-hairline bg-surface/40 p-10 text-center">
+        <div className="card grid min-h-[40vh] place-content-center p-10 text-center">
           <p className="mb-3 text-sm text-muted">{t("ov.emptyWeek")}</p>
-          <button onClick={reroll} className="rounded-full bg-brand px-4 py-2 text-sm font-medium text-white">{t("ov.createWeek")}</button>
+          <button onClick={reroll} className="mx-auto rounded-full bg-brand px-4 py-2 text-sm font-medium text-white">{t("ov.createWeek")}</button>
         </div>
       ) : (
         <>
@@ -207,7 +208,7 @@ export default function OverviewPage() {
           </section>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

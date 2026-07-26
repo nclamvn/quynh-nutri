@@ -3,6 +3,8 @@
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import { useTheme } from "@/ui/theme";
+import { PageContainer } from "@/ui/components/PageContainer";
+import { PageHeader } from "@/ui/components/PageHeader";
 import type { DayName, Household } from "@/domain/types";
 
 const DAYS: DayName[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -19,105 +21,92 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col">
-      <header className="sticky top-0 z-10 border-b border-hairline bg-bg/95 px-4 py-3 backdrop-blur">
-        <h1 className="text-lg font-semibold">{t("settings.title")}</h1>
-      </header>
+    <PageContainer size="narrow">
+      <PageHeader title={t("settings.title")} />
 
-      <div className="space-y-5 px-4 py-4">
-        {/* Language */}
-        <Row label={t("settings.language")}>
-          <Segmented
-            options={[
-              ["vi", "Tiếng Việt"],
-              ["en", "English"],
-            ]}
-            value={lang}
-            onChange={(v) => setLang(v as "vi" | "en")}
-          />
-        </Row>
-
-        {/* Theme */}
-        <Row label={t("settings.theme")}>
-          <Segmented
-            options={[
-              ["light", t("settings.themeLight")],
-              ["dark", t("settings.themeDark")],
-            ]}
-            value={theme}
-            onChange={(v) => setTheme(v as "light" | "dark")}
-          />
-        </Row>
-
-        <hr className="border-hairline" />
-
-        {/* Household size */}
-        <Row label={t("settings.size")}>
-          <div className="flex items-center gap-3">
-            <Stepper value={household.size} onChange={(n) => updateHousehold({ size: Math.max(1, n) })} />
-          </div>
-        </Row>
-
-        {/* Members */}
-        <div>
-          <p className="mb-2 text-sm font-medium">{t("settings.members")}</p>
-          <ul className="space-y-1.5">
-            {household.members.map((m) => (
-              <li key={m.id} className="flex items-center justify-between rounded-lg border border-hairline px-3 py-2 text-sm">
-                <span>{m.role === "adult" ? (m.sex === "M" ? "Người lớn (Nam)" : "Người lớn (Nữ)") : `Trẻ ${m.ageBand}`}</span>
-                <span className="text-xs text-muted">{m.activity}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Market mode */}
-        <Row label={t("settings.marketMode")}>
-          <Segmented
-            options={MARKET_MODES.map((m) => [m, m] as [string, string])}
-            value={household.marketMode}
-            onChange={(v) => updateHousehold({ marketMode: v as Household["marketMode"] })}
-          />
-        </Row>
-
-        {/* Busy days */}
-        <div>
-          <p className="mb-2 text-sm font-medium">{t("settings.busyDays")}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {DAYS.map((d, i) => {
-              const on = household.busyDays.includes(d);
-              return (
-                <button
-                  key={d}
-                  onClick={() => toggleBusy(d)}
-                  className={`rounded-full border px-3 py-1 text-xs ${on ? "border-amber bg-amber-weak text-amber" : "border-hairline text-muted"}`}
-                >
-                  {t(`day.${i}`)}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Lactating */}
-        <Row label={t("settings.lactating")}>
-          <button
-            onClick={() => updateHousehold({ lactatingMember: !household.lactatingMember })}
-            className={`relative h-6 w-11 rounded-full transition ${household.lactatingMember ? "bg-brand" : "bg-hairline"}`}
-          >
-            <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${
-                household.lactatingMember ? "left-[22px]" : "left-0.5"
-              }`}
+      <div className="space-y-5">
+        <Section title={t("settings.secAppearance")}>
+          <Row label={t("settings.language")}>
+            <Segmented options={[["vi", "Tiếng Việt"], ["en", "English"]]} value={lang} onChange={(v) => setLang(v as "vi" | "en")} />
+          </Row>
+          <Row label={t("settings.theme")}>
+            <Segmented
+              options={[["light", t("settings.themeLight")], ["dark", t("settings.themeDark")]]}
+              value={theme}
+              onChange={(v) => setTheme(v as "light" | "dark")}
             />
-          </button>
-        </Row>
+          </Row>
+        </Section>
 
-        <p className="pt-2 text-[11px] text-muted">
+        <Section title={t("settings.secHousehold")}>
+          <Row label={t("settings.size")}>
+            <Stepper value={household.size} onChange={(n) => updateHousehold({ size: Math.max(1, n) })} />
+          </Row>
+          <div>
+            <p className="mb-2 text-sm font-medium">{t("settings.members")}</p>
+            <ul className="space-y-1.5">
+              {household.members.map((m) => (
+                <li key={m.id} className="flex items-center gap-3 rounded-[12px] border border-hairline bg-surface/40 px-3 py-2 text-sm">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-weak text-[11px] font-medium text-brand-ink">
+                    {m.role === "adult" ? (m.sex === "M" ? "B" : "M") : "T"}
+                  </span>
+                  <span className="flex-1">{m.role === "adult" ? (m.sex === "M" ? "Người lớn (Nam)" : "Người lớn (Nữ)") : `Trẻ ${m.ageBand}`}</span>
+                  <span className="text-xs text-muted">{m.activity}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Section>
+
+        <Section title={t("settings.secRhythm")}>
+          <Row label={t("settings.marketMode")}>
+            <Segmented
+              options={MARKET_MODES.map((m) => [m, m] as [string, string])}
+              value={household.marketMode}
+              onChange={(v) => updateHousehold({ marketMode: v as Household["marketMode"] })}
+            />
+          </Row>
+          <div>
+            <p className="mb-2 text-sm font-medium">{t("settings.busyDays")}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {DAYS.map((d, i) => {
+                const on = household.busyDays.includes(d);
+                return (
+                  <button
+                    key={d}
+                    onClick={() => toggleBusy(d)}
+                    className={`rounded-full border px-3 py-1 text-xs ${on ? "border-amber bg-amber-weak text-amber" : "border-hairline text-muted"}`}
+                  >
+                    {t(`day.${i}`)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <Row label={t("settings.lactating")}>
+            <button
+              onClick={() => updateHousehold({ lactatingMember: !household.lactatingMember })}
+              className={`relative h-6 w-11 rounded-full transition ${household.lactatingMember ? "bg-brand" : "bg-hairline"}`}
+            >
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${household.lactatingMember ? "left-[22px]" : "left-0.5"}`} />
+            </button>
+          </Row>
+        </Section>
+
+        <p className="text-[11px] leading-relaxed text-muted">
           Hộ này là một cụ thể hoá (instance) của repertoire chung (B0). Chỉnh ở đây tạo lớp B1 ghi đè khi bạn sửa món.
         </p>
       </div>
-    </div>
+    </PageContainer>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="card p-5">
+      <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-tertiary">{title}</h2>
+      <div className="space-y-4">{children}</div>
+    </section>
   );
 }
 

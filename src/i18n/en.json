@@ -169,5 +169,17 @@
   "import.saved": "Saved · My Kitchen",
   "sidebar.collapse": "Collapse",
   "sidebar.expand": "Expand",
-  "ov.min": "min"
+  "ov.min": "min",
+  "week.title": "Weekly menu",
+  "week.meta": "{days} days · {quick} quick · {busy} busy",
+  "week.export": "View shopping list",
+  "dishes.count": "{n} dishes",
+  "dishes.semanticHits": "Semantic · {n} matches",
+  "dishes.noResults": "No dishes match.",
+  "shopping.meta": "{items} items · {vendors} vendors",
+  "pantry.count": "{n} items in stock",
+  "notes.count": "{n} notes",
+  "settings.secAppearance": "Language & Appearance",
+  "settings.secHousehold": "Household & Members",
+  "settings.secRhythm": "Routine & Market"
 }

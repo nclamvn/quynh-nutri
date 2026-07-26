@@ -4,6 +4,9 @@ import { useMemo, useState, useEffect } from "react";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import { costReport, formatVnd } from "@/domain/cost";
+import { Blossom } from "@/ui/components/Blossom";
+import { PageContainer } from "@/ui/components/PageContainer";
+import { PageHeader } from "@/ui/components/PageHeader";
 
 const BUDGET_KEY = "qk-budget-weekly";
 const GROUP_LABEL: Record<string, { vn: string; en: string }> = {
@@ -11,6 +14,12 @@ const GROUP_LABEL: Record<string, { vn: string; en: string }> = {
   "hải sản": { vn: "Hải sản", en: "Seafood" }, "rau": { vn: "Rau", en: "Veg" },
   "trái cây": { vn: "Trái cây", en: "Fruit" }, "ngũ cốc": { vn: "Tinh bột", en: "Grains" },
   "trứng": { vn: "Trứng", en: "Egg" }, "đậu": { vn: "Đậu", en: "Soy" }, "khác": { vn: "Khác", en: "Other" },
+};
+// Fixed chart color per food group (blueprint §6.9), reused from the nutrition tokens.
+const GROUP_COLOR: Record<string, string> = {
+  "thịt": "var(--chart-carb)", "cá": "var(--chart-protein)", "hải sản": "var(--chart-protein)",
+  "rau": "var(--chart-fiber)", "trái cây": "var(--chart-fruit)", "ngũ cốc": "var(--chart-fat)",
+  "trứng": "var(--chart-fat)", "đậu": "var(--chart-fiber)", "khác": "var(--muted)",
 };
 
 export default function ReportsPage() {
@@ -40,25 +49,27 @@ export default function ReportsPage() {
   const empty = report.totalCount === 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col pb-10">
-      <header className="sticky top-0 z-10 border-b border-hairline bg-bg/95 px-4 py-3 backdrop-blur">
-        <h1 className="text-lg font-semibold">{t("reports.title")}</h1>
-      </header>
+    <PageContainer>
+      <PageHeader
+        title={t("reports.title")}
+        subtitle={empty ? undefined : `${t("reports.estimate")} · ${t("reports.priceCoverage")} ${report.coveragePct}%`}
+      />
 
       {empty ? (
-        <p className="px-4 py-16 text-center text-sm text-muted">{t("reports.empty")}</p>
+        <p className="grid min-h-[40vh] place-content-center text-center text-sm text-muted">{t("reports.empty")}</p>
       ) : (
-        <div className="space-y-4 px-4 py-4">
+        <div className="grid gap-4 lg:grid-cols-12">
           {/* Hero — estimated weekly cost */}
-          <section className="rounded-[18px] border border-hairline bg-surface/40 p-5">
-            <p className="text-[11px] uppercase tracking-wide text-tertiary">{t("reports.costTitle")}</p>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-[32px] font-semibold leading-none">~{formatVnd(report.totalVnd)}</span>
+          <section className="card relative col-span-full overflow-hidden bg-gradient-to-br from-brand-weak/40 via-raised to-raised p-5 lg:col-span-5">
+            <Blossom size={130} className="pointer-events-none absolute -right-6 -top-8 -rotate-6 text-brand/10" />
+            <p className="relative text-[11px] uppercase tracking-wide text-tertiary">{t("reports.costTitle")}</p>
+            <div className="relative mt-1 flex items-baseline gap-1.5">
+              <span className="text-[32px] font-semibold leading-none lg:text-[40px]">~{formatVnd(report.totalVnd)}</span>
             </div>
-            <p className="mt-1 text-[11px] text-muted">{t("reports.estimate")}</p>
+            <p className="relative mt-1 text-[11px] text-muted">{t("reports.estimate")}</p>
 
             {/* Price coverage — every % states its base */}
-            <div className="mt-3 flex items-center gap-2">
+            <div className="relative mt-3 flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-brand-weak px-2 py-0.5 text-[11px] text-brand-ink">
                 {t("reports.priceCoverage")} {report.coveragePct}%
               </span>
@@ -67,14 +78,14 @@ export default function ReportsPage() {
               </span>
             </div>
             {report.coveragePct < 100 && (
-              <p className="mt-1.5 text-[11px] text-tertiary">
+              <p className="relative mt-1.5 text-[11px] text-tertiary">
                 {t("reports.lowerBound", { k: report.totalCount - report.pricedCount })}
               </p>
             )}
           </section>
 
           {/* Budget */}
-          <section className="rounded-[18px] border border-hairline bg-surface/40 p-4">
+          <section className="card col-span-full p-4 lg:col-span-7">
             <p className="text-[11px] uppercase tracking-wide text-tertiary">{t("reports.budget")}</p>
             {budget == null ? (
               <div className="mt-2 flex items-center gap-2">
@@ -110,9 +121,9 @@ export default function ReportsPage() {
           </section>
 
           {/* By group */}
-          <section>
-            <h2 className="mb-2 px-1 text-xs font-medium text-muted">{t("reports.byGroup")}</h2>
-            <div className="space-y-2 rounded-[18px] border border-hairline bg-surface/40 p-4">
+          <section className="card col-span-full p-5 lg:col-span-7">
+            <h2 className="mb-3 text-xs font-medium text-muted">{t("reports.byGroup")}</h2>
+            <div className="space-y-2.5">
               {report.byGroup.map((g) => (
                 <div key={g.group}>
                   <div className="mb-1 flex justify-between text-[13px]">
@@ -120,7 +131,7 @@ export default function ReportsPage() {
                     <span className="text-muted">~{formatVnd(g.vnd)}</span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-hairline">
-                    <div className="h-full rounded-full bg-brand/70" style={{ width: `${Math.round((g.vnd / maxGroup) * 100)}%` }} />
+                    <div className="h-full rounded-full" style={{ width: `${Math.round((g.vnd / maxGroup) * 100)}%`, background: GROUP_COLOR[g.group] ?? "var(--brand)" }} />
                   </div>
                 </div>
               ))}
@@ -128,8 +139,8 @@ export default function ReportsPage() {
           </section>
 
           {/* By trip */}
-          <section>
-            <h2 className="mb-2 px-1 text-xs font-medium text-muted">{t("reports.byTrip")}</h2>
+          <section className="card col-span-full p-5 lg:col-span-5">
+            <h2 className="mb-3 text-xs font-medium text-muted">{t("reports.byTrip")}</h2>
             <div className="grid grid-cols-2 gap-2">
               {report.byTrip.map((tr) => (
                 <div key={`${tr.trip}-${tr.kind}`} className="rounded-[14px] border border-hairline bg-surface/40 p-3">
@@ -141,9 +152,9 @@ export default function ReportsPage() {
           </section>
 
           {/* Priciest items */}
-          <section>
-            <h2 className="mb-2 px-1 text-xs font-medium text-muted">{t("reports.topItems")}</h2>
-            <ul className="divide-y divide-hairline rounded-[18px] border border-hairline bg-surface/40 px-4">
+          <section className="card col-span-full p-5">
+            <h2 className="mb-2 text-xs font-medium text-muted">{t("reports.topItems")}</h2>
+            <ul className="divide-y divide-hairline">
               {report.top.map((l) => (
                 <li key={l.commodityId} className="flex items-center justify-between py-2.5 text-[13px]">
                   <span className="min-w-0 truncate">{l.vnName} <span className="text-tertiary">· {Math.round(l.qtyTotal)}g</span></span>
@@ -153,9 +164,9 @@ export default function ReportsPage() {
             </ul>
           </section>
 
-          <p className="px-1 text-[11px] leading-relaxed text-tertiary">{t("reports.footer")}</p>
+          <p className="col-span-full text-[11px] leading-relaxed text-tertiary">{t("reports.footer")}</p>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

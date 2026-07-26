@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import type { Lang } from "@/i18n/context";
@@ -11,6 +12,8 @@ import { BottomSheet } from "@/ui/components/BottomSheet";
 import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
 import { DishThumb } from "@/ui/components/DishThumb";
 import { HeartButton } from "@/ui/components/HeartButton";
+import { Blossom } from "@/ui/components/Blossom";
+import { PageContainer } from "@/ui/components/PageContainer";
 
 const SLOT_ORDER: Slot[] = ["COM", "MAN", "RAU", "CANH", "TRANGMIENG"];
 const BUSY_INDEX: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
@@ -23,31 +26,38 @@ export default function WeekPage() {
   const [sheet, setSheet] = useState<{ day: number; slot: Slot } | null>(null);
 
   const busyDayIdx = new Set(household.busyDays.map((d) => BUSY_INDEX[d]));
+  const quickCount = plan.slots.filter((s) => dish(s.dishId)?.quick).length;
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-hairline bg-bg/95 px-4 py-3 backdrop-blur">
-        <div>
-          <h1 className="text-lg font-semibold">{t("nav.week")}</h1>
-          <p className="text-xs text-muted">{t("app.title")}</p>
+    <PageContainer>
+      {/* Hero — descriptive, never evaluative (honesty: don't imply "optimized"). */}
+      <section className="relative mb-5 overflow-hidden rounded-[24px] border border-hairline bg-gradient-to-br from-brand-weak/70 via-bg to-accent-weak/60 shadow-[var(--shadow-sm)]">
+        <Blossom size={190} className="pointer-events-none absolute -bottom-14 -left-12 -rotate-12 text-brand/10" />
+        <div className="relative flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold -tracking-[0.02em] lg:text-[28px]">{t("nav.week")}</h1>
+            <p className="mt-1 text-sm text-muted">
+              {t("week.meta", { days: 7, quick: quickCount, busy: household.busyDays.length })}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <button onClick={reroll} className="cta-primary inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium text-white">
+              ↻ {t("common.reroll")}
+            </button>
+            <Link href="/shopping" className="text-sm font-medium text-brand">{t("week.export")} →</Link>
+          </div>
         </div>
-        <button
-          onClick={reroll}
-          className="rounded-lg border border-brand px-3 py-1.5 text-sm font-medium text-brand active:bg-brand-weak"
-        >
-          ↻ {t("common.reroll")}
-        </button>
-      </header>
+      </section>
 
       {notes.length > 0 && (
-        <div className="mx-4 mt-3 rounded-lg border border-amber/40 bg-amber-weak px-3 py-2 text-xs text-amber">
+        <div className="mb-4 rounded-[14px] border border-amber/40 bg-amber-weak px-3 py-2 text-xs text-amber">
           {notes.map((n, i) => (
             <p key={i}>⚑ {n}</p>
           ))}
         </div>
       )}
 
-      <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 7 }, (_, day) => {
           const dishes = dayDishes(plan, day, dish);
           const nut = dayNutrition(dishes, household, commodity);
@@ -55,10 +65,7 @@ export default function WeekPage() {
           const daySlots = plan.slots.filter((s) => s.day === day).sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
 
           return (
-            <section
-              key={day}
-              className="w-[86%] shrink-0 snap-center rounded-[10px] border border-hairline bg-surface/40 p-3"
-            >
+            <section key={day} className="card flex flex-col p-3.5">
               <div className="mb-2 flex items-center justify-between">
                 <h2 className="text-sm font-semibold">{t(`day.${day}`)}</h2>
                 {busy && <span className="rounded-full bg-amber-weak px-2 py-0.5 text-[10px] text-amber">{t("day.busy")}</span>}
@@ -80,15 +87,15 @@ export default function WeekPage() {
                 {daySlots.map((s) => {
                   const d = dish(s.dishId);
                   return (
-                    <li key={s.slot} className="flex items-center gap-2 rounded-lg bg-bg px-2 py-1.5">
-                      <DishThumb dish={d} size={40} shape="rounded" />
-                      <span className="w-9 shrink-0 text-[9px] font-medium uppercase tracking-wide text-tertiary">
-                        {t(`slot.${s.slot}`)}
-                      </span>
-                      <button className="flex-1 truncate text-left text-sm" onClick={() => setSheet({ day, slot: s.slot })}>
-                        {dishName(d, lang)}
-                        {d?.quick && <span className="ml-1.5 text-[10px] text-brand-ink">⚡ {t("common.quick")}</span>}
-                      </button>
+                    <li key={s.slot} className="flex items-center gap-2 rounded-[12px] bg-surface/50 px-2 py-1.5 transition-colors hover:bg-surface">
+                      <DishThumb dish={d} size={52} shape="rounded" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] font-medium uppercase tracking-wide text-tertiary">{t(`slot.${s.slot}`)}</p>
+                        <button className="block w-full truncate text-left text-sm" onClick={() => setSheet({ day, slot: s.slot })}>
+                          {dishName(d, lang)}
+                          {d?.quick && <span className="ml-1.5 text-[10px] text-brand-ink">⚡</span>}
+                        </button>
+                      </div>
                       {d && <HeartButton dishId={d.id} size={17} />}
                       <button
                         aria-label="lock"
@@ -129,6 +136,6 @@ export default function WeekPage() {
           </ul>
         )}
       </BottomSheet>
-    </div>
+    </PageContainer>
   );
 }

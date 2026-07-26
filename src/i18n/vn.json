@@ -169,5 +169,17 @@
   "import.saved": "Đã lưu · Nhà mình",
   "sidebar.collapse": "Thu gọn",
   "sidebar.expand": "Mở rộng",
-  "ov.min": "phút"
+  "ov.min": "phút",
+  "week.title": "Thực đơn tuần",
+  "week.meta": "{days} ngày · {quick} món nhanh · {busy} ngày bận",
+  "week.export": "Xem danh sách chợ",
+  "dishes.count": "{n} món",
+  "dishes.semanticHits": "Tìm theo ngữ nghĩa · {n} món khớp",
+  "dishes.noResults": "Không tìm thấy món phù hợp.",
+  "shopping.meta": "{items} mặt hàng · {vendors} điểm mua",
+  "pantry.count": "{n} nguyên liệu đang có",
+  "notes.count": "{n} ghi chú",
+  "settings.secAppearance": "Ngôn ngữ & Giao diện",
+  "settings.secHousehold": "Gia đình & Thành viên",
+  "settings.secRhythm": "Nhịp & Đi chợ"
 }
