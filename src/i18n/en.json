@@ -157,5 +157,14 @@
   "reports.footer": "Prices are 2026 references; they vary by market and season. Unpriced items are excluded — no fabricated numbers.",
   "reports.empty": "No weekly menu yet — create one to estimate cost.",
   "reports.save": "Save",
-  "reports.clear": "Clear"
+  "reports.clear": "Clear",
+  "import.hint": "Describe the dish, or paste a recipe link. We extract ingredients, map them, and RECOMPUTE nutrition from what matched — never trusting the recipe’s own calories.",
+  "import.placeholder": "e.g. 500g tilapia braised in coconut water… or https://…",
+  "import.parse": "Extract",
+  "import.parsing": "Extracting…",
+  "import.matched": "Matched: {n}/{m} ingredients · nutrition covers the matched part",
+  "import.excluded": "Not in our database, excluded from nutrition: {names}",
+  "import.mock": "Parsed by fallback (no AI key) — please double-check.",
+  "import.save": "Save to My Kitchen (B1)",
+  "import.saved": "Saved · My Kitchen"
 }

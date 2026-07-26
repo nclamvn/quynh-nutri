@@ -13,8 +13,9 @@ import { getHouseholdState, persistState } from "@/app/actions";
 // Phase 1 data source: the typed seed, in-memory. When Postgres is wired the
 // repo layer swaps in here without touching domain or UI.
 const commodities = (id: string) => COMMODITY_BY_ID[id];
-// B0 baseline; household B1 forks live in component state and override via resolveDish.
+// B0 baseline; household B1 forks + imports live in state and override via resolveDish.
 const repertoire: Dish[] = REPERTOIRE;
+const B1_KEY = "qk-b1-dishes";
 
 interface StoreValue {
   household: Household;
@@ -34,6 +35,7 @@ interface StoreValue {
   toggleFavorite: (id: string) => void;
   favoriteDishes: Dish[];
   forkDish: (id: string) => void;
+  addB1Dish: (dish: Dish) => void;
   isForked: (id: string) => boolean;
   // UI-7: quick notes (THẬT-nhẹ)
   userNotes: { id: number; text: string }[];
@@ -54,7 +56,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [notes, setNotes] = useState<string[]>([]);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
-  const [b1, setB1] = useState<Dish[]>([]); // household forks (B1 ⊳ B0)
+  const [b1, setB1] = useState<Dish[]>([]); // household forks + imports (B1 ⊳ B0)
   const [userNotes, setUserNotes] = useState<{ id: number; text: string }[]>([]);
   const noteId = useRef(1);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
@@ -74,6 +76,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       })
       .catch(() => {}); // offline / no DB → keep defaults
   }, []);
+
+  // B1 dishes (forks + imports) persist on-device. DB-persist is a later migration.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(B1_KEY);
+      if (raw) setB1(JSON.parse(raw) as Dish[]);
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem(B1_KEY, JSON.stringify(b1)); } catch {}
+  }, [b1]);
 
   // Dishes the household is actually allowed to eat (allergies + diet restrictions).
   const allowedRepertoire = useMemo(() => dietaryRepertoire(repertoire, household, commodities), [household]);
@@ -224,6 +237,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // Add an imported dish as a B1 (household) dish. Nutrition is NOT taken on faith
+  // from the source — it is computed downstream from the mapped commodity lines,
+  // exactly like any B0 dish, so an import can never smuggle in a fabricated number.
+  const addB1Dish = useCallback((dish: Dish) => {
+    setB1((prev) => (prev.some((d) => d.id === dish.id) ? prev : [...prev, dish]));
+  }, []);
+
   const value: StoreValue = {
     household,
     plan,
@@ -241,6 +261,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     toggleFavorite,
     favoriteDishes,
     forkDish,
+    addB1Dish,
     isForked,
     userNotes,
     addNote,

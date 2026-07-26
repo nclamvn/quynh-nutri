@@ -157,5 +157,14 @@
   "reports.footer": "Giá là mức tham khảo 2026, đổi theo chợ và mùa. Món chưa có giá không được tính — app không bịa số.",
   "reports.empty": "Chưa có thực đơn — tạo tuần để tính chi phí.",
   "reports.save": "Lưu",
-  "reports.clear": "Xoá"
+  "reports.clear": "Xoá",
+  "import.hint": "Mô tả món bằng lời, hoặc dán link công thức. Máy tách nguyên liệu, ánh xạ về kho và TÍNH LẠI dinh dưỡng từ phần khớp — không lấy số calo công thức tự khai.",
+  "import.placeholder": "VD: Cá diêu hồng 500g kho tộ nước dừa… hoặc https://cooky.vn/…",
+  "import.parse": "Tách món",
+  "import.parsing": "Đang tách…",
+  "import.matched": "Khớp kho: {n}/{m} nguyên liệu · dinh dưỡng tính trên phần khớp",
+  "import.excluded": "Chưa có trong kho, không tính vào dinh dưỡng: {names}",
+  "import.mock": "Tách bằng bản dự phòng (chưa có khoá AI) — hãy kiểm lại.",
+  "import.save": "Lưu vào Nhà mình (B1)",
+  "import.saved": "Đã lưu · Nhà mình"
 }

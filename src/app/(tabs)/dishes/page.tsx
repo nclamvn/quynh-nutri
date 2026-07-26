@@ -113,7 +113,7 @@ export default function DishesPage() {
 
       <button
         onClick={() => setAddOpen(true)}
-        className="fixed bottom-8 right-8 z-30 hidden rounded-full bg-brand px-5 py-3 text-sm font-medium text-white shadow-float active:bg-brand-hover lg:block"
+        className="fixed bottom-24 right-5 z-30 rounded-full bg-brand px-5 py-3 text-sm font-medium text-white shadow-float active:bg-brand-hover lg:bottom-8 lg:right-8"
       >
         + {t("dishes.add")}
       </button>
