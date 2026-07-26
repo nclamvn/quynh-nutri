@@ -9,10 +9,10 @@ export async function POST(req: Request) {
     if (!Array.isArray(messages) || messages.length === 0) {
       return Response.json({ error: "Thiếu tin nhắn." }, { status: 400 });
     }
-    const result = await kitchenAgent.generate({ messages });
-    // Surface which tools ran (transparency: numbers came from engines, not the model).
-    const toolsUsed = result.steps.flatMap((s) => s.toolCalls?.map((c) => c.toolName) ?? []);
-    return Response.json({ text: result.text, toolsUsed });
+    // Stream the reply token-by-token. Tools still run server-side (numbers from
+    // engines, never the model) before the final text streams.
+    const result = await kitchenAgent.stream({ messages });
+    return result.toTextStreamResponse();
   } catch (e) {
     return Response.json({ error: e instanceof Error ? e.message : "Lỗi trợ lý" }, { status: 500 });
   }
