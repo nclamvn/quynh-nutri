@@ -38,7 +38,7 @@ function RailCard({ title, children }: { title: string; children: React.ReactNod
 }
 
 function TodayRail() {
-  const { plan, household, dish, commodity } = useStore();
+  const { plan, household, dish, commodity, userNotes } = useStore();
   const { t, lang } = useI18n();
   const dishes = dayDishes(plan, 0, dish);
   const nut = dayNutrition(dishes, household, commodity);
@@ -74,9 +74,20 @@ function TodayRail() {
         <div className="mt-2 h-1.5 rounded-full bg-surface" />
       </RailCard>
 
-      {/* Ghi chú nhanh — honest empty state, not fabricated notes */}
+      {/* Ghi chú nhanh — real notes (UI-7), honest empty state when none */}
       <RailCard title={t("ov.quickNotes")}>
-        <p className="text-sm text-muted">—</p>
+        {userNotes.length === 0 ? (
+          <p className="text-sm text-muted">—</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {userNotes.slice(0, 4).map((n) => (
+              <li key={n.id} className="flex items-start gap-2 text-sm">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+                <span className="flex-1">{n.text}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </RailCard>
     </>
   );

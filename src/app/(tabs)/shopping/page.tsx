@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import { groupByTrip, type ShoppingItem } from "@/domain/shopping";
@@ -23,8 +24,11 @@ export default function ShoppingPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
-      <header className="sticky top-0 z-10 border-b border-hairline bg-bg/95 px-4 py-3 backdrop-blur">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-hairline bg-bg/95 px-4 py-3 backdrop-blur">
         <h1 className="text-lg font-semibold">{t("shopping.title")}</h1>
+        <Link href="/pantry" className="rounded-full border border-hairline px-3 py-1 text-xs text-muted active:bg-surface">
+          {t("pantry.title")} →
+        </Link>
       </header>
 
       {shopping.length === 0 ? (

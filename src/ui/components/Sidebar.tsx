@@ -27,9 +27,9 @@ const GROUPS: { group: string; items: Item[] }[] = [
   {
     group: "group.track",
     items: [
-      { key: "nav.reports", icon: ReportIcon, soon: true },
+      { href: "/reports", key: "nav.reports", icon: ReportIcon },
       { href: "/favorites", key: "nav.favorites", icon: HeartIcon },
-      { key: "nav.notes", icon: NoteIcon, soon: true },
+      { href: "/notes", key: "nav.notes", icon: NoteIcon },
     ],
   },
   { group: "group.system", items: [{ href: "/settings", key: "nav.settings", icon: GearIcon }] },

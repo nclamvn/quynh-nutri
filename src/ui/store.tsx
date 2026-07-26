@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, useCallback, useEffect } from "react";
+import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
 import type { Dish, Household, PlannedSlot, Slot, WeekPlan } from "@/domain/types";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -34,6 +34,10 @@ interface StoreValue {
   favoriteDishes: Dish[];
   forkDish: (id: string) => void;
   isForked: (id: string) => boolean;
+  // UI-7: quick notes (THẬT-nhẹ)
+  userNotes: { id: number; text: string }[];
+  addNote: (text: string) => void;
+  deleteNote: (id: number) => void;
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -46,6 +50,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [b1, setB1] = useState<Dish[]>([]); // household forks (B1 ⊳ B0)
+  const [userNotes, setUserNotes] = useState<{ id: number; text: string }[]>([]);
+  const noteId = useRef(1);
 
   // Resolve a dish id through the override: B1 fork wins over B0 (Blueprint §2).
   const resolve = useCallback((id: string) => resolveDish(id, REPERTOIRE, b1) ?? REPERTOIRE_BY_ID[id], [b1]);
@@ -128,6 +134,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setHousehold((h) => ({ ...h, ...patch }));
   }, []);
 
+  const addNote = useCallback((text: string) => {
+    const t = text.trim();
+    if (!t) return;
+    setUserNotes((n) => [{ id: noteId.current++, text: t }, ...n]);
+  }, []);
+  const deleteNote = useCallback((id: number) => setUserNotes((n) => n.filter((x) => x.id !== id)), []);
+
   // ── Favorites (B1-lite): keyed by dish id shown on the card ──
   const isFavorite = useCallback((id: string) => Boolean(favorites[id]), [favorites]);
   const toggleFavorite = useCallback((id: string) => setFavorites((f) => ({ ...f, [id]: !f[id] })), []);
@@ -174,6 +187,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     favoriteDishes,
     forkDish,
     isForked,
+    userNotes,
+    addNote,
+    deleteNote,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

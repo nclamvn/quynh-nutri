@@ -114,3 +114,22 @@ Method: `scripts/qa-ui35.mjs` — Playwright 390 × {light,dark}, mở detail sh
 **Fork = B1⊳B0 thật:** `resolveDish(id, B0, b1)` → fork thắng; shopping/nutrition tự dùng lines B1 (cùng cơ chế đã test 42/42). Badge card flip "mẫu"→"Nhà mình", nút "Lưu vào Nhà mình"→"✓ Đã lưu".
 **Micro-interaction:** heart `active:scale-90`; card `active:bg-surface`; sheet trượt lên (BottomSheet, scrim `bg-black/40`, Escape đóng); reduced-motion phủ (đã khoá).
 **Evidence mới trong `qa/`:** `dish-detail__390__{light,dark}.png`, `favorites-empty__390__{light,dark}.png`.
+
+---
+
+## UI-7 (Ghi chú THẬT-nhẹ + Báo cáo SHELL) · UI-4 (Kho SHELL) · UI-6 (Dinh dưỡng)
+
+`scripts/qa-ui74.mjs` — 390 × {light,dark} evidence + carried-check flow.
+
+| Item | Tầng | Verdict | Bằng chứng |
+|---|---|---|---|
+| Ghi chú `/notes` | THẬT-nhẹ | PASS | store CRUD (add/xoá), empty state, right-rail "Ghi chú nhanh" nối thật. `notes__390__*.png` |
+| Báo cáo `/reports` | SHELL | PASS | `ShellNotice` "sắp có" + "cần dữ liệu giá"; **không tiền giả** (probe: `reports-has-money=none`). `reports__390__*.png` |
+| Kho `/pantry` | SHELL | PASS | `ShellNotice` "demo — chưa nối tồn kho, không tự trừ chợ" (L-6); link từ header Đi chợ. `pantry__390__*.png` |
+| Dinh dưỡng | THẬT | PASS (no change) | kế thừa primitive + AdequacyStrip denominator; period Tuần/Tháng **cố ý bỏ** (không data → sẽ là số-chế, L-1) |
+
+**Carried check (Human dặn) — fork→favorite lấy bản B1:** fork "Thịt kho trứng" → badge B0→**"Nhà mình"** (`=true`); favorite → `/favorites` (client-nav) hiện **đúng 1 món = bản B1**. `favorites-b1__1440__light.png`.
+
+**Meta-lesson (probe, không phải app):** hai lần probe ra số vô lý — `favorites count=14` (hard-nav `page.goto` reset React state) và `="Tổng quan"` (`ul>li` bắt trúng sidebar nav ở 1440). Cả hai là **probe đo nhầm**, sửa probe (client-nav + scope `main`) → PASS thật. Số vô lý = tín hiệu sửa kiểm-chứng trước khi khai FAIL. Cùng họ "bất đồng là dữ liệu".
+
+**Nợ mới (khai, không chặn):** trên mobile (<lg), các trang phụ (Yêu thích/Ghi chú/Báo cáo/Dinh dưỡng/Cài đặt) **chưa có đường vào từ bottom-nav** (chỉ 4 tab + FAB). Mock có "menu Thêm" — chưa dựng. Desktop vào đủ qua sidebar. Cần một "More" sheet cho mobile ở lượt sau.

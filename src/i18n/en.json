@@ -121,5 +121,16 @@
   "origin.b1": "My Kitchen",
   "fav.title": "Favorites",
   "fav.empty": "No favorites yet",
-  "fav.emptyHint": "Tap ♥ on a dish to save it here."
+  "fav.emptyHint": "Tap ♥ on a dish to save it here.",
+  "notes.title": "Notes",
+  "notes.add": "Add",
+  "notes.placeholder": "Quick note…",
+  "notes.empty": "No notes yet",
+  "notes.delete": "Delete",
+  "reports.title": "Reports",
+  "reports.shellTitle": "Spending & stats",
+  "reports.shellHint": "Needs price data to compute spending — enabled in a later phase.",
+  "pantry.title": "Pantry & Fridge",
+  "pantry.shellHint": "Demo — not wired to real inventory, does not deduct from the shopping list.",
+  "shell.badge": "soon"
 }

@@ -121,5 +121,16 @@
   "origin.b1": "Nhà mình",
   "fav.title": "Yêu thích",
   "fav.empty": "Chưa có món yêu thích",
-  "fav.emptyHint": "Chạm ♥ trên món để lưu vào đây."
+  "fav.emptyHint": "Chạm ♥ trên món để lưu vào đây.",
+  "notes.title": "Ghi chú",
+  "notes.add": "Thêm",
+  "notes.placeholder": "Viết ghi chú nhanh…",
+  "notes.empty": "Chưa có ghi chú",
+  "notes.delete": "Xoá",
+  "reports.title": "Báo cáo",
+  "reports.shellTitle": "Chi tiêu & thống kê",
+  "reports.shellHint": "Cần dữ liệu giá để tính chi tiêu — bật ở phase sau.",
+  "pantry.title": "Kho & Tủ lạnh",
+  "pantry.shellHint": "Demo — chưa nối tồn kho thật, không tự trừ vào danh sách chợ.",
+  "shell.badge": "sắp có"
 }
