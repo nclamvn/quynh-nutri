@@ -1,7 +1,14 @@
 import "server-only";
 import { z } from "zod";
+import { generateObject } from "ai";
 import { COMMODITIES } from "@/data/seed/commodity";
-import { claude, hasClaude, EXTRACTION_MODEL, normalizeVn } from "./claude";
+import { normalizeVn } from "./claude";
+
+// Extraction runs through the Vercel AI Gateway (OIDC auth in prod + dev), the
+// same path as the assistant + refinery — no separate ANTHROPIC_API_KEY needed.
+// Uses the same model as the assistant: the Gateway free tier gates cheaper
+// models (haiku), but sonnet is available on this account.
+const EXTRACT_MODEL = "anthropic/claude-sonnet-4.6";
 
 const SLOTS = ["COM", "MAN", "RAU", "CANH", "TRANGMIENG"] as const;
 const METHODS = ["kho", "xao", "luoc", "hap", "nuong", "ran", "song"] as const;
@@ -29,7 +36,7 @@ export interface ImportedDish {
   proteinType: string;
   lines: ImportedLine[];
   notes: string[];
-  source: "claude" | "mock";
+  source: "ai" | "mock";
 }
 
 // Pre-normalized commodity index for fuzzy matching.
@@ -57,21 +64,17 @@ function toLines(ingredients: Extract["ingredients"]): { lines: ImportedLine[]; 
   return { lines, unmatched };
 }
 
-const SYSTEM = `Bạn tách mô tả món ăn Việt thành JSON. Trả về DUY NHẤT JSON, không giải thích.
-Schema: {"vnName":string,"slot":"COM|MAN|RAU|CANH|TRANGMIENG","method":"kho|xao|luoc|hap|nuong|ran|song","proteinType":"bo|ga|ca|tom|heo|cua|trung|dau|rau","ingredients":[{"name":string,"qty":number,"unit":string}]}
-qty là số gram cho 4 người. Nếu không rõ định lượng, ước lượng hợp lý theo khẩu phần 4 người.`;
+const SYSTEM = `Bạn tách mô tả hoặc công thức món ăn Việt thành dữ liệu có cấu trúc.
+qty là số gram cho 4 người. Nếu công thức có nhiều khẩu phần hoặc không rõ định lượng, quy về khẩu phần 4 người và ước lượng hợp lý. Chỉ lấy nguyên liệu, bỏ phần kể chuyện.`;
 
-async function extractWithClaude(text: string): Promise<Extract> {
-  const msg = await claude().messages.create({
-    model: EXTRACTION_MODEL,
-    max_tokens: 1024,
+async function extractWithAI(text: string): Promise<Extract> {
+  const { object } = await generateObject({
+    model: EXTRACT_MODEL,
+    schema: ExtractSchema,
     system: SYSTEM,
-    messages: [{ role: "user", content: text }],
+    prompt: text,
   });
-  const block = msg.content.find((b) => b.type === "text");
-  const raw = block && block.type === "text" ? block.text : "{}";
-  const json = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1));
-  return ExtractSchema.parse(json);
+  return object; // validated against ExtractSchema by the tool layer
 }
 
 /** Deterministic mock: scan text for known commodities + nearby numbers. */
@@ -96,21 +99,15 @@ function extractMock(text: string): Extract {
 export async function importDish(text: string): Promise<ImportedDish> {
   const notes: string[] = [];
   let extracted: Extract;
-  let source: "claude" | "mock";
+  let source: "ai" | "mock";
 
-  if (hasClaude()) {
-    try {
-      extracted = await extractWithClaude(text);
-      source = "claude";
-    } catch {
-      extracted = extractMock(text);
-      source = "mock";
-      notes.push("Không tách được bằng AI — dùng bản dự phòng, hãy kiểm lại.");
-    }
-  } else {
+  try {
+    extracted = await extractWithAI(text);
+    source = "ai";
+  } catch {
     extracted = extractMock(text);
     source = "mock";
-    notes.push("Chưa cấu hình khoá AI (dev) — bản dự phòng dựa trên từ khoá.");
+    notes.push("Không tách được bằng AI — dùng bản dự phòng theo từ khoá, hãy kiểm lại.");
   }
 
   const { lines, unmatched } = toLines(extracted.ingredients);
