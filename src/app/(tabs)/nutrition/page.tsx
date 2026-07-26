@@ -116,6 +116,9 @@ export default function NutritionPage() {
 
           <div className="mb-4">
             <AdequacyStrip adequacy={adequacy} />
+            {hasStage && (lifeStage === "lactating_0_6" || lifeStage?.startsWith("pregnant")) && (
+              <p className="mt-1 text-[11px] text-tertiary">{t("health.needAdjusted")}</p>
+            )}
           </div>
 
           <ul className="space-y-2.5">

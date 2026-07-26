@@ -6,11 +6,21 @@ import { isLactating } from "@/domain/health";
 // fabricated number. The builder does not invent clinical/nutrition values; they
 // arrive via sourced INTAKE (P2 Nhu cầu 2016 / P3 HD 776 / P6 WHO), human-approved.
 
-/** Energy/protein uplift over base need, per life stage. Seeded ONLY where sourced. */
+/** Energy/protein uplift over base need, per life stage. Seeded ONLY where sourced.
+ *
+ * Pregnancy increments = Nhu cầu Dinh dưỡng Khuyến nghị VN 2016 (Viện Dinh dưỡng,
+ * P2), corroborated across VN clinical sources (Vinmec, BV Mỹ Đức, BV Tâm Anh…);
+ * the energy magnitudes also align with FAO/WHO/UNU 2004 (P6). Protein per-trimester
+ * has some variance between sources — verify against the primary QĐ before any
+ * clinical reliance. Displayed as an adequacy denominator only (kcal/protein are
+ * the only macros the intake side tracks) with a disclaimer; not a prescription. */
 export const LIFESTAGE_UPLIFT: Partial<Record<LifeStage, { kcal: number; proteinG: number; source: ProvenanceLevel }>> = {
-  // Already in the codebase, sourced P3 (HD 776, 0–6 months lactation).
+  pregnant_t1: { kcal: 50, proteinG: 1, source: "P2" },
+  pregnant_t2: { kcal: 250, proteinG: 10, source: "P2" },
+  pregnant_t3: { kcal: 450, proteinG: 31, source: "P2" },
+  // Lactation 0–6 months — HD 776 (P3), already in the codebase.
   lactating_0_6: { kcal: 505, proteinG: 19, source: "P3" },
-  // pregnant_t1/t2/t3, lactating_7_12: UNSOURCED — intentionally absent until seeded.
+  // lactating_7_12: kept UNSOURCED (honest_null) until the VN 7–12mo figure is verified.
 };
 
 /** Key micronutrients to track in pregnancy. Requirement values are null until a

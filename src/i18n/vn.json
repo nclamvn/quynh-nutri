@@ -224,5 +224,6 @@
   "restriction.pescatarian": "Chay + cá/hải sản",
   "restriction.no_pork": "Không thịt heo",
   "restriction.no_beef": "Không thịt bò",
-  "sync.syncing": "Đang đồng bộ…"
+  "sync.syncing": "Đang đồng bộ…",
+  "health.needAdjusted": "Nhu cầu năng lượng/đạm đã điều chỉnh theo giai đoạn (Nhu cầu 2016)."
 }

@@ -15,10 +15,19 @@ describe("life-stage needs (honest when unsourced)", () => {
     expect(withStage.proteinG - base.proteinG).toBe(19);
   });
 
-  it("adds NO number for an unsourced stage (pregnancy) — honest, not fabricated", () => {
+  it("applies the sourced VN pregnancy increments (P2): T2 +250 kcal / +10 g", () => {
     const u = lifeStageUplift(F({ lifeStage: "pregnant_t2", mode: "wellness" }));
-    expect(u).toMatchObject({ lifeStage: "pregnant_t2", applied: false, kcal: 0, proteinG: 0, source: null });
-    expect(dailyNeed(F({ lifeStage: "pregnant_t2", mode: "wellness" }))).toEqual(dailyNeed(F()));
+    expect(u).toMatchObject({ lifeStage: "pregnant_t2", applied: true, kcal: 250, proteinG: 10, source: "P2" });
+    const base = dailyNeed(F());
+    const t3 = dailyNeed(F({ lifeStage: "pregnant_t3", mode: "wellness" }));
+    expect(t3.kcal - base.kcal).toBe(450);
+    expect(t3.proteinG - base.proteinG).toBe(31);
+  });
+
+  it("adds NO number for a still-unsourced stage (lactating 7–12) — honest, not fabricated", () => {
+    const u = lifeStageUplift(F({ lifeStage: "lactating_7_12", mode: "wellness" }));
+    expect(u).toMatchObject({ lifeStage: "lactating_7_12", applied: false, kcal: 0, proteinG: 0, source: null });
+    expect(dailyNeed(F({ lifeStage: "lactating_7_12", mode: "wellness" }))).toEqual(dailyNeed(F()));
   });
 
   it("micronutrient needs are honest_null until sourced", () => {
