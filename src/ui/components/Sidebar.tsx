@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useI18n } from "@/i18n/context";
 import { useStore } from "@/ui/store";
 import { useTheme } from "@/ui/theme";
+import { UserButton } from "@clerk/nextjs";
 import { SunIcon, MoonIcon } from "./icons";
 import { FlowerLogo } from "./FlowerLogo";
 import { NAV_GROUPS as GROUPS } from "@/ui/nav";
@@ -78,6 +79,7 @@ export function Sidebar() {
               {t("sync.online")}
             </p>
           </div>
+          <UserButton appearance={{ elements: { avatarBox: "h-7 w-7" } }} />
         </div>
         <button
           onClick={toggle}

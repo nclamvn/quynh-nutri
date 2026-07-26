@@ -153,6 +153,7 @@ model HouseholdLine {
 // ─── Household ───────────────────────────────────────────────────────────
 model Household {
   id             String          @id @default(cuid())
+  userId         String?         @unique // Clerk user → their household (multi-tenant)
   name           String
   size           Int
   marketMode     String          @default("mixed")

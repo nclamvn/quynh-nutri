@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Providers } from "@/ui/providers";
 
@@ -36,7 +37,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-full flex flex-col bg-bg text-ink">
-        <Providers>{children}</Providers>
+        <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+          <Providers>{children}</Providers>
+        </ClerkProvider>
       </body>
     </html>
   );

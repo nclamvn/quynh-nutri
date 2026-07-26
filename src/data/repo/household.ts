@@ -1,11 +1,39 @@
 import "server-only";
+import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
 import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName } from "@/domain/types";
 
-// Single household until auth lands (Phase A). Mutable user state lives on the
-// Household row (favorites/notes/pantry) + Member.allergies.
-const HH_ID = DEFAULT_HOUSEHOLD.id;
+const HH_ID = DEFAULT_HOUSEHOLD.id; // template / unauth fallback
+
+// Resolve the signed-in user's household — creating one from the seed template
+// on first sign-in (multi-tenant). Unauth (e.g. sign-in page) → the template id.
+async function currentHouseholdId(): Promise<string> {
+  const { userId } = await auth();
+  if (!userId) return HH_ID;
+  const db = getDb();
+  const existing = await db.household.findUnique({ where: { userId }, select: { id: true } });
+  if (existing) return existing.id;
+  const t = DEFAULT_HOUSEHOLD;
+  const created = await db.household.create({
+    data: {
+      userId,
+      name: t.name,
+      size: t.size,
+      marketMode: t.marketMode,
+      cookTimeCapMin: t.cookTimeCapMin,
+      busyDays: t.busyDays,
+      lactatingMember: t.lactatingMember,
+      restrictions: [],
+      favorites: [],
+      notes: [],
+      pantry: [],
+      members: { create: t.members.map((m) => ({ role: m.role, sex: m.sex ?? null, ageBand: m.ageBand ?? null, activity: m.activity, allergies: [] })) },
+    },
+    select: { id: true },
+  });
+  return created.id;
+}
 
 export interface HouseholdState {
   household: Household;
@@ -14,8 +42,9 @@ export interface HouseholdState {
   pantry: PantryItem[];
 }
 
-export async function loadHouseholdState(id = HH_ID): Promise<HouseholdState> {
+export async function loadHouseholdState(): Promise<HouseholdState> {
   const db = getDb();
+  const id = await currentHouseholdId();
   const row = await db.household.findUnique({ where: { id }, include: { members: true } });
   if (!row) return { household: DEFAULT_HOUSEHOLD, favorites: [], notes: [], pantry: [] };
 
@@ -57,8 +86,9 @@ export type StatePatch = Partial<{
   pantry: PantryItem[];
 }>;
 
-export async function saveHouseholdState(patch: StatePatch, id = HH_ID): Promise<void> {
+export async function saveHouseholdState(patch: StatePatch): Promise<void> {
   const db = getDb();
+  const id = await currentHouseholdId();
   const data: Record<string, unknown> = {};
   for (const k of ["size", "marketMode", "busyDays", "lactatingMember", "restrictions", "favorites", "notes", "pantry"] as const) {
     if (patch[k] !== undefined) data[k] = patch[k];
