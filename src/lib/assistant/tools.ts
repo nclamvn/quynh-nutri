@@ -8,6 +8,7 @@ import { generateWeek } from "@/domain/rotation";
 import { dietaryRepertoire } from "@/domain/dish";
 import { cookFromPantry } from "@/domain/pantry";
 import { substitute } from "@/lib/substitute";
+import { semanticSearch } from "@/lib/search";
 import { normalizeVn } from "@/lib/claude";
 import { dayDishes, dayNutrition } from "@/ui/derive";
 import type { Household, Allergen, DietRestriction, Slot } from "@/domain/types";
@@ -92,6 +93,19 @@ export const tools = {
           coveragePct: Math.round(m.coverage * 100),
           missing: m.missing.map(name),
         })),
+      };
+    },
+  }),
+
+  search_dishes: tool({
+    description: "Tìm món theo ý tự nhiên (vd 'món chua thanh mát', 'món nhanh nhiều đạm cho bé', 'dùng hết cá'). Trả các món khớp nhất theo ngữ nghĩa.",
+    inputSchema: z.object({ query: z.string().describe("mô tả món muốn tìm") }),
+    execute: async ({ query }) => {
+      const hits = await semanticSearch(query, 6);
+      return {
+        matches: hits
+          .filter((h) => h.score > 0.4)
+          .map((h) => ({ dish: REPERTOIRE_BY_ID[h.id]?.vnName, slot: REPERTOIRE_BY_ID[h.id]?.slot, match: Math.round(h.score * 100) })),
       };
     },
   }),

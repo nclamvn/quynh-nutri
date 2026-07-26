@@ -138,5 +138,6 @@
   "pantry.have": "have",
   "pantry.miss": "missing",
   "pantry.deductNote": "Pantry stock is auto-deducted from the shopping list.",
-  "shell.badge": "soon"
+  "shell.badge": "soon",
+  "dishes.search": "Search dishes by idea…"
 }

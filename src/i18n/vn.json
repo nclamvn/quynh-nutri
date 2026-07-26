@@ -138,5 +138,6 @@
   "pantry.have": "đã có",
   "pantry.miss": "thiếu",
   "pantry.deductNote": "Đồ trong kho đã tự trừ khỏi danh sách đi chợ.",
-  "shell.badge": "sắp có"
+  "shell.badge": "sắp có",
+  "dishes.search": "Tìm món theo ý… (vd món chua, nhiều đạm)"
 }

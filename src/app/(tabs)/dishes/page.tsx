@@ -22,27 +22,58 @@ export default function DishesPage() {
   const [quickOnly, setQuickOnly] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [searchIds, setSearchIds] = useState<string[] | null>(null);
+  const [searching, setSearching] = useState(false);
 
   const all = useMemo(() => SLOTS.flatMap((s) => optionsFor(s)), [optionsFor]);
-  const list = all.filter((d) => (slotFilter === "ALL" || d.slot === slotFilter) && (!quickOnly || d.quick));
+  const byId = useMemo(() => new Map(all.map((d) => [d.id, d])), [all]);
+  // Semantic search results (ranked) override the filtered list when active.
+  const list = searchIds
+    ? searchIds.map((id) => byId.get(id)).filter((d): d is Dish => Boolean(d))
+    : all.filter((d) => (slotFilter === "ALL" || d.slot === slotFilter) && (!quickOnly || d.quick));
+
+  const runSearch = async (q: string) => {
+    const t = q.trim();
+    if (!t) { setSearchIds(null); return; }
+    setSearching(true);
+    try {
+      const { searchDishes } = await import("@/app/actions");
+      setSearchIds(await searchDishes(t));
+    } catch { setSearchIds([]); }
+    finally { setSearching(false); }
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
       <header className="sticky top-0 z-10 border-b border-hairline bg-bg/95 px-4 py-3 backdrop-blur">
         <h1 className="text-lg font-semibold">{t("dishes.title")}</h1>
-        <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
-          <Chip active={slotFilter === "ALL"} onClick={() => setSlotFilter("ALL")}>
-            {t("dishes.filterAll")}
-          </Chip>
-          {SLOTS.map((s) => (
-            <Chip key={s} active={slotFilter === s} onClick={() => setSlotFilter(s)}>
-              {t(`slot.${s}`)}
-            </Chip>
-          ))}
-          <Chip active={quickOnly} onClick={() => setQuickOnly((q) => !q)}>
-            ⚡ {t("common.quick")}
-          </Chip>
-        </div>
+        <form
+          onSubmit={(e) => { e.preventDefault(); runSearch(query); }}
+          className="mt-2 flex items-center gap-2 rounded-full border border-hairline bg-surface/40 px-3.5 py-1.5 focus-within:border-brand"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0 text-tertiary"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" strokeLinecap="round" /></svg>
+          <input
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); if (!e.target.value.trim()) setSearchIds(null); }}
+            placeholder={t("dishes.search")}
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+          />
+          {searching && <span className="text-[10px] text-muted">…</span>}
+          {searchIds && !searching && (
+            <button type="button" onClick={() => { setQuery(""); setSearchIds(null); }} aria-label="clear" className="text-tertiary active:text-danger">✕</button>
+          )}
+        </form>
+        {!searchIds && (
+          <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+            <Chip active={slotFilter === "ALL"} onClick={() => setSlotFilter("ALL")}>{t("dishes.filterAll")}</Chip>
+            {SLOTS.map((s) => (
+              <Chip key={s} active={slotFilter === s} onClick={() => setSlotFilter(s)}>{t(`slot.${s}`)}</Chip>
+            ))}
+            <Chip active={quickOnly} onClick={() => setQuickOnly((q) => !q)}>⚡ {t("common.quick")}</Chip>
+          </div>
+        )}
+        {searchIds && <p className="mt-2 text-[11px] text-muted">Tìm theo ngữ nghĩa · {list.length} món khớp</p>}
       </header>
 
       <ul className="space-y-2 px-4 py-4">
