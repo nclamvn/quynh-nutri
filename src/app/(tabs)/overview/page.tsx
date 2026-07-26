@@ -83,7 +83,7 @@ export default function OverviewPage() {
       ) : (
         <>
           {/* Week matrix 5 slot × 7 days */}
-          <section className="card mb-5 overflow-x-auto p-3">
+          <section className="card scroll-x-thin mb-5 overflow-x-auto p-3">
             <div className="min-w-[640px]">
               <div className="mb-2 grid grid-cols-[64px_repeat(7,1fr)] gap-1.5">
                 <div />

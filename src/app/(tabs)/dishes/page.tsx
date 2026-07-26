@@ -67,7 +67,7 @@ export default function DishesPage() {
             )}
           </form>
           {!searchIds ? (
-            <div className="flex gap-1.5 overflow-x-auto pb-1">
+            <div className="scroll-x-thin flex gap-1.5 overflow-x-auto pb-2.5 pt-0.5">
               <Chip active={slotFilter === "ALL"} onClick={() => setSlotFilter("ALL")}>{t("dishes.filterAll")}</Chip>
               {SLOTS.map((s) => (
                 <Chip key={s} active={slotFilter === s} onClick={() => setSlotFilter(s)}>{t(`slot.${s}`)}</Chip>

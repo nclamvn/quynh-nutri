@@ -52,7 +52,7 @@ export default function NutritionPage() {
     <PageContainer>
       <PageHeader title={t("nutrition.title")} subtitle={t("nutrition.perDay")} sticky>
         <div className="space-y-1.5">
-          <div className="flex gap-1.5 overflow-x-auto pb-1">
+          <div className="scroll-x-thin flex gap-1.5 overflow-x-auto pb-2.5 pt-0.5">
             {Array.from({ length: 7 }, (_, d) => (
               <button
                 key={d}
@@ -63,7 +63,7 @@ export default function NutritionPage() {
               </button>
             ))}
           </div>
-          <div className="flex gap-1.5 overflow-x-auto pb-1">
+          <div className="scroll-x-thin flex gap-1.5 overflow-x-auto pb-2.5 pt-0.5">
             {["household", ...household.members.map((m) => m.id)].map((id) => (
               <button
                 key={id}
