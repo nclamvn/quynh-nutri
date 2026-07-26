@@ -40,13 +40,26 @@ export function Sidebar() {
 
   return (
     <aside className={`sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-surface/40 lg:flex ${collapsed ? "w-16" : "w-60"}`}>
-      {/* Brand */}
+      {/* Brand + collapse toggle (top). When collapsed, logo + name hide and the
+          toggle sits in the logo's spot. */}
       <div className={`pb-3 pt-5 ${collapsed ? "px-0" : "px-5"}`}>
-        <div className={`flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}>
-          <span className="text-brand">
-            <FlowerLogo size={28} />
-          </span>
-          {!collapsed && <p className="font-semibold leading-tight tracking-tight">{t("brand.name")}</p>}
+        <div className={`flex items-center ${collapsed ? "justify-center" : "gap-2.5"}`}>
+          {!collapsed && (
+            <>
+              <span className="text-brand">
+                <FlowerLogo size={28} />
+              </span>
+              <p className="font-semibold leading-tight tracking-tight">{t("brand.name")}</p>
+            </>
+          )}
+          <button
+            onClick={toggleCollapsed}
+            title={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
+            aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
+            className={`rounded-lg p-1.5 text-muted hover:bg-surface hover:text-ink ${collapsed ? "" : "ml-auto"}`}
+          >
+            <ChevronsIcon dir={collapsed ? "right" : "left"} />
+          </button>
         </div>
         {!collapsed && <p className="mt-4 text-sm font-medium text-ink">{t("greeting")} 👋</p>}
       </div>
@@ -107,15 +120,6 @@ export function Sidebar() {
             <UserButton appearance={{ elements: { avatarBox: "h-7 w-7" } }} />
           </div>
         )}
-        <button
-          onClick={toggleCollapsed}
-          title={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
-          aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
-          className={`flex w-full items-center rounded-lg text-sm text-muted hover:bg-surface hover:text-ink ${collapsed ? "justify-center px-2 py-2.5" : "gap-2.5 px-3 py-2"}`}
-        >
-          <ChevronsIcon dir={collapsed ? "right" : "left"} />
-          {!collapsed && <span>{t("sidebar.collapse")}</span>}
-        </button>
       </div>
     </aside>
   );
