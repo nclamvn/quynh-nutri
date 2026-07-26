@@ -360,6 +360,15 @@ const MICROS_P1: Record<string, Partial<Record<"iron" | "folate" | "calcium" | "
   cam: { iron: 0.4, calcium: 34, zinc: 0.22, folate: 30 },
   dua_hau: { iron: 1, calcium: 8, zinc: 0.11, folate: 3 },
   bun: { iron: 0.2, calcium: 12 },
+  // com_trang: no cooked-rice row in the FCT → derived from raw polished rice
+  // (Fe 1.3 / Ca 30 / Zn 1.5 / Fol 9 per 100g) × the app's cooked-density factor
+  // (0.38 = 130 kcal cooked ÷ ~344 kcal raw). A transparent unit conversion of a P1
+  // value, not a guess. Rice is a large mass in every meal, so this lifts coverage.
+  com_trang: { iron: 0.5, calcium: 11, zinc: 0.6, folate: 3 },
+  gung: { iron: 2.5, calcium: 60, zinc: 0.34, folate: 11 },
+  me_chua: { iron: 0.4, calcium: 130 },
+  nuoc_mam: { iron: 0.78, calcium: 43, zinc: 0.2, folate: 51 },
+  duong: { iron: 0.06, calcium: 0 },
 };
 // Vitamin A (µg RAE = retinol + β-caroten/12, standard conversion) + vitamin C (mg),
 // per 100g edible, from the same FCT (P1). Merged into the same micros block.
@@ -395,6 +404,11 @@ const VITAMINS_P1: Record<string, Partial<Record<"vitA" | "vitC", number>>> = {
   cam: { vitA: 6, vitC: 40 },
   dua_hau: { vitA: 25, vitC: 7 },
   bun: { vitA: 0, vitC: 0 },
+  com_trang: { vitA: 0, vitC: 0 },
+  gung: { vitA: 0, vitC: 5 },
+  me_chua: { vitA: 1, vitC: 12 },
+  nuoc_mam: { vitA: 4, vitC: 1 },
+  duong: { vitA: 0, vitC: 0 },
 };
 for (const c of COMMODITIES) {
   const m = { ...(MICROS_P1[c.id] ?? {}), ...(VITAMINS_P1[c.id] ?? {}) };
