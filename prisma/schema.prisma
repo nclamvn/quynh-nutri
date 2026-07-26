@@ -159,6 +159,12 @@ model Household {
   cookTimeCapMin Int             @default(45)
   busyDays       String[] // ["Mon","Wed"]
   lactatingMember Boolean        @default(false)
+  restrictions   String[] // diet: vegetarian, no_pork, …
+  // Mutable per-household user state (Phase A persistence). Collections kept on
+  // the household row to avoid many tiny tables; promote to relations if needed.
+  favorites      String[] // dish ids
+  notes          Json      @default("[]") // [{id, text}]
+  pantry         Json      @default("[]") // [{commodityId, qty, unit, expiry?}]
   members        Member[]
   dishes         HouseholdDish[]
   weekPlans      WeekPlan[]
@@ -172,6 +178,7 @@ model Member {
   sex         String?
   ageBand     String?
   activity    Activity   @default(moderate)
+  allergies   String[] // shellfish, fish, egg, …
 }
 
 // ─── Planning ────────────────────────────────────────────────────────────

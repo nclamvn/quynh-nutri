@@ -8,6 +8,7 @@ import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
 import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
 import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
+import { getHouseholdState, persistState } from "@/app/actions";
 
 // Phase 1 data source: the typed seed, in-memory. When Postgres is wired the
 // repo layer swaps in here without touching domain or UI.
@@ -60,6 +61,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   // Resolve a dish id through the override: B1 fork wins over B0 (Blueprint §2).
   const resolve = useCallback((id: string) => resolveDish(id, REPERTOIRE, b1) ?? REPERTOIRE_BY_ID[id], [b1]);
+
+  // Hydrate from Neon on mount (persistence). Falls back to in-memory defaults.
+  useEffect(() => {
+    getHouseholdState()
+      .then((s) => {
+        setHousehold(s.household);
+        setFavorites(Object.fromEntries(s.favorites.map((id) => [id, true])));
+        setUserNotes(s.notes);
+        noteId.current = s.notes.reduce((m, n) => Math.max(m, n.id), 0) + 1;
+        setPantry(s.pantry);
+      })
+      .catch(() => {}); // offline / no DB → keep defaults
+  }, []);
 
   // Dishes the household is actually allowed to eat (allergies + diet restrictions).
   const allowedRepertoire = useMemo(() => dietaryRepertoire(repertoire, household, commodities), [household]);
@@ -143,28 +157,48 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const updateHousehold = useCallback((patch: Partial<Household>) => {
     setHousehold((h) => ({ ...h, ...patch }));
+    persistState({
+      size: patch.size,
+      marketMode: patch.marketMode,
+      busyDays: patch.busyDays,
+      lactatingMember: patch.lactatingMember,
+      restrictions: patch.restrictions,
+    });
   }, []);
 
   const addNote = useCallback((text: string) => {
     const t = text.trim();
     if (!t) return;
-    setUserNotes((n) => [{ id: noteId.current++, text: t }, ...n]);
-  }, []);
-  const deleteNote = useCallback((id: number) => setUserNotes((n) => n.filter((x) => x.id !== id)), []);
+    const next = [{ id: noteId.current++, text: t }, ...userNotes];
+    setUserNotes(next);
+    persistState({ notes: next });
+  }, [userNotes]);
+  const deleteNote = useCallback((id: number) => {
+    const next = userNotes.filter((x) => x.id !== id);
+    setUserNotes(next);
+    persistState({ notes: next });
+  }, [userNotes]);
 
   const addPantry = useCallback((commodityId: string, qty: number, unit: string) => {
     if (!commodityId || qty <= 0) return;
-    setPantry((p) => {
-      const i = p.findIndex((x) => x.commodityId === commodityId);
-      if (i >= 0) { const c = [...p]; c[i] = { ...c[i], qty: c[i].qty + qty }; return c; }
-      return [...p, { commodityId, qty, unit }];
-    });
-  }, []);
-  const removePantry = useCallback((commodityId: string) => setPantry((p) => p.filter((x) => x.commodityId !== commodityId)), []);
+    const i = pantry.findIndex((x) => x.commodityId === commodityId);
+    const next = i >= 0 ? pantry.map((x, j) => (j === i ? { ...x, qty: x.qty + qty } : x)) : [...pantry, { commodityId, qty, unit }];
+    setPantry(next);
+    persistState({ pantry: next });
+  }, [pantry]);
+  const removePantry = useCallback((commodityId: string) => {
+    const next = pantry.filter((x) => x.commodityId !== commodityId);
+    setPantry(next);
+    persistState({ pantry: next });
+  }, [pantry]);
 
   // ── Favorites (B1-lite): keyed by dish id shown on the card ──
   const isFavorite = useCallback((id: string) => Boolean(favorites[id]), [favorites]);
-  const toggleFavorite = useCallback((id: string) => setFavorites((f) => ({ ...f, [id]: !f[id] })), []);
+  const toggleFavorite = useCallback((id: string) => {
+    const next = { ...favorites, [id]: !favorites[id] };
+    setFavorites(next);
+    persistState({ favorites: Object.keys(next).filter((k) => next[k]) });
+  }, [favorites]);
   const favoriteDishes = useMemo(
     () => Object.keys(favorites).filter((id) => favorites[id]).map(resolve).filter((d): d is Dish => Boolean(d)),
     [favorites, resolve],
