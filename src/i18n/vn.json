@@ -227,5 +227,7 @@
   "sync.syncing": "Đang đồng bộ…",
   "health.needAdjusted": "Nhu cầu năng lượng/đạm đã điều chỉnh theo giai đoạn (Nhu cầu 2016).",
   "health.microNote": "Ước lượng vi chất từ Bảng thành phần thực phẩm VN (Viện Dinh dưỡng). I-ốt chưa theo dõi (thiếu dữ liệu). Hỏi chuyên gia.",
-  "health.micro.zinc": "Kẽm"
+  "health.micro.zinc": "Kẽm",
+  "health.micro.vitA": "Vitamin A",
+  "health.micro.vitC": "Vitamin C"
 }

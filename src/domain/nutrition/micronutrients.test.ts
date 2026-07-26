@@ -31,7 +31,7 @@ describe("micronutrients (real VN FCT data, honest coverage)", () => {
     const member: Member = { id: "m", role: "adult", sex: "F", activity: "moderate", healthProfile: { lifeStage: "pregnant_t2", mode: "wellness" } };
     const hh: Household = { id: "h", name: "H", size: 1, marketMode: "mixed", cookTimeCapMin: 45, busyDays: [], lactatingMember: false, members: [member] };
     const rows = pregnancyMicroAdequacy([dish()], member, hh, src);
-    expect(rows.map((r) => r.nutrient)).toEqual(["iron", "folate", "calcium", "zinc"]);
+    expect(rows.map((r) => r.nutrient)).toEqual(["iron", "folate", "calcium", "zinc", "vitA", "vitC"]);
     const iron = rows.find((r) => r.nutrient === "iron")!;
     expect(iron.need).toBe(27);
     expect(iron.ratioPct).toBeGreaterThan(0);

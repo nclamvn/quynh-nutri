@@ -82,8 +82,9 @@ export type LifeStage =
 export type PregnancyHazard =
   | "high_mercury" | "raw_undercooked" | "unpasteurized" | "liver_vit_a" | "alcohol" | "high_caffeine";
 
-/** Micronutrients tracked from the VN Food Composition Table (per 100g edible). */
-export type Micronutrient = "iron" | "folate" | "calcium" | "zinc" | "iodine";
+/** Micronutrients tracked from the VN Food Composition Table (per 100g edible).
+ *  vitA = retinol activity equivalent (µg RAE), vitC = ascorbic acid (mg). */
+export type Micronutrient = "iron" | "folate" | "calcium" | "zinc" | "iodine" | "vitA" | "vitC";
 
 export interface HealthProfile {
   lifeStage: LifeStage;

@@ -8,7 +8,7 @@ import { householdNeed } from "./adequacy";
 // (% of the day's food mass that actually has data for that nutrient) — same honesty
 // discipline as the macro D3 gate. iodine is excluded: the FCT lacks reliable food
 // iodine, so it stays honest_null rather than being guessed.
-export const PREG_MICROS = ["iron", "folate", "calcium", "zinc"] as const;
+export const PREG_MICROS = ["iron", "folate", "calcium", "zinc", "vitA", "vitC"] as const;
 export type PregMicro = (typeof PREG_MICROS)[number];
 
 /** Pregnancy Recommended Nutrient Intake / day. DRI/WHO reference values, which the
@@ -19,6 +19,8 @@ export const MICRO_RNI: Record<PregMicro, { need: number; unit: string }> = {
   folate: { need: 600, unit: "µg" },
   calcium: { need: 1000, unit: "mg" },
   zinc: { need: 11, unit: "mg" },
+  vitA: { need: 770, unit: "µg" }, // RAE
+  vitC: { need: 85, unit: "mg" },
 };
 export const MICRO_RNI_SOURCE: ProvenanceLevel = "P6"; // WHO/DRI (VN Nhu cầu 2016 similar)
 

@@ -361,8 +361,44 @@ const MICROS_P1: Record<string, Partial<Record<"iron" | "folate" | "calcium" | "
   dua_hau: { iron: 1, calcium: 8, zinc: 0.11, folate: 3 },
   bun: { iron: 0.2, calcium: 12 },
 };
+// Vitamin A (µg RAE = retinol + β-caroten/12, standard conversion) + vitamin C (mg),
+// per 100g edible, from the same FCT (P1). Merged into the same micros block.
+const VITAMINS_P1: Record<string, Partial<Record<"vitA" | "vitC", number>>> = {
+  thit_bo: { vitA: 12, vitC: 1 },
+  thit_heo_nac: { vitA: 2, vitC: 1 },
+  thit_ba_chi: { vitA: 10, vitC: 2 },
+  suon_heo: { vitA: 0, vitC: 0 },
+  thit_ga: { vitA: 120, vitC: 4 },
+  trung_ga: { vitA: 700, vitC: 0 },
+  dau_hu: { vitA: 0 },
+  ca_thu: { vitA: 10, vitC: 0 },
+  ca_dieu_hong: { vitA: 0, vitC: 0 },
+  ca_loc: { vitA: 0, vitC: 0 },
+  tom: { vitA: 20, vitC: 0 },
+  ghe: { vitA: 36, vitC: 0 },
+  cua_dong: { vitA: 210, vitC: 0 },
+  muc: { vitA: 10, vitC: 5 },
+  rau_muong: { vitA: 466, vitC: 23 },
+  rau_ngot: { vitA: 554, vitC: 185 },
+  rau_day: { vitA: 380, vitC: 77 },
+  cai_ngot: { vitA: 525, vitC: 51 },
+  bong_cai: { vitA: 1, vitC: 70 },
+  gia_do: { vitA: 1, vitC: 10 },
+  bi_xanh: { vitA: 0, vitC: 16 },
+  su_su: { vitA: 0, vitC: 4 },
+  muop: { vitA: 13, vitC: 8 },
+  ca_chua: { vitA: 33, vitC: 40 },
+  hanh_tay: { vitA: 0, vitC: 10 },
+  mong_toi: { vitA: 160, vitC: 72 },
+  rau_lang: { vitA: 153, vitC: 11 },
+  chuoi: { vitA: 2, vitC: 6 },
+  cam: { vitA: 6, vitC: 40 },
+  dua_hau: { vitA: 25, vitC: 7 },
+  bun: { vitA: 0, vitC: 0 },
+};
 for (const c of COMMODITIES) {
-  if (MICROS_P1[c.id]) { c.micros = MICROS_P1[c.id]; c.microSource = "P1"; }
+  const m = { ...(MICROS_P1[c.id] ?? {}), ...(VITAMINS_P1[c.id] ?? {}) };
+  if (Object.keys(m).length) { c.micros = m; c.microSource = "P1"; }
 }
 
 export const COMMODITY_BY_ID: Record<string, Commodity> = Object.fromEntries(
