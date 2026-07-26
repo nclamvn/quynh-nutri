@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BottomSheet } from "./BottomSheet";
 import { FlowerLogo } from "./FlowerLogo";
+import { RichText } from "./RichText";
 
 type Msg = { role: "user" | "assistant"; content: string; tools?: string[] };
 
@@ -79,10 +80,10 @@ export function AssistantSheet() {
         )}
         {messages.map((m, i) => (
           <div key={i} className={m.role === "user" ? "flex justify-end" : ""}>
-            <div className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm ${m.role === "user" ? "bg-brand text-white" : "bg-surface"}`}>
-              {m.content}
+            <div className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm ${m.role === "user" ? "whitespace-pre-wrap bg-brand text-white" : "bg-surface"}`}>
+              {m.role === "user" ? m.content : <RichText text={m.content} />}
               {m.tools && m.tools.length > 0 && (
-                <p className="mt-1.5 text-[10px] text-muted">↳ số liệu từ: {[...new Set(m.tools)].join(", ")}</p>
+                <p className="mt-2 border-t border-hairline pt-1.5 text-[10px] text-muted">↳ số liệu từ engine: {[...new Set(m.tools)].join(", ")}</p>
               )}
             </div>
           </div>

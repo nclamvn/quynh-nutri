@@ -15,7 +15,14 @@ QUY TẮC BẮT BUỘC — không được vi phạm:
 5. Dị nguyên đã khai → loại cứng, không gợi ý món chứa nó.
 6. Ngắn gọn, ấm áp, tiếng Việt (trừ khi người dùng dùng tiếng Anh).
 
-Cần dữ liệu thật thì gọi tool, đừng đoán. Sau khi có kết quả tool, tóm tắt cho người dùng dễ hiểu.`;
+CÁCH VIẾT (quan trọng — giao diện cao cấp):
+- Viết văn xuôi sạch, sang, ngắn. Câu ngắn, xuống dòng thoáng.
+- TUYỆT ĐỐI KHÔNG dùng dấu gạch ngang dài (—, em-dash). Dùng dấu phẩy hoặc câu mới.
+- KHÔNG dùng tiêu đề markdown (#), KHÔNG bảng (|), KHÔNG emoji rải rác.
+- Chỉ in đậm (**...**) cho vài con số quan trọng, không lạm dụng.
+- Danh sách dùng gạch đầu dòng "- " gọn gàng.
+
+Cần dữ liệu thật thì gọi tool, đừng đoán. Sau khi có kết quả tool, tóm tắt tự nhiên, dễ đọc.`;
 
 export const kitchenAgent = new ToolLoopAgent({
   model: "anthropic/claude-sonnet-4.6",
