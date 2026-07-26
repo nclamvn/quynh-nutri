@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 export interface DonutSegment {
   color: string; // CSS color (chart token)
   on: boolean; // present → full opacity; absent → faded
@@ -32,6 +34,12 @@ export function Donut({
   const segDeg = 360 / n - gapDeg;
   const segLen = (segDeg / 360) * c;
   const allOn = segments.every((s) => s.on);
+  // Draw arcs in on mount (cosmetic — presence is still shown by opacity).
+  const [drawn, setDrawn] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setDrawn(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
@@ -49,8 +57,12 @@ export function Donut({
               strokeWidth={stroke}
               strokeLinecap="round"
               strokeDasharray={`${segLen} ${c - segLen}`}
+              strokeDashoffset={drawn ? 0 : segLen}
               transform={`rotate(${rot} ${size / 2} ${size / 2})`}
-              style={{ opacity: s.on ? 1 : 0.16, transition: "opacity var(--dur-normal) var(--ease-standard)" }}
+              style={{
+                opacity: s.on ? 1 : 0.16,
+                transition: `opacity var(--dur-normal) var(--ease-standard), stroke-dashoffset var(--dur-slow) var(--ease-emphasized) ${i * 80}ms`,
+              }}
             />
           );
         })}

@@ -32,15 +32,17 @@ export function DishThumb({
     return <span className={`inline-block shrink-0 bg-surface ${radius} ${className}`} style={{ width: size, height: size }} aria-hidden />;
   }
   return (
-    <img
-      src={failed ? dishSvg(dish) : photo}
-      alt=""
-      width={size}
-      height={size}
-      loading="lazy"
-      onError={() => setFailed(true)}
-      className={`shrink-0 bg-surface object-cover ring-1 ring-hairline/70 dark:brightness-[0.92] ${radius} ${className}`}
+    <span
+      className={`relative inline-block shrink-0 overflow-hidden bg-surface ring-1 ring-hairline/70 ${radius} ${className}`}
       style={{ width: size, height: size }}
-    />
+    >
+      <img
+        src={failed ? dishSvg(dish) : photo}
+        alt=""
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.06] dark:brightness-[0.92]"
+      />
+    </span>
   );
 }

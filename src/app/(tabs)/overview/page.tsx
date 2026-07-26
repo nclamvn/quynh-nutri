@@ -13,6 +13,8 @@ import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
 import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
+import { SLOT_COLOR } from "@/ui/slotColor";
+import { useCountUp } from "@/ui/hooks/useCountUp";
 import type { FoodGroup } from "@/domain/nutrition";
 
 const GROUP_COLORS: [FoodGroup, string][] = [
@@ -51,6 +53,7 @@ export default function OverviewPage() {
   }, [optionsFor, today]);
 
   const slotDish = (day: number, slot: Slot) => dish(plan.slots.find((s) => s.day === day && s.slot === slot)?.dishId ?? "");
+  const needCount = Math.round(useCountUp(shopping.length)); // count-up flourish
 
   return (
     <PageContainer>
@@ -95,7 +98,7 @@ export default function OverviewPage() {
               </div>
               {GRID_SLOTS.map(({ slot, key }) => (
                 <div key={slot} className="mb-1.5 grid grid-cols-[64px_repeat(7,1fr)] items-center gap-1.5">
-                  <div className="text-[10px] font-semibold uppercase tracking-wide text-tertiary">{t(key)}</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: SLOT_COLOR[slot] }}>{t(key)}</div>
                   {Array.from({ length: 7 }, (_, d) => {
                     const dd = slotDish(d, slot);
                     return (
@@ -114,9 +117,9 @@ export default function OverviewPage() {
           </section>
 
           {/* Metric row */}
-          <section className="mb-5 grid gap-4 md:grid-cols-3">
+          <section data-stagger className="mb-5 grid gap-4 md:grid-cols-3">
             {/* Nutrition today */}
-            <div className="card card-interactive p-4">
+            <div style={{ "--i": 0 } as React.CSSProperties} className="card card-interactive p-4">
               <h2 className="mb-3 text-sm font-semibold">{t("ov.nutritionToday")}</h2>
               <div className="flex items-center gap-4">
                 <Donut segments={groupSegments} label={`${presentCore}/4`} sublabel={t("ov.groupsMet")} />
@@ -141,10 +144,10 @@ export default function OverviewPage() {
             </div>
 
             {/* Need to buy today */}
-            <div className="card card-interactive flex flex-col p-4">
+            <div style={{ "--i": 1 } as React.CSSProperties} className="card card-interactive flex flex-col p-4">
               <h2 className="mb-2 text-sm font-semibold">{t("ov.needToday")}</h2>
               <div className="flex items-baseline gap-2">
-                <span className="tnum text-4xl font-semibold text-brand">{shopping.length}</span>
+                <span className="tnum text-4xl font-semibold text-brand">{needCount}</span>
                 <span className="text-sm text-muted">{t("ov.items")}</span>
               </div>
               <p className="tnum mt-1 text-xs text-muted">· {vendors} {t("ov.vendors")}</p>
@@ -154,7 +157,7 @@ export default function OverviewPage() {
             </div>
 
             {/* Suggestion */}
-            <div className="card card-interactive p-4">
+            <div style={{ "--i": 2 } as React.CSSProperties} className="group card card-interactive p-4">
               <h2 className="mb-3 text-sm font-semibold">{t("ov.suggestion")}</h2>
               {suggestion && (
                 <div className="flex items-center gap-3">
@@ -172,7 +175,7 @@ export default function OverviewPage() {
           </section>
 
           {/* Headline suggestion card — hero: gradient + blossom motif (§2.3 zone) */}
-          <section className="relative overflow-hidden rounded-[24px] border border-hairline bg-gradient-to-br from-brand-weak/70 via-bg to-accent-weak/60 shadow-[var(--shadow-sm)]">
+          <section className="grain group relative overflow-hidden rounded-[24px] border border-hairline bg-gradient-to-br from-brand-weak/70 via-bg to-accent-weak/60 shadow-[var(--shadow-sm)]">
             {/* Soft blossom accent, tucked bottom-left so it never sits under the dish. */}
             <Blossom size={190} className="pointer-events-none absolute -bottom-14 -left-12 -rotate-12 text-brand/10" />
             <div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:gap-8">

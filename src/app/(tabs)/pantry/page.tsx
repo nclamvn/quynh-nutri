@@ -81,9 +81,9 @@ export default function PantryPage() {
               <p className="relative text-sm text-muted">{t("pantry.empty")}</p>
             </div>
           ) : (
-            <ul className="space-y-2">
-              {pantry.map((p) => (
-                <li key={p.commodityId} className="card flex items-center gap-3 p-3">
+            <ul data-stagger className="space-y-2">
+              {pantry.map((p, i) => (
+                <li key={p.commodityId} style={{ "--i": Math.min(i, 12) } as React.CSSProperties} className="card flex items-center gap-3 p-3">
                   <span className="flex-1 text-sm">{cName(p.commodityId, lang)}</span>
                   <span className="tnum text-xs text-muted">{p.qty} {p.unit}</span>
                   <button onClick={() => removePantry(p.commodityId)} aria-label={t("notes.delete")} className="rounded p-1 text-tertiary active:text-danger">
@@ -99,9 +99,9 @@ export default function PantryPage() {
         {matches.length > 0 && (
           <aside className="h-fit lg:sticky lg:top-6">
             <h2 className="mb-2 text-sm font-semibold">{t("pantry.cookNow")}</h2>
-            <ul className="space-y-2">
-              {matches.map((m) => (
-                <li key={m.dish.id} className="card card-interactive flex items-center gap-3 p-3">
+            <ul data-stagger className="space-y-2">
+              {matches.map((m, i) => (
+                <li key={m.dish.id} style={{ "--i": i } as React.CSSProperties} className="group card card-interactive flex items-center gap-3 p-3">
                   <DishThumb dish={m.dish} size={56} shape="rounded" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{lang === "en" && m.dish.enLabel ? m.dish.enLabel : m.dish.vnName}</p>

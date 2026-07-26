@@ -77,8 +77,8 @@ export default function NutritionPage() {
         </div>
       </PageHeader>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <section className="card p-5">
+      <div data-stagger className="grid gap-4 lg:grid-cols-2">
+        <section style={{ "--i": 0 } as React.CSSProperties} className="card p-5">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-sm font-medium">{memberLabel(memberId)}</span>
             <span
@@ -106,7 +106,7 @@ export default function NutritionPage() {
           </ul>
         </section>
 
-        <section className="card flex flex-col items-center p-5">
+        <section style={{ "--i": 1 } as React.CSSProperties} className="card flex flex-col items-center p-5">
           <Donut segments={groupSegments} label={`${presentCore}/4`} sublabel={t("ov.groupsMet")} size={132} />
           <h2 className="mt-4 text-sm font-semibold">
             {nut.groups.missingCore.length === 0 ? `✓ ${t("nutrition.groupsOk")}` : `${t("nutrition.missingGroups")}: ${nut.groups.missingCore.join(", ")}`}

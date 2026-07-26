@@ -4,6 +4,7 @@ import { TabBar } from "./TabBar";
 import { SWRegister } from "./SWRegister";
 import { MobileTopBar } from "./MobileTopBar";
 import { AssistantSheet } from "./AssistantSheet";
+import { AmbientBackground } from "./AmbientBackground";
 
 /**
  * Responsive app shell (Blueprint §4–5).
@@ -15,6 +16,7 @@ import { AssistantSheet } from "./AssistantSheet";
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh">
+      <AmbientBackground />
       <SWRegister />
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">

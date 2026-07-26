@@ -7,6 +7,7 @@ import { costReport, formatVnd } from "@/domain/cost";
 import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
+import { useCountUp } from "@/ui/hooks/useCountUp";
 
 const BUDGET_KEY = "qk-budget-weekly";
 const GROUP_LABEL: Record<string, { vn: string; en: string }> = {
@@ -47,6 +48,7 @@ export default function ReportsPage() {
   const glabel = (g: string) => GROUP_LABEL[g]?.[lang === "en" ? "en" : "vn"] ?? g;
   const maxGroup = report.byGroup[0]?.vnd ?? 1;
   const empty = report.totalCount === 0;
+  const animatedTotal = Math.round(useCountUp(report.totalVnd)); // display flourish only
 
   return (
     <PageContainer>
@@ -58,13 +60,13 @@ export default function ReportsPage() {
       {empty ? (
         <p className="grid min-h-[40vh] place-content-center text-center text-sm text-muted">{t("reports.empty")}</p>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-12">
+        <div data-stagger className="grid gap-4 lg:grid-cols-12">
           {/* Hero — estimated weekly cost */}
-          <section className="card relative col-span-full overflow-hidden bg-gradient-to-br from-brand-weak/40 via-raised to-raised p-5 lg:col-span-5">
+          <section style={{ "--i": 0 } as React.CSSProperties} className="grain card relative col-span-full overflow-hidden bg-gradient-to-br from-brand-weak/40 via-raised to-raised p-5 lg:col-span-5">
             <Blossom size={130} className="pointer-events-none absolute -right-6 -top-8 -rotate-6 text-brand/10" />
             <p className="relative text-[11px] uppercase tracking-wide text-tertiary">{t("reports.costTitle")}</p>
             <div className="relative mt-1 flex items-baseline gap-1.5">
-              <span className="text-[32px] font-semibold leading-none lg:text-[40px]">~{formatVnd(report.totalVnd)}</span>
+              <span className="tnum text-[32px] font-semibold leading-none lg:text-[40px]">~{formatVnd(animatedTotal)}</span>
             </div>
             <p className="relative mt-1 text-[11px] text-muted">{t("reports.estimate")}</p>
 
@@ -85,8 +87,8 @@ export default function ReportsPage() {
           </section>
 
           {/* Budget */}
-          <section className="card col-span-full p-4 lg:col-span-7">
-            <p className="text-[11px] uppercase tracking-wide text-tertiary">{t("reports.budget")}</p>
+          <section style={{ "--i": 1, borderInlineStartColor: "var(--chart-fruit)" } as React.CSSProperties} className="card col-span-full border-l-[3px] p-4 lg:col-span-7">
+            <p className="text-[11px] uppercase tracking-wide" style={{ color: "var(--chart-fruit)" }}>{t("reports.budget")}</p>
             {budget == null ? (
               <div className="mt-2 flex items-center gap-2">
                 <input
@@ -121,7 +123,7 @@ export default function ReportsPage() {
           </section>
 
           {/* By group */}
-          <section className="card col-span-full p-5 lg:col-span-7">
+          <section style={{ "--i": 2 } as React.CSSProperties} className="card col-span-full p-5 lg:col-span-7">
             <h2 className="mb-3 text-xs font-medium text-muted">{t("reports.byGroup")}</h2>
             <div className="space-y-2.5">
               {report.byGroup.map((g) => (
@@ -139,7 +141,7 @@ export default function ReportsPage() {
           </section>
 
           {/* By trip */}
-          <section className="card col-span-full p-5 lg:col-span-5">
+          <section style={{ "--i": 3 } as React.CSSProperties} className="card col-span-full p-5 lg:col-span-5">
             <h2 className="mb-3 text-xs font-medium text-muted">{t("reports.byTrip")}</h2>
             <div className="grid grid-cols-2 gap-2">
               {report.byTrip.map((tr) => (
@@ -152,7 +154,7 @@ export default function ReportsPage() {
           </section>
 
           {/* Priciest items */}
-          <section className="card col-span-full p-5">
+          <section style={{ "--i": 4 } as React.CSSProperties} className="card col-span-full p-5">
             <h2 className="mb-2 text-xs font-medium text-muted">{t("reports.topItems")}</h2>
             <ul className="divide-y divide-hairline">
               {report.top.map((l) => (

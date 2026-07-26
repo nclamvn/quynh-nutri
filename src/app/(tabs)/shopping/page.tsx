@@ -47,15 +47,15 @@ export default function ShoppingPage() {
           <Link href="/week" className="relative mt-2 text-sm font-medium text-brand">{t("week.title")} →</Link>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {groups.map((g) => {
+        <div data-stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {groups.map((g, gi) => {
             const byVendor = groupVendors(g.items);
             const total = g.items.length;
             const done = g.items.filter((i) => i.checked).length;
             const pct = total ? Math.round((done / total) * 100) : 0;
             const complete = done === total;
             return (
-              <section key={g.trip} className="card h-fit overflow-hidden">
+              <section key={g.trip} style={{ "--i": gi } as React.CSSProperties} className="card h-fit overflow-hidden">
                 <div className="border-b border-hairline px-4 py-3">
                   <div className="flex items-center justify-between">
                     <h2 className="text-sm font-semibold">

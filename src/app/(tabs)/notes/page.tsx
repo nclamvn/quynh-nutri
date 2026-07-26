@@ -48,9 +48,9 @@ export default function NotesPage() {
           <p className="relative text-sm text-muted">{t("notes.empty")}</p>
         </div>
       ) : (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {userNotes.map((n) => (
-            <li key={n.id} className="card flex items-start gap-2 p-3.5">
+        <ul data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {userNotes.map((n, i) => (
+            <li key={n.id} style={{ "--i": Math.min(i, 12) } as React.CSSProperties} className="card flex items-start gap-2 p-3.5">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
               <span className="flex-1 text-sm">{n.text}</span>
               <button onClick={() => deleteNote(n.id)} aria-label={t("notes.delete")} className="shrink-0 rounded p-1 text-tertiary active:text-danger">

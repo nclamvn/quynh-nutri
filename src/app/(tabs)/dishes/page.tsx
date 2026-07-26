@@ -86,15 +86,15 @@ export default function DishesPage() {
           <p className="mt-3 text-sm text-muted">{t("dishes.noResults")}</p>
         </div>
       ) : (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-          {list.map((d) => (
-            <li key={d.id}>
+        <ul data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {list.map((d, i) => (
+            <li key={d.id} style={{ "--i": Math.min(i, 12) } as React.CSSProperties}>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setDetailId(d.id)}
                 onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDetailId(d.id)}
-                className="card card-interactive flex h-full cursor-pointer items-center gap-3 p-3"
+                className="group card card-interactive flex h-full cursor-pointer items-center gap-3 p-3"
               >
                 <DishThumb dish={d} size={72} shape="rounded" />
                 <div className="min-w-0 flex-1">

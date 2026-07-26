@@ -14,6 +14,7 @@ import { DishThumb } from "@/ui/components/DishThumb";
 import { HeartButton } from "@/ui/components/HeartButton";
 import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
+import { SLOT_COLOR } from "@/ui/slotColor";
 
 const SLOT_ORDER: Slot[] = ["COM", "MAN", "RAU", "CANH", "TRANGMIENG"];
 const BUSY_INDEX: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
@@ -31,7 +32,7 @@ export default function WeekPage() {
   return (
     <PageContainer>
       {/* Hero — descriptive, never evaluative (honesty: don't imply "optimized"). */}
-      <section className="relative mb-5 overflow-hidden rounded-[24px] border border-hairline bg-gradient-to-br from-brand-weak/70 via-bg to-accent-weak/60 shadow-[var(--shadow-sm)]">
+      <section className="grain relative mb-5 overflow-hidden rounded-[24px] border border-hairline bg-gradient-to-br from-brand-weak/70 via-bg to-accent-weak/60 shadow-[var(--shadow-sm)]">
         <Blossom size={190} className="pointer-events-none absolute -bottom-14 -left-12 -rotate-12 text-brand/10" />
         <div className="relative flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
@@ -57,7 +58,7 @@ export default function WeekPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 7 }, (_, day) => {
           const dishes = dayDishes(plan, day, dish);
           const nut = dayNutrition(dishes, household, commodity);
@@ -65,7 +66,7 @@ export default function WeekPage() {
           const daySlots = plan.slots.filter((s) => s.day === day).sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
 
           return (
-            <section key={day} className="card flex flex-col p-3.5">
+            <section key={day} style={{ "--i": day } as React.CSSProperties} className="card flex flex-col p-3.5">
               <div className="mb-2 flex items-center justify-between">
                 <h2 className="text-sm font-semibold">{t(`day.${day}`)}</h2>
                 {busy && <span className="rounded-full bg-amber-weak px-2 py-0.5 text-[10px] text-amber">{t("day.busy")}</span>}
@@ -87,10 +88,14 @@ export default function WeekPage() {
                 {daySlots.map((s) => {
                   const d = dish(s.dishId);
                   return (
-                    <li key={s.slot} className="flex items-center gap-2 rounded-[12px] bg-surface/50 px-2 py-1.5 transition-colors hover:bg-surface">
+                    <li
+                      key={s.slot}
+                      style={{ borderInlineStartColor: SLOT_COLOR[s.slot] }}
+                      className="group flex items-center gap-2 rounded-[12px] border-l-[3px] bg-surface/50 px-2 py-1.5 transition-colors hover:bg-surface"
+                    >
                       <DishThumb dish={d} size={52} shape="rounded" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-[9px] font-medium uppercase tracking-wide text-tertiary">{t(`slot.${s.slot}`)}</p>
+                        <p className="text-[9px] font-medium uppercase tracking-wide" style={{ color: SLOT_COLOR[s.slot] }}>{t(`slot.${s.slot}`)}</p>
                         <button className="block w-full truncate text-left text-sm" onClick={() => setSheet({ day, slot: s.slot })}>
                           {dishName(d, lang)}
                           {d?.quick && <span className="ml-1.5 text-[10px] text-brand-ink">⚡</span>}
