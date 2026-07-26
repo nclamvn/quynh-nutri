@@ -2,7 +2,7 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
-import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName } from "@/domain/types";
+import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName, HealthProfile } from "@/domain/types";
 
 const HH_ID = DEFAULT_HOUSEHOLD.id; // template / unauth fallback
 
@@ -64,6 +64,7 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
       ageBand: m.ageBand ?? undefined,
       activity: m.activity as Activity,
       allergies: (m.allergies as Allergen[]) ?? [],
+      healthProfile: (m.healthProfile as unknown as HealthProfile) ?? undefined,
     })),
   };
   return {
@@ -95,4 +96,15 @@ export async function saveHouseholdState(patch: StatePatch): Promise<void> {
   }
   if (Object.keys(data).length === 0) return;
   await db.household.update({ where: { id }, data: data as never });
+}
+
+/** Persist a member's health profile (T1). Scoped to the current household so a
+ *  user can't touch another household's member. */
+export async function saveMemberHealthProfile(memberId: string, profile: HealthProfile | null): Promise<void> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  await db.member.updateMany({
+    where: { id: memberId, householdId },
+    data: { healthProfile: (profile ?? undefined) as never },
+  });
 }

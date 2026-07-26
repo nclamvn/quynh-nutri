@@ -9,7 +9,12 @@ import { AdequacyStrip } from "@/ui/components/AdequacyStrip";
 import { Donut } from "@/ui/components/Donut";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
+import { HealthDisclaimer } from "@/ui/components/HealthDisclaimer";
 import { pct } from "@/ui/format";
+import { lifeStageMicros } from "@/data/seed/lifestage";
+import { pregnancyWarnings, hasPregnancyData } from "@/domain/dish/pregnancy";
+import { isPregnant } from "@/domain/health";
+import { COMMODITIES } from "@/data/seed/commodity";
 import type { FoodGroup } from "@/domain/nutrition";
 
 const MACRO_FIELDS: { field: "kcal" | "proteinG" | "carbG" | "fatG" | "fiberG"; label: string; unit: string }[] = [
@@ -48,6 +53,16 @@ export default function NutritionPage() {
   const presentCore = (["đạm", "tinh bột", "xơ", "béo"] as const).filter((g) => nut.groups.present.has(g)).length;
   const groupSegments = GROUP_COLORS.map(([g, color]) => ({ color, on: nut.groups.present.has(g) }));
 
+  // T1 life-stage (wellness). Honest_null everywhere until sources are seeded.
+  const lifeStage = member?.healthProfile?.lifeStage;
+  const hasStage = !!lifeStage && lifeStage !== "none";
+  const micros = member ? lifeStageMicros(member) : [];
+  const pregnant = !!lifeStage && isPregnant(lifeStage);
+  const warnings = pregnant && member
+    ? dishes.flatMap((d) => pregnancyWarnings(d, member, commodity).map((w) => ({ ...w, dish: d.vnName })))
+    : [];
+  const hazardRegistrySeeded = hasPregnancyData(COMMODITIES);
+
   return (
     <PageContainer>
       <PageHeader title={t("nutrition.title")} subtitle={t("nutrition.perDay")} sticky>
@@ -77,10 +92,17 @@ export default function NutritionPage() {
         </div>
       </PageHeader>
 
+      {hasStage && <HealthDisclaimer className="mb-4" />}
+
       <div data-stagger className="grid gap-4 lg:grid-cols-2">
         <section style={{ "--i": 0 } as React.CSSProperties} className="card p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium">{memberLabel(memberId)}</span>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+              <span className="truncate">{memberLabel(memberId)}</span>
+              {hasStage && (
+                <span className="shrink-0 rounded-full bg-brand-weak px-2 py-0.5 text-[10px] font-normal text-brand-ink">{t(`health.stage.${lifeStage}`)}</span>
+              )}
+            </span>
             <span
               className={`rounded-full px-2 py-0.5 text-[11px] ${
                 nut.display.mode === "number" ? "bg-accent-weak text-accent" : "bg-amber-weak text-amber"
@@ -104,6 +126,49 @@ export default function NutritionPage() {
               </li>
             ))}
           </ul>
+
+          {/* Key micronutrients for this stage — honest_null until a sourced RNI is seeded. */}
+          {hasStage && micros.length > 0 && (
+            <div className="mt-4 border-t border-hairline pt-3">
+              <p className="mb-2 text-xs font-medium text-muted">{t("health.microTitle", { stage: t(`health.stage.${lifeStage}`) })}</p>
+              <ul className="space-y-2">
+                {micros.map((mi) => (
+                  <li key={mi.nutrient} className="flex items-center justify-between text-sm">
+                    <span className="text-muted">{t(`health.micro.${mi.nutrient}`)}</span>
+                    {mi.need == null ? (
+                      <span className="inline-flex items-center gap-1.5 text-[13px] text-muted">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted" /> {t("health.microNull")}
+                      </span>
+                    ) : (
+                      <span className="tnum text-[13px]">{mi.need}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Pregnancy avoid-list — soft, sourced (never excludes). */}
+          {pregnant && (
+            <div className="mt-4 border-t border-hairline pt-3">
+              <p className="mb-2 text-xs font-medium text-muted">{t("health.avoidTitle")}</p>
+              {!hazardRegistrySeeded ? (
+                <p className="text-[12px] text-tertiary">{t("health.avoidPending")}</p>
+              ) : warnings.length === 0 ? (
+                <p className="text-[12px] text-accent">✓ {t("health.avoidNone")}</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {warnings.map((w, i) => (
+                    <li key={i} className="flex items-center gap-2 text-[12px]">
+                      <span className="rounded-full bg-amber-weak px-2 py-0.5 text-amber">{t(`health.hazard.${w.hazard}`)}</span>
+                      <span className="min-w-0 flex-1 truncate text-muted">{w.dish} · {commodity(w.commodityId)?.canonicalVn ?? w.commodityId}</span>
+                      <span className="shrink-0 text-tertiary">{w.source}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </section>
 
         <section style={{ "--i": 1 } as React.CSSProperties} className="card flex flex-col items-center p-5">

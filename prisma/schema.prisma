@@ -180,6 +180,7 @@ model Member {
   ageBand     String?
   activity    Activity   @default(moderate)
   allergies   String[] // shellfish, fish, egg, …
+  healthProfile Json?    // { lifeStage, mode } — T1 special diets (wellness only)
 }
 
 // ─── Planning ────────────────────────────────────────────────────────────

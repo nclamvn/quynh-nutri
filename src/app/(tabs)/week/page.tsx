@@ -15,6 +15,8 @@ import { HeartButton } from "@/ui/components/HeartButton";
 import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { SLOT_COLOR } from "@/ui/slotColor";
+import { pregnancyWarnings } from "@/domain/dish/pregnancy";
+import { isPregnant } from "@/domain/health";
 
 const SLOT_ORDER: Slot[] = ["COM", "MAN", "RAU", "CANH", "TRANGMIENG"];
 const BUSY_INDEX: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
@@ -28,6 +30,9 @@ export default function WeekPage() {
 
   const busyDayIdx = new Set(household.busyDays.map((d) => BUSY_INDEX[d]));
   const quickCount = plan.slots.filter((s) => dish(s.dishId)?.quick).length;
+  // Soft pregnancy warning on the mâm (dormant until hazard tags are sourced).
+  const pregnantMember = household.members.find((m) => m.healthProfile && isPregnant(m.healthProfile.lifeStage));
+  const warned = (d: ReturnType<typeof dish>) => !!(pregnantMember && d && pregnancyWarnings(d, pregnantMember, commodity).length > 0);
 
   return (
     <PageContainer>
@@ -99,6 +104,7 @@ export default function WeekPage() {
                         <button className="block w-full truncate text-left text-sm" onClick={() => setSheet({ day, slot: s.slot })}>
                           {dishName(d, lang)}
                           {d?.quick && <span className="ml-1.5 text-[10px] text-brand-ink">⚡</span>}
+                          {warned(d) && <span className="ml-1.5 text-[10px] text-amber" title={t("health.warnBadge")}>⚠</span>}
                         </button>
                       </div>
                       {d && <HeartButton dishId={d.id} size={17} />}

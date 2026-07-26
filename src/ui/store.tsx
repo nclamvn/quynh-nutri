@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile } from "@/domain/types";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
@@ -30,6 +30,7 @@ interface StoreValue {
   dish: (id: string) => Dish | undefined;
   commodity: typeof commodities;
   updateHousehold: (patch: Partial<Household>) => void;
+  updateMemberHealthProfile: (memberId: string, profile: HealthProfile | null) => void;
   // UI-3/5: favorites + fork (B1)
   isFavorite: (id: string) => boolean;
   toggleFavorite: (id: string) => void;
@@ -179,6 +180,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const updateMemberHealthProfile = useCallback((memberId: string, profile: HealthProfile | null) => {
+    setHousehold((h) => ({
+      ...h,
+      members: h.members.map((m) => (m.id === memberId ? { ...m, healthProfile: profile ?? undefined } : m)),
+    }));
+    import("@/app/actions").then(({ persistMemberHealthProfile }) => persistMemberHealthProfile(memberId, profile)).catch(() => {});
+  }, []);
+
   const addNote = useCallback((text: string) => {
     const t = text.trim();
     if (!t) return;
@@ -257,6 +266,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     dish: resolve,
     commodity: commodities,
     updateHousehold,
+    updateMemberHealthProfile,
     isFavorite,
     toggleFavorite,
     favoriteDishes,
