@@ -1,0 +1,230 @@
+// Meal SOT — persistence contract (Blueprint §3).
+// Postgres because the domain needs native enums + scalar arrays.
+// Runtime dev data lives as typed TS in src/data/seed/*; this schema is the
+// contract for when a real Postgres (Supabase/Neon) is wired via the repo layer.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────
+enum ProvenanceLevel {
+  P1 // Bảng Thành phần Thực phẩm VN (Viện Dinh dưỡng)
+  P2 // Nhu cầu Dinh dưỡng Khuyến nghị 2016
+  P3 // HD dinh dưỡng mẹ mang thai & cho con bú 2017
+  P4 // FAO/INFOODS ASEAN
+  P5 // USDA
+  P6 // WHO/FAO
+}
+
+enum Confidence {
+  corroborated // ≥2 nguồn độc lập khớp
+  disputed // nguồn vênh nhau
+  honest_null // chưa đủ dữ liệu — không đoán
+}
+
+enum ProteinType {
+  bo
+  ga
+  ca
+  tom
+  heo
+  cua
+  trung
+  dau
+  rau
+}
+
+enum CookMethod {
+  kho
+  xao
+  luoc
+  hap
+  nuong
+  ran
+  song
+}
+
+enum Slot {
+  COM
+  MAN
+  RAU
+  CANH
+  TRANGMIENG
+}
+
+enum MemberRole {
+  adult
+  child
+}
+
+enum Activity {
+  light
+  moderate
+  heavy
+}
+
+// ─── A: Commodity (macro/100g, provenance) ───────────────────────────────
+model CommodityIngredient {
+  id             String          @id
+  canonicalVn    String // khóa ngữ nghĩa (canonical)
+  labelEn        String? // chỉ hiển thị; thiếu → fallback VN
+  group          String // 14 nhóm theo Bảng 2016
+  kcal           Float
+  proteinG       Float
+  carbG          Float
+  fatG           Float
+  fiberG         Float
+  provenanceLevel ProvenanceLevel
+  confidence     Confidence
+  sourceRefs     Json // [{ source, value }]
+  seasonMonths   Int[]
+  storageNote    String?
+  substitutes    String[] // commodity ids cùng slot/vai trò
+
+  repertoireLines RepertoireLine[]
+  householdLines  HouseholdLine[]
+  shoppingItems   ShoppingItem[]
+}
+
+// ─── B0: Repertoire phổ dụng (system-owned seed) ─────────────────────────
+model RepertoireDish {
+  id           String           @id
+  vnName       String
+  enLabel      String?
+  proteinType  ProteinType
+  method       CookMethod
+  slot         Slot
+  quick        Boolean          @default(false)
+  baseServings Int              @default(4)
+  prepAhead    String[]
+  cookTimeMin  Int?
+  tags         String[]
+  lines        RepertoireLine[]
+  forks        HouseholdDish[]
+}
+
+model RepertoireLine {
+  id           String              @id @default(cuid())
+  dishId       String
+  dish         RepertoireDish      @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  commodityId  String
+  commodity    CommodityIngredient @relation(fields: [commodityId], references: [id])
+  qtyBase      Float // cho baseServings
+  unit         String
+}
+
+// ─── B1: Household dish (override B0) ─────────────────────────────────────
+model HouseholdDish {
+  id                 String          @id @default(cuid())
+  householdId        String
+  household          Household       @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  sourceRepertoireId String? // null = món tự tạo
+  source             RepertoireDish? @relation(fields: [sourceRepertoireId], references: [id])
+  vnName             String
+  enLabel            String?
+  proteinType        ProteinType
+  method             CookMethod
+  slot               Slot
+  quick              Boolean         @default(false)
+  baseServings       Int             @default(4)
+  vendor             String? // hàng ngoài chợ
+  isFavorite         Boolean         @default(false)
+  cookTimeMin        Int?
+  tags               String[]
+  lines              HouseholdLine[]
+  daySlots           DaySlot[]
+}
+
+model HouseholdLine {
+  id          String              @id @default(cuid())
+  dishId      String
+  dish        HouseholdDish       @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  commodityId String
+  commodity   CommodityIngredient @relation(fields: [commodityId], references: [id])
+  qtyBase     Float
+  unit        String
+}
+
+// ─── Household ───────────────────────────────────────────────────────────
+model Household {
+  id             String          @id @default(cuid())
+  name           String
+  size           Int
+  marketMode     String          @default("mixed")
+  cookTimeCapMin Int             @default(45)
+  busyDays       String[] // ["Mon","Wed"]
+  lactatingMember Boolean        @default(false)
+  members        Member[]
+  dishes         HouseholdDish[]
+  weekPlans      WeekPlan[]
+}
+
+model Member {
+  id          String     @id @default(cuid())
+  householdId String
+  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  role        MemberRole
+  sex         String?
+  ageBand     String?
+  activity    Activity   @default(moderate)
+}
+
+// ─── Planning ────────────────────────────────────────────────────────────
+model WeekPlan {
+  id          String        @id @default(cuid())
+  householdId String
+  household   Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  weekStart   DateTime
+  daySlots    DaySlot[]
+  shoppingList ShoppingList?
+}
+
+model DaySlot {
+  id                String         @id @default(cuid())
+  weekPlanId        String
+  weekPlan          WeekPlan       @relation(fields: [weekPlanId], references: [id], onDelete: Cascade)
+  day               Int // 0..6
+  slot              Slot
+  repertoireDishId  String? // ref B0
+  householdDishId   String? // ref B1
+  householdDish     HouseholdDish? @relation(fields: [householdDishId], references: [id])
+  locked            Boolean        @default(false)
+}
+
+model ShoppingList {
+  id         String         @id @default(cuid())
+  weekPlanId String         @unique
+  weekPlan   WeekPlan       @relation(fields: [weekPlanId], references: [id], onDelete: Cascade)
+  items      ShoppingItem[]
+}
+
+model ShoppingItem {
+  id          String              @id @default(cuid())
+  listId      String
+  list        ShoppingList        @relation(fields: [listId], references: [id], onDelete: Cascade)
+  commodityId String
+  commodity   CommodityIngredient @relation(fields: [commodityId], references: [id])
+  qtyTotal    Float
+  unit        String
+  vendor      String?
+  trip        Int // chuyến đi chợ
+  checked     Boolean             @default(false)
+}
+
+// ─── Nutrition cache (derived) ───────────────────────────────────────────
+model NutritionCache {
+  id          String   @id @default(cuid())
+  scope       String // dish | day | member
+  refId       String
+  macros      Json
+  coveragePct Float
+  displayMode String // number | range
+  computedAt  DateTime @default(now())
+
+  @@unique([scope, refId])
+}
