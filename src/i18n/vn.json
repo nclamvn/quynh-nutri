@@ -225,5 +225,7 @@
   "restriction.no_pork": "Không thịt heo",
   "restriction.no_beef": "Không thịt bò",
   "sync.syncing": "Đang đồng bộ…",
-  "health.needAdjusted": "Nhu cầu năng lượng/đạm đã điều chỉnh theo giai đoạn (Nhu cầu 2016)."
+  "health.needAdjusted": "Nhu cầu năng lượng/đạm đã điều chỉnh theo giai đoạn (Nhu cầu 2016).",
+  "health.microNote": "Ước lượng vi chất từ Bảng thành phần thực phẩm VN (Viện Dinh dưỡng). I-ốt chưa theo dõi (thiếu dữ liệu). Hỏi chuyên gia.",
+  "health.micro.zinc": "Kẽm"
 }

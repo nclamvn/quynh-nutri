@@ -51,6 +51,10 @@ export interface Commodity extends Macro {
   allergens?: Allergen[];
   /** Pregnancy hazard tags — only set with a sourceRef (soft warnings, T1). */
   pregnancyHazards?: { hazard: PregnancyHazard; source: ProvenanceLevel }[];
+  /** Micronutrients per 100g edible (iron/calcium/zinc mg, folate µg). Sourced from
+   *  the VN Food Composition Table (P1); absent nutrients stay honest_null. */
+  micros?: Partial<Record<Micronutrient, number>>;
+  microSource?: ProvenanceLevel;
   /**
    * Reference retail price in VND per kg of PURCHASED weight (same basis as the
    * shopping list's grossed-up qty). Price is inherently a market estimate — it
@@ -77,6 +81,9 @@ export type LifeStage =
  *  exclusion for T1). Only set when a sourceRef backs it. */
 export type PregnancyHazard =
   | "high_mercury" | "raw_undercooked" | "unpasteurized" | "liver_vit_a" | "alcohol" | "high_caffeine";
+
+/** Micronutrients tracked from the VN Food Composition Table (per 100g edible). */
+export type Micronutrient = "iron" | "folate" | "calcium" | "zinc" | "iodine";
 
 export interface HealthProfile {
   lifeStage: LifeStage;

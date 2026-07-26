@@ -322,6 +322,49 @@ for (const c of COMMODITIES) {
   if (PRICES[c.id] != null) { c.priceVndPerKg = PRICES[c.id]; c.priceSource = PRICE_SOURCE; }
 }
 
+// Micronutrients per 100g EDIBLE — read directly from the Vietnamese Food
+// Composition Table (Viện Dinh dưỡng, Bộ Y tế / FAO), the canonical P1 source.
+// iron/calcium/zinc in mg, folate in µg. Only nutrients present in the FCT are
+// listed; absent ones stay honest_null (never guessed). iodine is not reliably in
+// the FCT → omitted everywhere (honest_null). Foods with no confident FCT match
+// (com_trang cooked rice, thanh_long, can_tay, condiments) carry no micros.
+const MICROS_P1: Record<string, Partial<Record<"iron" | "folate" | "calcium" | "zinc", number>>> = {
+  thit_bo: { iron: 3.1, calcium: 12, zinc: 2.2 },
+  thit_heo_nac: { iron: 0.96, calcium: 7, zinc: 2.5, folate: 5 },
+  thit_ba_chi: { iron: 1.5, calcium: 9, zinc: 1.91, folate: 4 },
+  suon_heo: { iron: 0.61, calcium: 7, zinc: 3.6, folate: 2 },
+  thit_ga: { iron: 1.5, calcium: 12, zinc: 1.5, folate: 6 },
+  trung_ga: { iron: 2.7, calcium: 55, zinc: 0.9, folate: 47 },
+  dau_hu: { iron: 10.8, calcium: 325 },
+  ca_thu: { iron: 1.3, calcium: 50 },
+  ca_dieu_hong: { iron: 0.53, calcium: 50 },
+  ca_loc: { calcium: 90 },
+  tom: { iron: 1.6, calcium: 79, zinc: 1.11, folate: 3 },
+  ghe: { iron: 3.8, calcium: 141, zinc: 1.4 },
+  cua_dong: { iron: 1.4, calcium: 120 },
+  muc: { iron: 0.6, calcium: 14, zinc: 0.7, folate: 5 },
+  rau_muong: { iron: 1.4, calcium: 100, zinc: 0.35, folate: 194 },
+  rau_ngot: { iron: 2.7, calcium: 169, zinc: 0.94 },
+  rau_day: { iron: 7.7, calcium: 182, zinc: 0.79, folate: 123 },
+  cai_ngot: { iron: 1.9, calcium: 89, zinc: 0.9, folate: 187 },
+  bong_cai: { iron: 1.4, calcium: 26, zinc: 0.2, folate: 57 },
+  gia_do: { iron: 1.4, calcium: 38, zinc: 0.41, folate: 61 },
+  bi_xanh: { iron: 0.3, calcium: 26 },
+  su_su: { iron: 0.4, calcium: 17, zinc: 0.74, folate: 93 },
+  muop: { iron: 0.8, calcium: 28, zinc: 0.07, folate: 7 },
+  ca_chua: { iron: 1.4, calcium: 12, zinc: 0.74, folate: 15 },
+  hanh_tay: { iron: 0.8, calcium: 38, zinc: 1.43, folate: 19 },
+  mong_toi: { iron: 1.6, calcium: 176, zinc: 0.54 },
+  rau_lang: { iron: 2.7, calcium: 48, zinc: 0.29, folate: 80 },
+  chuoi: { iron: 0.5, calcium: 12, zinc: 0.32, folate: 20 },
+  cam: { iron: 0.4, calcium: 34, zinc: 0.22, folate: 30 },
+  dua_hau: { iron: 1, calcium: 8, zinc: 0.11, folate: 3 },
+  bun: { iron: 0.2, calcium: 12 },
+};
+for (const c of COMMODITIES) {
+  if (MICROS_P1[c.id]) { c.micros = MICROS_P1[c.id]; c.microSource = "P1"; }
+}
+
 export const COMMODITY_BY_ID: Record<string, Commodity> = Object.fromEntries(
   COMMODITIES.map((c) => [c.id, c]),
 );

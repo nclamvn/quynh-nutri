@@ -11,7 +11,7 @@ import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
 import { HealthDisclaimer } from "@/ui/components/HealthDisclaimer";
 import { pct } from "@/ui/format";
-import { lifeStageMicros } from "@/data/seed/lifestage";
+import { pregnancyMicroAdequacy } from "@/domain/nutrition/micronutrients";
 import { pregnancyWarnings, hasPregnancyData } from "@/domain/dish/pregnancy";
 import { isPregnant } from "@/domain/health";
 import { COMMODITIES } from "@/data/seed/commodity";
@@ -56,8 +56,8 @@ export default function NutritionPage() {
   // T1 life-stage (wellness). Honest_null everywhere until sources are seeded.
   const lifeStage = member?.healthProfile?.lifeStage;
   const hasStage = !!lifeStage && lifeStage !== "none";
-  const micros = member ? lifeStageMicros(member) : [];
   const pregnant = !!lifeStage && isPregnant(lifeStage);
+  const microRows = pregnant && member ? pregnancyMicroAdequacy(dishes, member, household, commodity) : [];
   const warnings = pregnant && member
     ? dishes.flatMap((d) => pregnancyWarnings(d, member, commodity).map((w) => ({ ...w, dish: d.vnName })))
     : [];
@@ -130,24 +130,35 @@ export default function NutritionPage() {
             ))}
           </ul>
 
-          {/* Key micronutrients for this stage — honest_null until a sourced RNI is seeded. */}
-          {hasStage && micros.length > 0 && (
+          {/* Key micronutrients — estimated adequacy from real VN FCT data (P1), shown
+              with honest coverage; never a precise claim. iodine not tracked (no data). */}
+          {pregnant && microRows.length > 0 && (
             <div className="mt-4 border-t border-hairline pt-3">
               <p className="mb-2 text-xs font-medium text-muted">{t("health.microTitle", { stage: t(`health.stage.${lifeStage}`) })}</p>
               <ul className="space-y-2">
-                {micros.map((mi) => (
-                  <li key={mi.nutrient} className="flex items-center justify-between text-sm">
-                    <span className="text-muted">{t(`health.micro.${mi.nutrient}`)}</span>
-                    {mi.need == null ? (
-                      <span className="inline-flex items-center gap-1.5 text-[13px] text-muted">
-                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted" /> {t("health.microNull")}
-                      </span>
-                    ) : (
-                      <span className="tnum text-[13px]">{mi.need}</span>
-                    )}
-                  </li>
-                ))}
+                {microRows.map((mi) => {
+                  const tone = mi.coveragePct >= 85 ? "accent" : mi.coveragePct >= 50 ? "amber" : "muted";
+                  const toneCls = tone === "accent" ? "text-accent" : tone === "amber" ? "text-amber" : "text-muted";
+                  const dotCls = tone === "accent" ? "bg-accent" : tone === "amber" ? "bg-amber" : "bg-muted";
+                  return (
+                    <li key={mi.nutrient} className="flex items-center justify-between text-sm">
+                      <span className="text-muted">{t(`health.micro.${mi.nutrient}`)}</span>
+                      {mi.coveragePct === 0 ? (
+                        <span className="inline-flex items-center gap-1.5 text-[13px] text-muted">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted" /> {t("health.microNull")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[13px]">
+                          <span className={`inline-block h-1.5 w-1.5 rounded-full ${dotCls}`} />
+                          <span className={`tnum font-medium ${toneCls}`}>≈{mi.ratioPct}%</span>
+                          <span className="text-muted">nhu cầu · phủ {mi.coveragePct}%</span>
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
+              <p className="mt-2 text-[11px] text-tertiary">{t("health.microNote")}</p>
             </div>
           )}
 

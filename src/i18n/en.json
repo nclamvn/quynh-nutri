@@ -225,5 +225,7 @@
   "restriction.no_pork": "No pork",
   "restriction.no_beef": "No beef",
   "sync.syncing": "Syncing…",
-  "health.needAdjusted": "Energy/protein need adjusted for this life stage (Nhu cầu 2016)."
+  "health.needAdjusted": "Energy/protein need adjusted for this life stage (Nhu cầu 2016).",
+  "health.microNote": "Micronutrient estimate from the VN Food Composition Table. Iodine not tracked (no data). Consult a professional.",
+  "health.micro.zinc": "Zinc"
 }
