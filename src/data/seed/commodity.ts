@@ -1,4 +1,4 @@
-import type { Commodity } from "@/domain/types";
+import type { Commodity, Allergen } from "@/domain/types";
 
 // A — commodity registry. Macros are per 100g edible portion.
 // Provenance/confidence are seeded to reflect the arbitration order (INTAKE-SEED §5):
@@ -284,6 +284,22 @@ const EDIBLE_YIELD: Record<string, number> = {
 };
 
 for (const c of COMMODITIES) c.edibleYield = EDIBLE_YIELD[c.id] ?? 1;
+
+// Allergen tags (Phase A dietary). Kept minimal — the common Vietnamese-kitchen
+// allergens present in the seed. Fish sauce carries fish.
+const ALLERGENS: Record<string, Allergen[]> = {
+  tom: ["shellfish"],
+  ghe: ["shellfish"],
+  cua_dong: ["shellfish"],
+  muc: ["shellfish"],
+  ca_dieu_hong: ["fish"],
+  ca_thu: ["fish"],
+  ca_loc: ["fish"],
+  nuoc_mam: ["fish"],
+  trung_ga: ["egg"],
+  dau_hu: ["soy"],
+};
+for (const c of COMMODITIES) c.allergens = ALLERGENS[c.id];
 
 export const COMMODITY_BY_ID: Record<string, Commodity> = Object.fromEntries(
   COMMODITIES.map((c) => [c.id, c]),

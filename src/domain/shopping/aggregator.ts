@@ -1,4 +1,4 @@
-import type { Dish, Household, WeekPlan } from "@/domain/types";
+import type { Dish, Household, WeekPlan, PantryItem } from "@/domain/types";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
 
 export type TripKind = "fresh" | "dry";
@@ -58,9 +58,13 @@ export function aggregateShopping(
   commodities: CommoditySource,
   household: Household,
   previous: ShoppingItem[] = [],
+  pantry: PantryItem[] = [],
 ): ShoppingItem[] {
   const freshTrips = freshTripCount(household);
   const acc = new Map<string, Acc>();
+  // Pantry stock to subtract (by commodity, gross grams — same basis as buy qty).
+  const stock = new Map<string, number>();
+  for (const p of pantry) stock.set(p.commodityId, (stock.get(p.commodityId) ?? 0) + p.qty);
 
   for (const slot of plan.slots) {
     const dish = dishes(slot.dishId);
@@ -88,10 +92,18 @@ export function aggregateShopping(
 
   const items: ShoppingItem[] = [];
   for (const a of acc.values()) {
+    // Deduct pantry stock (what you already have) → only buy the shortfall.
+    const have = stock.get(a.commodityId) ?? 0;
+    const need = a.qtyTotal - have;
+    if (need <= 0.5) {
+      stock.set(a.commodityId, have - a.qtyTotal); // leftover stock for other lines of same commodity
+      continue; // fully covered by pantry → not on the list
+    }
+    stock.set(a.commodityId, 0);
     const trip = a.kind === "dry" ? freshTrips + 1 : tripForDay(a.earliestDay, freshTrips);
     items.push({
       commodityId: a.commodityId,
-      qtyTotal: Math.round(a.qtyTotal),
+      qtyTotal: Math.round(need),
       unit: a.unit,
       vendor: a.vendor,
       trip,

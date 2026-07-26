@@ -1,13 +1,13 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, WeekPlan } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem } from "@/domain/types";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
 import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
-import { resolveSlot, resolveDish } from "@/domain/dish";
+import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
 
 // Phase 1 data source: the typed seed, in-memory. When Postgres is wired the
 // repo layer swaps in here without touching domain or UI.
@@ -38,6 +38,10 @@ interface StoreValue {
   userNotes: { id: number; text: string }[];
   addNote: (text: string) => void;
   deleteNote: (id: number) => void;
+  // PA-Pantry
+  pantry: PantryItem[];
+  addPantry: (commodityId: string, qty: number, unit: string) => void;
+  removePantry: (commodityId: string) => void;
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -52,16 +56,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [b1, setB1] = useState<Dish[]>([]); // household forks (B1 ⊳ B0)
   const [userNotes, setUserNotes] = useState<{ id: number; text: string }[]>([]);
   const noteId = useRef(1);
+  const [pantry, setPantry] = useState<PantryItem[]>([]);
 
   // Resolve a dish id through the override: B1 fork wins over B0 (Blueprint §2).
   const resolve = useCallback((id: string) => resolveDish(id, REPERTOIRE, b1) ?? REPERTOIRE_BY_ID[id], [b1]);
 
+  // Dishes the household is actually allowed to eat (allergies + diet restrictions).
+  const allowedRepertoire = useMemo(() => dietaryRepertoire(repertoire, household, commodities), [household]);
+
   // Generate a plan from the seed unless the user hand-edited slots.
   const generated = useMemo(() => {
     const locked = manualPlan?.slots.filter((s) => s.locked);
-    const res = generateWeek({ household, repertoire, weekStart: "2026-07-27", seed, locked });
+    const res = generateWeek({ household, repertoire: allowedRepertoire, weekStart: "2026-07-27", seed, locked });
     return res;
-  }, [household, seed, manualPlan]);
+  }, [household, seed, manualPlan, allowedRepertoire]);
 
   const plan = manualPlan ?? generated.plan;
 
@@ -77,8 +85,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const [commodityId, vendor] = key.split("|");
         return { commodityId, vendor, checked: true } as ShoppingItem;
       });
-    return aggregateShopping(plan, resolve, commodities, household, prev);
-  }, [plan, household, checked, resolve]);
+    return aggregateShopping(plan, resolve, commodities, household, prev, pantry);
+  }, [plan, household, checked, resolve, pantry]);
 
   const reroll = useCallback(() => {
     // Keep locked slots, drop manual edits, advance the seed.
@@ -128,7 +136,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setChecked((c) => ({ ...c, [key]: !c[key] }));
   }, []);
 
-  const optionsFor = useCallback((slot: Slot) => resolveSlot(slot, repertoire, b1), [b1]);
+  const optionsFor = useCallback(
+    (slot: Slot) => resolveSlot(slot, repertoire, b1).filter((d) => dishAllowed(d, household, commodities)),
+    [b1, household],
+  );
 
   const updateHousehold = useCallback((patch: Partial<Household>) => {
     setHousehold((h) => ({ ...h, ...patch }));
@@ -140,6 +151,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setUserNotes((n) => [{ id: noteId.current++, text: t }, ...n]);
   }, []);
   const deleteNote = useCallback((id: number) => setUserNotes((n) => n.filter((x) => x.id !== id)), []);
+
+  const addPantry = useCallback((commodityId: string, qty: number, unit: string) => {
+    if (!commodityId || qty <= 0) return;
+    setPantry((p) => {
+      const i = p.findIndex((x) => x.commodityId === commodityId);
+      if (i >= 0) { const c = [...p]; c[i] = { ...c[i], qty: c[i].qty + qty }; return c; }
+      return [...p, { commodityId, qty, unit }];
+    });
+  }, []);
+  const removePantry = useCallback((commodityId: string) => setPantry((p) => p.filter((x) => x.commodityId !== commodityId)), []);
 
   // ── Favorites (B1-lite): keyed by dish id shown on the card ──
   const isFavorite = useCallback((id: string) => Boolean(favorites[id]), [favorites]);
@@ -190,6 +211,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     userNotes,
     addNote,
     deleteNote,
+    pantry,
+    addPantry,
+    removePantry,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

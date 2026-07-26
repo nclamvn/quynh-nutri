@@ -132,5 +132,11 @@
   "reports.shellHint": "Cần dữ liệu giá để tính chi tiêu — bật ở phase sau.",
   "pantry.title": "Kho & Tủ lạnh",
   "pantry.shellHint": "Demo — chưa nối tồn kho thật, không tự trừ vào danh sách chợ.",
+  "pantry.pick": "Chọn nguyên liệu…",
+  "pantry.empty": "Kho trống — thêm đồ đang có để bớt phải mua.",
+  "pantry.cookNow": "Nấu được gì với đồ đang có",
+  "pantry.have": "đã có",
+  "pantry.miss": "thiếu",
+  "pantry.deductNote": "Đồ trong kho đã tự trừ khỏi danh sách đi chợ.",
   "shell.badge": "sắp có"
 }

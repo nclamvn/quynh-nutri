@@ -15,9 +15,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
+    "@prisma/adapter-pg": "^7.9.0",
     "@prisma/client": "^7.9.0",
     "next": "16.2.11",
     "next-intl": "^4.13.4",
+    "pg": "^8.22.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "server-only": "^0.0.1",
@@ -26,6 +28,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.4",

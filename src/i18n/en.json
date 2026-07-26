@@ -132,5 +132,11 @@
   "reports.shellHint": "Needs price data to compute spending — enabled in a later phase.",
   "pantry.title": "Pantry & Fridge",
   "pantry.shellHint": "Demo — not wired to real inventory, does not deduct from the shopping list.",
+  "pantry.pick": "Pick an ingredient…",
+  "pantry.empty": "Pantry is empty — add what you have to buy less.",
+  "pantry.cookNow": "Cook with what you have",
+  "pantry.have": "have",
+  "pantry.miss": "missing",
+  "pantry.deductNote": "Pantry stock is auto-deducted from the shopping list.",
   "shell.badge": "soon"
 }

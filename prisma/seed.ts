@@ -5,11 +5,13 @@
 //   npm run db:seed   (after `prisma db push` against a provisioned Postgres)
 
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { COMMODITIES } from "../src/data/seed/commodity";
 import { REPERTOIRE } from "../src/data/seed/repertoire";
 import { DEFAULT_HOUSEHOLD } from "../src/data/seed/household";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // A — commodities

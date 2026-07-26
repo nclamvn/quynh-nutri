@@ -47,7 +47,12 @@ export interface Commodity extends Macro {
    * grosses up by this to say what to actually buy. Default 1 when omitted.
    */
   edibleYield?: number;
+  /** Allergen tags this ingredient carries (e.g. "shellfish", "fish", "egg"). */
+  allergens?: Allergen[];
 }
+
+export type Allergen = "shellfish" | "fish" | "egg" | "soy" | "dairy" | "gluten" | "peanut";
+export type DietRestriction = "vegetarian" | "pescatarian" | "no_pork" | "no_beef";
 
 /** One ingredient line inside a dish, qty for `baseServings`. */
 export interface DishLine {
@@ -83,6 +88,8 @@ export interface Member {
   sex?: "M" | "F";
   ageBand?: string;
   activity: Activity;
+  /** Allergens this member must avoid (dinner is shared → household-wide effect). */
+  allergies?: Allergen[];
 }
 
 export interface Household {
@@ -94,6 +101,8 @@ export interface Household {
   busyDays: DayName[];
   lactatingMember: boolean;
   members: Member[];
+  /** Household-wide diet restrictions (vegetarian, no pork, …). */
+  restrictions?: DietRestriction[];
 }
 
 /** A planned dish in a slot on a given day. */
@@ -102,6 +111,15 @@ export interface PlannedSlot {
   slot: Slot;
   dishId: string;
   locked: boolean;
+}
+
+/** What the household already has on hand (Phase A pantry). qty is PURCHASED
+ *  grams (same basis as the shopping list), so it deducts directly. */
+export interface PantryItem {
+  commodityId: string;
+  qty: number;
+  unit: string;
+  expiry?: string; // ISO date, optional
 }
 
 export interface WeekPlan {
