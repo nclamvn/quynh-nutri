@@ -3,6 +3,7 @@ import { RightRail } from "./RightRail";
 import { TabBar } from "./TabBar";
 import { SWRegister } from "./SWRegister";
 import { MobileTopBar } from "./MobileTopBar";
+import { AssistantSheet } from "./AssistantSheet";
 
 /**
  * Responsive app shell (Blueprint §4–5).
@@ -26,6 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <TabBar />
       </div>
+      <AssistantSheet />
     </div>
   );
 }

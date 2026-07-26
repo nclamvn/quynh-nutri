@@ -17,6 +17,7 @@
     "@anthropic-ai/sdk": "^0.115.0",
     "@prisma/adapter-pg": "^7.9.0",
     "@prisma/client": "^7.9.0",
+    "ai": "^7.0.37",
     "next": "16.2.11",
     "next-intl": "^4.13.4",
     "pg": "^8.22.0",
