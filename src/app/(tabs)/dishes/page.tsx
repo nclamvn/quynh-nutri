@@ -124,9 +124,10 @@ export default function DishesPage() {
         </ul>
       )}
 
+      {/* Desktop only — on mobile the TabBar center "+" already adds a dish. */}
       <button
         onClick={() => setAddOpen(true)}
-        className="cta-primary fixed bottom-24 right-5 z-30 rounded-full px-5 py-3 text-sm font-medium text-white lg:bottom-8 lg:right-8"
+        className="cta-primary fixed bottom-8 right-8 z-30 hidden rounded-full px-5 py-3 text-sm font-medium text-white lg:block"
       >
         + {t("dishes.add")}
       </button>
