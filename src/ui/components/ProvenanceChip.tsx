@@ -49,7 +49,7 @@ export function ProvenanceChip({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md bg-surface px-2 py-0.5 text-[13px] ${className}`}
+      className={`glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[13px] ${className}`}
       title={`${pct(display.coverage)} khối lượng đã đối chiếu`}
     >
       <ProvenanceDot tone={tone} />

@@ -57,7 +57,7 @@ export default function NutritionPage() {
               <button
                 key={d}
                 onClick={() => setDay(d)}
-                className={`shrink-0 rounded-full border px-3 py-1 text-xs ${day === d ? "border-brand bg-brand-weak text-brand" : "border-hairline text-muted"}`}
+                className={`shrink-0 rounded-full border px-3 py-1 text-xs ${day === d ? "border border-brand bg-brand-weak text-brand" : "glass text-muted"}`}
               >
                 {t(`day.${d}`)}
               </button>
@@ -68,7 +68,7 @@ export default function NutritionPage() {
               <button
                 key={id}
                 onClick={() => setMemberId(id)}
-                className={`shrink-0 rounded-full border px-3 py-1 text-xs ${memberId === id ? "border-brand bg-brand-weak text-brand" : "border-hairline text-muted"}`}
+                className={`shrink-0 rounded-full border px-3 py-1 text-xs ${memberId === id ? "border border-brand bg-brand-weak text-brand" : "glass text-muted"}`}
               >
                 {memberLabel(id)}
               </button>

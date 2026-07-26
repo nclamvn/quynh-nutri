@@ -137,8 +137,8 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
-        active ? "border-brand bg-brand-weak text-brand" : "border-hairline text-muted"
+      className={`shrink-0 rounded-full px-3 py-1 text-xs ${
+        active ? "border border-brand bg-brand-weak text-brand" : "glass text-muted"
       }`}
     >
       {children}
