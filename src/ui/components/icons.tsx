@@ -11,6 +11,13 @@ const base = (p: P) => ({
   className: p.className,
 });
 
+export const HealthIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M20.5 8.5a4.5 4.5 0 0 0-8-2.8A4.5 4.5 0 0 0 3.5 8.5c0 4.2 5.6 7.9 8.5 9.9 2.9-2 8.5-5.7 8.5-9.9Z" />
+    <path d="M8 11h2.2l1 2 1.6-3.4 1 1.4H16" />
+  </svg>
+);
+
 export const CalendarIcon = (p: P) => (
   <svg {...base(p)}>
     <rect x="3" y="4.5" width="18" height="16" rx="2.5" />

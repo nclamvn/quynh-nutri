@@ -229,5 +229,14 @@
   "health.microNote": "Ước lượng vi chất từ Bảng thành phần thực phẩm VN (Viện Dinh dưỡng). I-ốt chưa theo dõi (thiếu dữ liệu). Hỏi chuyên gia.",
   "health.micro.zinc": "Kẽm",
   "health.micro.vitA": "Vitamin A",
-  "health.micro.vitC": "Vitamin C"
+  "health.micro.vitC": "Vitamin C",
+  "nav.health": "Sức khoẻ",
+  "health.pageTitle": "Sức khoẻ & Chế độ ăn đặc biệt",
+  "health.pageSub": "Đặt giai đoạn sống, dị ứng và chế độ ăn theo tình trạng của từng thành viên.",
+  "health.membersTitle": "Giai đoạn & Dị ứng theo thành viên",
+  "health.setProfile": "Đặt / Sửa →",
+  "health.noStage": "Chưa đặt giai đoạn",
+  "health.clinicalTitle": "Chế độ ăn bệnh lý",
+  "health.clinicalSoon": "Cần chỉ định bác sĩ",
+  "health.clinicalNote": "Chế độ ăn cho bệnh lý là y lệnh của bác sĩ — app không tự kê. Tính năng này sẽ mở qua bệnh viện/phòng khám dinh dưỡng (bác sĩ thiết lập ràng buộc, bạn dùng ở nhà)."
 }

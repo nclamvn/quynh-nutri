@@ -1,6 +1,6 @@
 import {
   CalendarIcon, BasketIcon, BowlIcon, ChartIcon, GearIcon,
-  OverviewIcon, ReportIcon, HeartIcon, NoteIcon,
+  OverviewIcon, ReportIcon, HeartIcon, NoteIcon, HealthIcon,
 } from "./components/icons";
 
 export type NavItem = { href: string; key: string; icon: (p: { className?: string }) => React.ReactElement };
@@ -19,6 +19,7 @@ export const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
       { href: "/shopping", key: "nav.shopping", icon: BasketIcon },
       { href: "/dishes", key: "nav.dishes", icon: BowlIcon },
       { href: "/nutrition", key: "nav.nutrition", icon: ChartIcon },
+      { href: "/health", key: "nav.health", icon: HealthIcon },
     ],
   },
   {

@@ -229,5 +229,14 @@
   "health.microNote": "Micronutrient estimate from the VN Food Composition Table. Iodine not tracked (no data). Consult a professional.",
   "health.micro.zinc": "Zinc",
   "health.micro.vitA": "Vitamin A",
-  "health.micro.vitC": "Vitamin C"
+  "health.micro.vitC": "Vitamin C",
+  "nav.health": "Health",
+  "health.pageTitle": "Health & special diets",
+  "health.pageSub": "Set life stage, allergies and condition-based diets per member.",
+  "health.membersTitle": "Life stage & allergies by member",
+  "health.setProfile": "Set / Edit →",
+  "health.noStage": "No stage set",
+  "health.clinicalTitle": "Clinical (disease) diets",
+  "health.clinicalSoon": "Requires a doctor",
+  "health.clinicalNote": "Clinical diets are a doctor’s order — the app does not self-prescribe. This will open via clinics (a professional sets the constraints, you use it at home)."
 }
