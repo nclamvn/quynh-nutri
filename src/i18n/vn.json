@@ -209,5 +209,19 @@
   "health.hazard.unpasteurized": "chưa tiệt trùng",
   "health.hazard.liver_vit_a": "gan · vitamin A cao",
   "health.hazard.alcohol": "rượu/cồn",
-  "health.hazard.high_caffeine": "caffeine cao"
+  "health.hazard.high_caffeine": "caffeine cao",
+  "health.memberTitle": "Tùy chỉnh thành viên",
+  "health.allergies": "Dị ứng cần tránh",
+  "allergen.shellfish": "Hải sản có vỏ",
+  "allergen.fish": "Cá",
+  "allergen.egg": "Trứng",
+  "allergen.soy": "Đậu nành",
+  "allergen.dairy": "Sữa",
+  "allergen.gluten": "Gluten",
+  "allergen.peanut": "Đậu phộng",
+  "settings.diet": "Ăn kiêng của hộ",
+  "restriction.vegetarian": "Ăn chay",
+  "restriction.pescatarian": "Chay + cá/hải sản",
+  "restriction.no_pork": "Không thịt heo",
+  "restriction.no_beef": "Không thịt bò"
 }

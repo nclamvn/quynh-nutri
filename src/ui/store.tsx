@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen } from "@/domain/types";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
@@ -31,6 +31,7 @@ interface StoreValue {
   commodity: typeof commodities;
   updateHousehold: (patch: Partial<Household>) => void;
   updateMemberHealthProfile: (memberId: string, profile: HealthProfile | null) => void;
+  updateMemberAllergies: (memberId: string, allergies: Allergen[]) => void;
   // UI-3/5: favorites + fork (B1)
   isFavorite: (id: string) => boolean;
   toggleFavorite: (id: string) => void;
@@ -52,6 +53,9 @@ const StoreContext = createContext<StoreValue | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [household, setHousehold] = useState<Household>(DEFAULT_HOUSEHOLD);
+  // Per-piece "touched" flags so late-arriving DB hydration never clobbers an
+  // optimistic edit the user made before it resolved.
+  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false });
   const [seed, setSeed] = useState(1);
   const [manualPlan, setManualPlan] = useState<WeekPlan | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
@@ -69,11 +73,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     getHouseholdState()
       .then((s) => {
-        setHousehold(s.household);
-        setFavorites(Object.fromEntries(s.favorites.map((id) => [id, true])));
-        setUserNotes(s.notes);
-        noteId.current = s.notes.reduce((m, n) => Math.max(m, n.id), 0) + 1;
-        setPantry(s.pantry);
+        const tp = touched.current;
+        if (!tp.household) setHousehold(s.household);
+        if (!tp.favorites) setFavorites(Object.fromEntries(s.favorites.map((id) => [id, true])));
+        if (!tp.notes) {
+          setUserNotes(s.notes);
+          noteId.current = s.notes.reduce((m, n) => Math.max(m, n.id), 0) + 1;
+        }
+        if (!tp.pantry) setPantry(s.pantry);
       })
       .catch(() => {}); // offline / no DB → keep defaults
   }, []);
@@ -170,6 +177,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateHousehold = useCallback((patch: Partial<Household>) => {
+    touched.current.household = true;
     setHousehold((h) => ({ ...h, ...patch }));
     persistState({
       size: patch.size,
@@ -181,6 +189,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateMemberHealthProfile = useCallback((memberId: string, profile: HealthProfile | null) => {
+    touched.current.household = true;
     setHousehold((h) => ({
       ...h,
       members: h.members.map((m) => (m.id === memberId ? { ...m, healthProfile: profile ?? undefined } : m)),
@@ -188,14 +197,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     import("@/app/actions").then(({ persistMemberHealthProfile }) => persistMemberHealthProfile(memberId, profile)).catch(() => {});
   }, []);
 
+  const updateMemberAllergies = useCallback((memberId: string, allergies: Allergen[]) => {
+    touched.current.household = true;
+    setHousehold((h) => ({
+      ...h,
+      members: h.members.map((m) => (m.id === memberId ? { ...m, allergies } : m)),
+    }));
+    import("@/app/actions").then(({ persistMemberAllergies }) => persistMemberAllergies(memberId, allergies)).catch(() => {});
+  }, []);
+
   const addNote = useCallback((text: string) => {
     const t = text.trim();
     if (!t) return;
+    touched.current.notes = true;
     const next = [{ id: noteId.current++, text: t }, ...userNotes];
     setUserNotes(next);
     persistState({ notes: next });
   }, [userNotes]);
   const deleteNote = useCallback((id: number) => {
+    touched.current.notes = true;
     const next = userNotes.filter((x) => x.id !== id);
     setUserNotes(next);
     persistState({ notes: next });
@@ -203,12 +223,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const addPantry = useCallback((commodityId: string, qty: number, unit: string) => {
     if (!commodityId || qty <= 0) return;
+    touched.current.pantry = true;
     const i = pantry.findIndex((x) => x.commodityId === commodityId);
     const next = i >= 0 ? pantry.map((x, j) => (j === i ? { ...x, qty: x.qty + qty } : x)) : [...pantry, { commodityId, qty, unit }];
     setPantry(next);
     persistState({ pantry: next });
   }, [pantry]);
   const removePantry = useCallback((commodityId: string) => {
+    touched.current.pantry = true;
     const next = pantry.filter((x) => x.commodityId !== commodityId);
     setPantry(next);
     persistState({ pantry: next });
@@ -217,6 +239,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // ── Favorites (B1-lite): keyed by dish id shown on the card ──
   const isFavorite = useCallback((id: string) => Boolean(favorites[id]), [favorites]);
   const toggleFavorite = useCallback((id: string) => {
+    touched.current.favorites = true;
     const next = { ...favorites, [id]: !favorites[id] };
     setFavorites(next);
     persistState({ favorites: Object.keys(next).filter((k) => next[k]) });
@@ -267,6 +290,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     commodity: commodities,
     updateHousehold,
     updateMemberHealthProfile,
+    updateMemberAllergies,
     isFavorite,
     toggleFavorite,
     favoriteDishes,

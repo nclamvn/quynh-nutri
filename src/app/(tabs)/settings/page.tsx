@@ -7,8 +7,10 @@ import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
 import { HealthProfileSheet } from "@/ui/components/HealthProfileSheet";
 import { useState } from "react";
-import type { Member } from "@/domain/types";
+import type { Member, DietRestriction } from "@/domain/types";
 import type { DayName, Household } from "@/domain/types";
+
+const DIET_RESTRICTIONS: DietRestriction[] = ["vegetarian", "pescatarian", "no_pork", "no_beef"];
 
 const DAYS: DayName[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MARKET_MODES: Household["marketMode"][] = ["traditional", "mixed", "supermarket"];
@@ -64,6 +66,9 @@ export default function SettingsPage() {
                       {ls && ls !== "none" && (
                         <span className="shrink-0 rounded-full bg-brand-weak px-2 py-0.5 text-[10px] text-brand-ink">{t(`health.stage.${ls}`)}</span>
                       )}
+                      {m.allergies && m.allergies.length > 0 && (
+                        <span className="shrink-0 rounded-full bg-danger-weak px-2 py-0.5 text-[10px] text-danger">⚠ {m.allergies.length}</span>
+                      )}
                       <span className="shrink-0 text-xs text-muted">{m.activity}</span>
                       <span aria-hidden className="shrink-0 text-tertiary">›</span>
                     </button>
@@ -107,6 +112,27 @@ export default function SettingsPage() {
               <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${household.lactatingMember ? "left-[22px]" : "left-0.5"}`} />
             </button>
           </Row>
+        </Section>
+
+        <Section title={t("settings.diet")}>
+          <div className="flex flex-wrap gap-1.5">
+            {DIET_RESTRICTIONS.map((r) => {
+              const on = (household.restrictions ?? []).includes(r);
+              return (
+                <button
+                  key={r}
+                  aria-pressed={on}
+                  onClick={() => {
+                    const cur = household.restrictions ?? [];
+                    updateHousehold({ restrictions: on ? cur.filter((x) => x !== r) : [...cur, r] });
+                  }}
+                  className={`rounded-full border px-3 py-1.5 text-xs ${on ? "border-brand bg-brand-weak text-brand" : "border-hairline text-muted"}`}
+                >
+                  {on ? "✓ " : ""}{t(`restriction.${r}`)}
+                </button>
+              );
+            })}
+          </div>
         </Section>
 
         <p className="text-[11px] leading-relaxed text-muted">

@@ -108,3 +108,10 @@ export async function saveMemberHealthProfile(memberId: string, profile: HealthP
     data: { healthProfile: (profile ?? undefined) as never },
   });
 }
+
+/** Persist a member's allergen list. Scoped to the current household. */
+export async function saveMemberAllergies(memberId: string, allergies: Allergen[]): Promise<void> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  await db.member.updateMany({ where: { id: memberId, householdId }, data: { allergies } });
+}

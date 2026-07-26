@@ -209,5 +209,19 @@
   "health.hazard.unpasteurized": "unpasteurized",
   "health.hazard.liver_vit_a": "liver · high vitamin A",
   "health.hazard.alcohol": "alcohol",
-  "health.hazard.high_caffeine": "high caffeine"
+  "health.hazard.high_caffeine": "high caffeine",
+  "health.memberTitle": "Member settings",
+  "health.allergies": "Allergies to avoid",
+  "allergen.shellfish": "Shellfish",
+  "allergen.fish": "Fish",
+  "allergen.egg": "Egg",
+  "allergen.soy": "Soy",
+  "allergen.dairy": "Dairy",
+  "allergen.gluten": "Gluten",
+  "allergen.peanut": "Peanut",
+  "settings.diet": "Household diet",
+  "restriction.vegetarian": "Vegetarian",
+  "restriction.pescatarian": "Pescatarian",
+  "restriction.no_pork": "No pork",
+  "restriction.no_beef": "No beef"
 }
