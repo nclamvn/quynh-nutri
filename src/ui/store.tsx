@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen, Supplier, Order, OrderStatus, ChannelKind } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord } from "@/domain/types";
 import { splitOrders, type OrderSplit } from "@/domain/order";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -68,6 +68,9 @@ interface StoreValue {
   markChannelOpened: (supplierId: string, channelUsed: ChannelKind) => void;
   /** Human-set status (confirmed/delivered) — the app never auto-advances here. */
   setOrderStatus: (supplierId: string, status: OrderStatus) => void;
+  // Lane 2 — purchase log (real-price catch-bucket)
+  purchases: PurchaseRecord[];
+  addPurchase: (input: Omit<PurchaseRecord, "id">) => void;
 }
 
 export type SupplierInput = Omit<Supplier, "householdId" | "seed">;
@@ -78,7 +81,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [household, setHousehold] = useState<Household>(DEFAULT_HOUSEHOLD);
   // Per-piece "touched" flags so late-arriving DB hydration never clobbers an
   // optimistic edit the user made before it resolved.
-  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, suppliers: false, orders: false });
+  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, suppliers: false, orders: false, purchases: false });
   const [hydrated, setHydrated] = useState(false);
   const [seed, setSeed] = useState(1);
   const [manualPlan, setManualPlan] = useState<WeekPlan | null>(null);
@@ -91,6 +94,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [pantry, setPantry] = useState<PantryItem[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
 
   // Resolve a dish id through the override: B1 fork wins over B0 (Blueprint §2).
   const resolve = useCallback((id: string) => resolveDish(id, REPERTOIRE, b1) ?? REPERTOIRE_BY_ID[id], [b1]);
@@ -109,6 +113,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (!tp.pantry) setPantry(s.pantry);
         if (!tp.suppliers) setSuppliers(s.suppliers);
         if (!tp.orders) setOrders(s.orders);
+        if (!tp.purchases) setPurchases(s.purchases);
       })
       .catch(() => toast(SYNC_FAIL_MSG, "error")) // surface, don't swallow
       .finally(() => setHydrated(true));
@@ -343,6 +348,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   }, [orderSplit, orders, weekRef, upsertOrder]);
 
+  // ── Lane 2 — purchase log: append-only catch-bucket, optimistic + persist ──
+  const addPurchase = useCallback((input: Omit<PurchaseRecord, "id">) => {
+    touched.current.purchases = true;
+    const optimistic: PurchaseRecord = { ...input, id: `tmp_${Date.now()}_${Math.round(Math.random() * 1e6)}` };
+    setPurchases((prev) => [optimistic, ...prev]);
+    import("@/app/actions")
+      .then(({ persistPurchase }) => persistPurchase(input))
+      .then((saved) => setPurchases((prev) => prev.map((p) => (p.id === optimistic.id ? saved : p))))
+      .catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+
   // ── Favorites (B1-lite): keyed by dish id shown on the card ──
   const isFavorite = useCallback((id: string) => Boolean(favorites[id]), [favorites]);
   const toggleFavorite = useCallback((id: string) => {
@@ -418,6 +434,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     orderFor,
     markChannelOpened,
     setOrderStatus,
+    purchases,
+    addPurchase,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

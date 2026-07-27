@@ -2,7 +2,7 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
-import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName, HealthProfile, Supplier, SupplierChannel, SupplierType, Order, OrderLine, OrderStatus, ChannelKind } from "@/domain/types";
+import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName, HealthProfile, Supplier, SupplierChannel, SupplierType, Order, OrderLine, OrderStatus, ChannelKind, PurchaseRecord, PurchaseLine, OnTime } from "@/domain/types";
 
 const HH_ID = DEFAULT_HOUSEHOLD.id; // template / unauth fallback
 
@@ -42,6 +42,7 @@ export interface HouseholdState {
   pantry: PantryItem[];
   suppliers: Supplier[];
   orders: Order[];
+  purchases: PurchaseRecord[];
 }
 
 export async function loadHouseholdState(): Promise<HouseholdState> {
@@ -49,9 +50,9 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
   const id = await currentHouseholdId();
   const row = await db.household.findUnique({
     where: { id },
-    include: { members: true, suppliers: true, orders: true },
+    include: { members: true, suppliers: true, orders: true, purchases: true },
   });
-  if (!row) return { household: DEFAULT_HOUSEHOLD, favorites: [], notes: [], pantry: [], suppliers: [], orders: [] };
+  if (!row) return { household: DEFAULT_HOUSEHOLD, favorites: [], notes: [], pantry: [], suppliers: [], orders: [], purchases: [] };
 
   const household: Household = {
     id: row.id,
@@ -79,7 +80,42 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
     pantry: (row.pantry as unknown as PantryItem[]) ?? [],
     suppliers: row.suppliers.map(rowToSupplier),
     orders: row.orders.map(rowToOrder),
+    purchases: row.purchases.map(rowToPurchase),
   };
+}
+
+type PurchaseRow = {
+  id: string; date: Date; orderRef: string | null; supplierId: string | null;
+  lines: unknown; onTime: string | null; note: string | null;
+};
+function rowToPurchase(r: PurchaseRow): PurchaseRecord {
+  return {
+    id: r.id,
+    date: r.date.toISOString(),
+    orderRef: r.orderRef ?? undefined,
+    supplierId: r.supplierId ?? undefined,
+    lines: (r.lines as PurchaseLine[]) ?? [],
+    onTime: (r.onTime as OnTime | null) ?? undefined,
+    note: r.note ?? undefined,
+  };
+}
+
+/** Append a purchase record for the current household. */
+export async function savePurchase(input: Omit<PurchaseRecord, "id">): Promise<PurchaseRecord> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  const row = await db.purchaseRecord.create({
+    data: {
+      householdId,
+      date: input.date ? new Date(input.date) : new Date(),
+      orderRef: input.orderRef ?? null,
+      supplierId: input.supplierId ?? null,
+      lines: (input.lines ?? []) as never,
+      onTime: input.onTime ?? null,
+      note: input.note ?? null,
+    },
+  });
+  return rowToPurchase(row as PurchaseRow);
 }
 
 // ── Phase 2 — Supplier & Order persistence (household-owned) ────────────────

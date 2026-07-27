@@ -230,3 +230,25 @@ export interface Order {
   sentAt?: string;
   note?: string;
 }
+
+// ─── Purchase log (Lane 2 — the real-data catch-bucket) ───
+// The household's record of an actual purchase. `pricePaid` is the REAL price paid
+// = B1 ground truth (overrides the B0 reference price in cost). Missing price =
+// honest-null (never fabricated). `onTime` is the household's SUBJECTIVE observation,
+// not an objective rating. This TIP only CAPTURES — analytics/optimization is Lane 3.
+export type OnTime = "on_time" | "late" | "no_show";
+export interface PurchaseLine {
+  commodityId: string;
+  qty: number;
+  unit: string;
+  pricePaid?: number; // VND actually paid for this line's qty; optional → honest-null
+}
+export interface PurchaseRecord {
+  id: string;
+  date: string; // ISO
+  orderRef?: string; // links an Order (Phase 2) if logged from one
+  supplierId?: string;
+  lines: PurchaseLine[];
+  onTime?: OnTime; // subjective household observation
+  note?: string;
+}

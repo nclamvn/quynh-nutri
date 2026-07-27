@@ -171,6 +171,20 @@ model Household {
   weekPlans      WeekPlan[]
   suppliers      Supplier[]
   orders         Order[]
+  purchases      PurchaseRecord[]
+}
+
+// ── Lane 2 — Purchase log (real-price catch-bucket; pricePaid = B1 ground truth) ──
+model PurchaseRecord {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  date        DateTime   @default(now())
+  orderRef    String?
+  supplierId  String?
+  lines       Json       @default("[]") // [{ commodityId, qty, unit, pricePaid? }]
+  onTime      String?    // on_time | late | no_show — subjective household observation
+  note        String?
 }
 
 // ── Phase 2 — Supplier & Order (household-owned; chain registry is code-seed) ──

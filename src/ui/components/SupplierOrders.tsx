@@ -7,6 +7,7 @@ import { useI18n } from "@/i18n/context";
 import { fmt } from "@/ui/format";
 import { toast } from "@/ui/toast";
 import { SupplierSheet } from "./SupplierSheet";
+import { PurchaseLogSheet, type PurchaseDraftLine } from "./PurchaseLogSheet";
 import { channelCapability, channelCarriesOrder, orderMessage, type SupplierOrder } from "@/domain/order";
 import { SUPPLIER_REGISTRY } from "@/data/seed/suppliers";
 import type { Supplier, SupplierChannel, ChannelKind, OrderStatus } from "@/domain/types";
@@ -54,6 +55,7 @@ export function SupplierOrders() {
   const { lang } = useI18n();
   const [editing, setEditing] = useState<Supplier | null>(null);
   const [seed, setSeed] = useState<SupplierInput | null>(null);
+  const [logTarget, setLogTarget] = useState<{ supplierId: string; supplierName: string; orderRef?: string; lines: PurchaseDraftLine[] } | null>(null);
 
   const name = (id: string) => {
     const c = commodity(id);
@@ -180,6 +182,14 @@ export function SupplierOrders() {
                       <button onClick={() => setOrderStatus(s.id, "draft")} className="rounded-full px-2.5 py-1 text-tertiary hover:text-ink">Soạn lại</button>
                     </div>
                   )}
+                  {status === "delivered" && (
+                    <button
+                      onClick={() => setLogTarget({ supplierId: s.id, supplierName: s.name, orderRef: order?.id || undefined, lines: so.lines.map((l) => ({ commodityId: l.commodityId, qty: l.qtyGross, unit: l.unit })) })}
+                      className="mt-2 mr-3 text-[11px] font-medium text-brand hover:underline"
+                    >
+                      Ghi lại lần mua?
+                    </button>
+                  )}
                   {(status === "confirmed" || status === "delivered") && (
                     <button onClick={() => setOrderStatus(s.id, "draft")} className="mt-2 text-[11px] text-tertiary hover:text-ink">Đặt lại trạng thái</button>
                   )}
@@ -240,6 +250,14 @@ export function SupplierOrders() {
         supplier={editing}
         seed={seed}
         onClose={() => { setEditing(null); setSeed(null); }}
+      />
+      <PurchaseLogSheet
+        open={logTarget !== null}
+        onClose={() => setLogTarget(null)}
+        supplierId={logTarget?.supplierId}
+        supplierName={logTarget?.supplierName}
+        orderRef={logTarget?.orderRef}
+        lines={logTarget?.lines ?? []}
       />
     </section>
   );
