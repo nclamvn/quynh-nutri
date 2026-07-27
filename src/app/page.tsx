@@ -29,7 +29,7 @@ export default function LandingPage() {
         <div className="nav-links">
           <a href="#philosophy">Cách hoạt động</a>
           <a href="#data">Dữ liệu</a>
-          <a href="#product">Sản phẩm</a>
+          <Link href="/overview">Mở ứng dụng</Link>
         </div>
         <Link className="nav-cta" href="/sign-up">Bắt đầu một tuần <span>↗</span></Link>
       </nav>
@@ -50,7 +50,7 @@ export default function LandingPage() {
             <p>Một hệ thống lập bữa cho gia đình Việt, biết xoay món, cân lượng, gộp chợ và nói thật độ chắc của từng con số.</p>
             <div className="actions">
               <Link className="btn" href="/sign-up">Lập tuần đầu tiên <span>→</span></Link>
-              <a className="text-link" href="#philosophy">Xem câu chuyện ↗</a>
+              <Link className="text-link" href="/overview">Mở ứng dụng ↗</Link>
             </div>
           </div>
         </div>
