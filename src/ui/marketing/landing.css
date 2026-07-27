@@ -55,11 +55,12 @@
   .eyebrow, .section-label { display: flex; align-items: center; gap: 1rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
   .eyebrow { margin: 0 0 1.5rem; opacity: 0.74; }
   .round-no { display: grid; place-items: center; width: 2.15rem; aspect-ratio: 1; border: 1px solid currentColor; border-radius: 50%; font-variant-numeric: tabular-nums; }
-  /* line-height loosened from the mock's 0.78 → Vietnamese stacked diacritics
-     (Ỗ Ữ Đ Ề) collide across lines at ultra-tight leading. */
-  .hero h1 { max-width: 1150px; margin: 0; font-size: clamp(4.6rem, 9.8vw, 10rem); line-height: 0.92; letter-spacing: -0.086em; font-weight: 820; }
+  /* line-height loosened well past the mock's 0.78 → Vietnamese stacks TWO marks
+     per glyph (ố=o+◌̂+◌́, ộ=o+◌̂+◌̣) that overrun neighbouring lines at tight
+     leading. 1.04 clears them while keeping the poster feel. */
+  .hero h1 { max-width: 1150px; margin: 0; font-size: clamp(4.6rem, 9.8vw, 10rem); line-height: 1.04; letter-spacing: -0.086em; font-weight: 820; }
   .hero h1 span { display: block; }
-  .soft { display: block; margin-bottom: 0.08em; font: italic 400 0.55em/1.2 var(--serif); letter-spacing: -0.055em; }
+  .soft { display: block; margin-bottom: 0.05em; font: italic 400 0.55em/1.15 var(--serif); letter-spacing: -0.055em; }
   .strong { text-transform: uppercase; }
   .accent { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--rose); letter-spacing: -0.066em; }
   .hero-intro { display: grid; grid-template-columns: minmax(18rem, 32rem) auto; align-items: end; gap: 3rem; margin: 2.4rem 0 0 38%; }
@@ -91,7 +92,7 @@
   .manifesto { display: grid; grid-template-columns: minmax(13rem, 0.7fr) 2.3fr; gap: 5vw; padding: clamp(6rem, 11vw, 11rem) 4vw; }
   .section-label { align-self: start; color: rgba(23, 18, 20, 0.58); }
   .manifesto-lead { margin: 0 0 1.2rem; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
-  .display { margin: 0; max-width: 1100px; font-size: clamp(3.4rem, 7.4vw, 8.2rem); line-height: 0.92; letter-spacing: -0.072em; font-weight: 790; }
+  .display { margin: 0; max-width: 1100px; font-size: clamp(3.4rem, 7.4vw, 8.2rem); line-height: 1.04; letter-spacing: -0.072em; font-weight: 790; }
   .display em { display: block; font-family: var(--serif); font-weight: 400; font-style: italic; color: var(--rose); }
   .manifesto-foot { display: grid; grid-template-columns: minmax(18rem, 33rem) auto; align-items: center; gap: 4rem; margin: 3rem 0 0 24%; }
   .manifesto-foot p { font-size: 1.03rem; line-height: 1.68; color: var(--muted); }
@@ -116,7 +117,7 @@
   .days .on { background: var(--ink); color: white; }
   .meal-head { justify-content: space-between; gap: 2rem; padding: 2.5rem 0.75rem 1.4rem; }
   .meal-head small { font-size: 0.54rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(23, 18, 20, 0.5); }
-  .meal-head h3 { margin: 0.35rem 0 0; font: italic 400 clamp(2rem, 4vw, 4rem)/0.98 var(--serif); letter-spacing: -0.056em; }
+  .meal-head h3 { margin: 0.35rem 0 0; font: italic 400 clamp(2rem, 4vw, 4rem)/1.08 var(--serif); letter-spacing: -0.056em; }
   .pill { padding: 0.62rem 0.82rem; border-radius: 999px; background: var(--acid); color: #1e402a; font-size: 0.57rem; font-weight: 850; white-space: nowrap; }
   .meal-list { border-top: 1px solid var(--line); }
   .meal-row { gap: 1rem; padding: 1.28rem 0.7rem; border-bottom: 1px solid var(--line); }
@@ -129,7 +130,7 @@
   .app-foot .foot-cta { border: 0; border-radius: 999px; padding: 0.82rem 1rem; background: var(--rose); color: white; font: 700 0.62rem var(--font-sans); text-decoration: none; white-space: nowrap; }
   .stage-copy { position: absolute; z-index: 4; right: 7vw; bottom: 8vw; width: min(33rem, 42vw); }
   .stage-copy small { font-size: 0.58rem; font-weight: 850; letter-spacing: 0.15em; text-transform: uppercase; color: var(--wine); }
-  .stage-copy h2 { margin: 0.8rem 0 1.1rem; font-size: clamp(2.7rem, 4.7vw, 5.2rem); line-height: 0.94; letter-spacing: -0.063em; }
+  .stage-copy h2 { margin: 0.8rem 0 1.1rem; font-size: clamp(2.7rem, 4.7vw, 5.2rem); line-height: 1.06; letter-spacing: -0.063em; }
   .stage-copy p { font-size: 0.97rem; line-height: 1.65; color: var(--muted); }
   .stage-copy a { display: inline-block; margin-top: 0.6rem; font-size: 0.72rem; font-weight: 800; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 0.25rem; }
 
@@ -158,7 +159,7 @@
   .trust article:last-child { border: 0; }
   .trust .n { font: italic 1.2rem var(--serif); color: var(--rose); }
   .trust small { font-size: 0.55rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(23, 18, 20, 0.52); }
-  .trust h3 { margin: 0.4rem 0 0; font: italic 400 clamp(2rem, 3.6vw, 4rem)/1 var(--serif); letter-spacing: -0.05em; }
+  .trust h3 { margin: 0.4rem 0 0; font: italic 400 clamp(2rem, 3.6vw, 4rem)/1.08 var(--serif); letter-spacing: -0.05em; }
   .trust p { margin: 0; font-size: 0.66rem; font-weight: 800; }
   .ribbon { display: flex; align-items: center; gap: 1rem; padding-top: 2rem; font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; }
   .ribbon i { flex: 1; height: 1px; background: var(--line); }
@@ -167,7 +168,7 @@
   /* quote */
   .quote { position: relative; padding: clamp(7rem, 13vw, 14rem) 8vw; background: var(--rose); color: white; text-align: center; overflow: hidden; }
   .quote:before { content: "“"; position: absolute; top: -0.27em; left: 50%; transform: translateX(-50%); font: clamp(16rem, 35vw, 38rem)/1 var(--serif); color: rgba(255, 255, 255, 0.11); }
-  .quote blockquote { position: relative; z-index: 1; max-width: 1100px; margin: auto; font: italic 400 clamp(3rem, 6.3vw, 6.8rem)/1 var(--serif); letter-spacing: -0.062em; }
+  .quote blockquote { position: relative; z-index: 1; max-width: 1100px; margin: auto; font: italic 400 clamp(3rem, 6.3vw, 6.8rem)/1.18 var(--serif); letter-spacing: -0.062em; }
   .quote-meta { position: relative; z-index: 1; display: flex; justify-content: space-between; margin-top: 4rem; font-size: 0.54rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
 
   /* final */
@@ -177,7 +178,7 @@
   .halo:after { inset: 27%; border-color: rgba(199, 255, 98, 0.18); }
   .final > *:not(.halo) { position: relative; z-index: 2; }
   .final > p { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
-  .final .display { font-size: clamp(5rem, 12vw, 12rem); line-height: 0.8; }
+  .final .display { font-size: clamp(5rem, 12vw, 12rem); line-height: 1.04; }
   .final-actions { display: flex; align-items: center; gap: 2rem; margin-top: 3rem; }
   .final-actions > a:last-child { font-size: 0.72rem; font-weight: 750; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.42); padding-bottom: 0.25rem; }
 
@@ -214,7 +215,7 @@
     .hero:after { background: linear-gradient(0deg, rgba(13, 9, 11, 0.9), rgba(13, 9, 11, 0.12) 78%); }
     .hero-bg { background-position: 58% center; }
     .hero-copy { padding-top: 8.2rem; }
-    .hero h1 { font-size: clamp(3.8rem, 19vw, 6rem); line-height: 0.94; }
+    .hero h1 { font-size: clamp(3.8rem, 19vw, 6rem); line-height: 1.05; }
     .soft { font-size: 0.48em; }
     .hero-intro { margin: 2rem 0 0; gap: 1.6rem; }
     .actions { align-items: flex-start; flex-direction: column; }
