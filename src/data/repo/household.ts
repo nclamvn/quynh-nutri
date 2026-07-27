@@ -2,7 +2,7 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
-import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName, HealthProfile } from "@/domain/types";
+import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName, HealthProfile, Supplier, SupplierChannel, SupplierType, Order, OrderLine, OrderStatus, ChannelKind } from "@/domain/types";
 
 const HH_ID = DEFAULT_HOUSEHOLD.id; // template / unauth fallback
 
@@ -40,13 +40,18 @@ export interface HouseholdState {
   favorites: string[];
   notes: { id: number; text: string }[];
   pantry: PantryItem[];
+  suppliers: Supplier[];
+  orders: Order[];
 }
 
 export async function loadHouseholdState(): Promise<HouseholdState> {
   const db = getDb();
   const id = await currentHouseholdId();
-  const row = await db.household.findUnique({ where: { id }, include: { members: true } });
-  if (!row) return { household: DEFAULT_HOUSEHOLD, favorites: [], notes: [], pantry: [] };
+  const row = await db.household.findUnique({
+    where: { id },
+    include: { members: true, suppliers: true, orders: true },
+  });
+  if (!row) return { household: DEFAULT_HOUSEHOLD, favorites: [], notes: [], pantry: [], suppliers: [], orders: [] };
 
   const household: Household = {
     id: row.id,
@@ -72,7 +77,97 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
     favorites: row.favorites ?? [],
     notes: (row.notes as unknown as { id: number; text: string }[]) ?? [],
     pantry: (row.pantry as unknown as PantryItem[]) ?? [],
+    suppliers: row.suppliers.map(rowToSupplier),
+    orders: row.orders.map(rowToOrder),
   };
+}
+
+// ── Phase 2 — Supplier & Order persistence (household-owned) ────────────────
+type SupplierRow = {
+  id: string; householdId: string; name: string; type: string;
+  channels: unknown; hours: string | null; shipFee: string | null; shipArea: string | null; handles: string[];
+};
+function rowToSupplier(r: SupplierRow): Supplier {
+  return {
+    id: r.id,
+    householdId: r.householdId,
+    name: r.name,
+    type: r.type as SupplierType,
+    channels: (r.channels as SupplierChannel[]) ?? [],
+    hours: r.hours ?? undefined,
+    shipFee: r.shipFee ?? undefined,
+    shipArea: r.shipArea ?? undefined,
+    handles: r.handles ?? [],
+  };
+}
+type OrderRow = {
+  id: string; supplierId: string; weekRef: string; lines: unknown;
+  status: string; channelUsed: string | null; sentAt: Date | null; note: string | null;
+};
+function rowToOrder(r: OrderRow): Order {
+  return {
+    id: r.id,
+    supplierId: r.supplierId,
+    weekRef: r.weekRef,
+    lines: (r.lines as OrderLine[]) ?? [],
+    status: r.status as OrderStatus,
+    channelUsed: (r.channelUsed as ChannelKind | null) ?? undefined,
+    sentAt: r.sentAt?.toISOString(),
+    note: r.note ?? undefined,
+  };
+}
+
+/** Create or update a household supplier. Scoped to the current household so a
+ *  user can only touch their own. Registry seeds are code, never written here. */
+export async function saveSupplier(input: Omit<Supplier, "householdId" | "seed" | "needsVerify" | "sources">): Promise<Supplier> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  const data = {
+    name: input.name,
+    type: input.type,
+    channels: (input.channels ?? []) as never,
+    hours: input.hours ?? null,
+    shipFee: input.shipFee ?? null,
+    shipArea: input.shipArea ?? null,
+    handles: input.handles ?? [],
+  };
+  // Guard update to this household; create attaches to it.
+  const existing = input.id ? await db.supplier.findFirst({ where: { id: input.id, householdId }, select: { id: true } }) : null;
+  const row = existing
+    ? await db.supplier.update({ where: { id: existing.id }, data })
+    : await db.supplier.create({ data: { ...data, householdId } });
+  return rowToSupplier(row as SupplierRow);
+}
+
+export async function deleteSupplier(id: string): Promise<void> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  await db.supplier.deleteMany({ where: { id, householdId } });
+}
+
+/** Upsert the order record for (supplier, week). Status transitions are the
+ *  caller's job (the store enforces the honest ladder); this only persists. */
+export async function saveOrder(order: Omit<Order, "id"> & { id?: string }): Promise<Order> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  const supplier = await db.supplier.findFirst({ where: { id: order.supplierId, householdId }, select: { id: true } });
+  if (!supplier) throw new Error("supplier not in household");
+  const data = {
+    weekRef: order.weekRef,
+    lines: (order.lines ?? []) as never,
+    status: order.status,
+    channelUsed: order.channelUsed ?? null,
+    sentAt: order.sentAt ? new Date(order.sentAt) : null,
+    note: order.note ?? null,
+  };
+  const existing = await db.order.findFirst({
+    where: { householdId, supplierId: order.supplierId, weekRef: order.weekRef },
+    select: { id: true },
+  });
+  const row = existing
+    ? await db.order.update({ where: { id: existing.id }, data })
+    : await db.order.create({ data: { ...data, householdId, supplierId: order.supplierId } });
+  return rowToOrder(row as OrderRow);
 }
 
 /** Persist any subset of the mutable household-row state. */

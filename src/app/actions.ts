@@ -1,8 +1,8 @@
 "use server";
 
-import { loadHouseholdState, saveHouseholdState, saveMemberHealthProfile, saveMemberAllergies, type StatePatch, type HouseholdState } from "@/data/repo/household";
+import { loadHouseholdState, saveHouseholdState, saveMemberHealthProfile, saveMemberAllergies, saveSupplier, deleteSupplier, saveOrder, type StatePatch, type HouseholdState } from "@/data/repo/household";
 import { semanticSearch } from "@/lib/search";
-import type { HealthProfile, Allergen } from "@/domain/types";
+import type { HealthProfile, Allergen, Supplier, Order } from "@/domain/types";
 
 // Server Action boundary — client store calls these to load/persist to Neon.
 export async function getHouseholdState(): Promise<HouseholdState> {
@@ -19,6 +19,21 @@ export async function persistMemberHealthProfile(memberId: string, profile: Heal
 
 export async function persistMemberAllergies(memberId: string, allergies: Allergen[]): Promise<void> {
   await saveMemberAllergies(memberId, allergies);
+}
+
+// ── Phase 2 — Supplier & Order (household-owned) ──
+export async function persistSupplier(
+  input: Omit<Supplier, "householdId" | "seed" | "needsVerify" | "sources">,
+): Promise<Supplier> {
+  return saveSupplier(input);
+}
+
+export async function removeSupplier(id: string): Promise<void> {
+  await deleteSupplier(id);
+}
+
+export async function persistOrder(order: Omit<Order, "id"> & { id?: string }): Promise<Order> {
+  return saveOrder(order);
 }
 
 // Semantic dish search (Phase B) — returns ranked dish ids for the query.

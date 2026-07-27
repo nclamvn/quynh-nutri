@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen, Supplier, Order, OrderStatus, ChannelKind } from "@/domain/types";
+import { splitOrders, type OrderSplit } from "@/domain/order";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
@@ -56,7 +57,20 @@ interface StoreValue {
   pantry: PantryItem[];
   addPantry: (commodityId: string, qty: number, unit: string) => void;
   removePantry: (commodityId: string) => void;
+  // Phase 2 — Supplier & Order (household-owned)
+  suppliers: Supplier[];
+  saveSupplier: (input: SupplierInput) => void;
+  deleteSupplier: (id: string) => void;
+  orderSplit: OrderSplit;
+  orderFor: (supplierId: string) => Order | undefined;
+  /** App-side auto-status: opening a carrying channel → `sent` ("đã mở kênh").
+   *  Never call for open-only (`their_*`) suppliers — nothing was sent there. */
+  markChannelOpened: (supplierId: string, channelUsed: ChannelKind) => void;
+  /** Human-set status (confirmed/delivered) — the app never auto-advances here. */
+  setOrderStatus: (supplierId: string, status: OrderStatus) => void;
 }
+
+export type SupplierInput = Omit<Supplier, "householdId" | "seed" | "needsVerify" | "sources">;
 
 const StoreContext = createContext<StoreValue | null>(null);
 
@@ -64,7 +78,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [household, setHousehold] = useState<Household>(DEFAULT_HOUSEHOLD);
   // Per-piece "touched" flags so late-arriving DB hydration never clobbers an
   // optimistic edit the user made before it resolved.
-  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false });
+  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, suppliers: false, orders: false });
   const [hydrated, setHydrated] = useState(false);
   const [seed, setSeed] = useState(1);
   const [manualPlan, setManualPlan] = useState<WeekPlan | null>(null);
@@ -75,6 +89,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [userNotes, setUserNotes] = useState<{ id: number; text: string }[]>([]);
   const noteId = useRef(1);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   // Resolve a dish id through the override: B1 fork wins over B0 (Blueprint §2).
   const resolve = useCallback((id: string) => resolveDish(id, REPERTOIRE, b1) ?? REPERTOIRE_BY_ID[id], [b1]);
@@ -91,6 +107,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           noteId.current = s.notes.reduce((m, n) => Math.max(m, n.id), 0) + 1;
         }
         if (!tp.pantry) setPantry(s.pantry);
+        if (!tp.suppliers) setSuppliers(s.suppliers);
+        if (!tp.orders) setOrders(s.orders);
       })
       .catch(() => toast(SYNC_FAIL_MSG, "error")) // surface, don't swallow
       .finally(() => setHydrated(true));
@@ -247,6 +265,84 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     safePersist({ pantry: next });
   }, [pantry]);
 
+  // ── Phase 2 — Suppliers (household-owned, DB-persisted) ──
+  const saveSupplierFn = useCallback((input: SupplierInput) => {
+    touched.current.suppliers = true;
+    // Optimistic: temp id for a new one, then swap in the DB row.
+    const tempId = input.id || `tmp_${Date.now()}_${Math.round(Math.random() * 1e6)}`;
+    const optimistic: Supplier = { ...input, id: tempId, householdId: household.id };
+    setSuppliers((prev) => {
+      const i = prev.findIndex((s) => s.id === input.id);
+      return i >= 0 ? prev.map((s, j) => (j === i ? optimistic : s)) : [...prev, optimistic];
+    });
+    import("@/app/actions")
+      .then(({ persistSupplier }) => persistSupplier(input))
+      .then((saved) => setSuppliers((prev) => prev.map((s) => (s.id === tempId || s.id === saved.id ? saved : s))))
+      .catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, [household.id]);
+
+  const deleteSupplierFn = useCallback((id: string) => {
+    touched.current.suppliers = true;
+    setSuppliers((prev) => prev.filter((s) => s.id !== id));
+    setOrders((prev) => prev.filter((o) => o.supplierId !== id));
+    import("@/app/actions").then(({ removeSupplier }) => removeSupplier(id)).catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+
+  // Split the current shopping list into per-supplier orders (gram MUA carried
+  // straight through). Derived — never persisted as the source of truth.
+  const orderSplit = useMemo(
+    () => splitOrders(shopping, suppliers, (id) => commodities(id)?.group),
+    [shopping, suppliers],
+  );
+
+  const weekRef = plan.weekStart;
+  const orderFor = useCallback(
+    (supplierId: string) => orders.find((o) => o.supplierId === supplierId && o.weekRef === weekRef),
+    [orders, weekRef],
+  );
+
+  const upsertOrder = useCallback((next: Order) => {
+    touched.current.orders = true;
+    setOrders((prev) => {
+      const i = prev.findIndex((o) => o.supplierId === next.supplierId && o.weekRef === next.weekRef);
+      return i >= 0 ? prev.map((o, j) => (j === i ? next : o)) : [...prev, next];
+    });
+    import("@/app/actions").then(({ persistOrder }) => persistOrder(next)).catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+
+  const markChannelOpened = useCallback((supplierId: string, channelUsed: ChannelKind) => {
+    const so = orderSplit.orders.find((o) => o.supplier.id === supplierId);
+    if (!so) return;
+    const existing = orders.find((o) => o.supplierId === supplierId && o.weekRef === weekRef);
+    upsertOrder({
+      id: existing?.id ?? "",
+      supplierId,
+      weekRef,
+      lines: so.lines,
+      // Honest ceiling: the app only ever asserts "channel opened" (sent). It never
+      // auto-advances to confirmed/delivered — the shop hasn't told us anything.
+      status: "sent",
+      channelUsed,
+      sentAt: new Date().toISOString(),
+      note: existing?.note,
+    });
+  }, [orderSplit, orders, weekRef, upsertOrder]);
+
+  const setOrderStatus = useCallback((supplierId: string, status: OrderStatus) => {
+    const so = orderSplit.orders.find((o) => o.supplier.id === supplierId);
+    const existing = orders.find((o) => o.supplierId === supplierId && o.weekRef === weekRef);
+    upsertOrder({
+      id: existing?.id ?? "",
+      supplierId,
+      weekRef,
+      lines: so?.lines ?? existing?.lines ?? [],
+      status,
+      channelUsed: existing?.channelUsed,
+      sentAt: status === "draft" ? undefined : existing?.sentAt,
+      note: existing?.note,
+    });
+  }, [orderSplit, orders, weekRef, upsertOrder]);
+
   // ── Favorites (B1-lite): keyed by dish id shown on the card ──
   const isFavorite = useCallback((id: string) => Boolean(favorites[id]), [favorites]);
   const toggleFavorite = useCallback((id: string) => {
@@ -315,6 +411,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     pantry,
     addPantry,
     removePantry,
+    suppliers,
+    saveSupplier: saveSupplierFn,
+    deleteSupplier: deleteSupplierFn,
+    orderSplit,
+    orderFor,
+    markChannelOpened,
+    setOrderStatus,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -9,6 +9,7 @@ import { Blossom } from "@/ui/components/Blossom";
 import { BasketIcon } from "@/ui/components/icons";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
+import { SupplierOrders } from "@/ui/components/SupplierOrders";
 
 export default function ShoppingPage() {
   const { shopping, toggleShopping, commodity } = useStore();
@@ -97,6 +98,8 @@ export default function ShoppingPage() {
           })}
         </div>
       )}
+
+      {shopping.length > 0 && <SupplierOrders />}
     </PageContainer>
   );
 }
