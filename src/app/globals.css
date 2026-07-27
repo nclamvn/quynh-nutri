@@ -61,6 +61,16 @@
   --chart-fruit: #b58ad6;
 
   --radius-card: 16px;
+
+  /* Landing marketing palette (blueprint §18.1) — used ONLY by /ui/marketing.
+     Section-by-section art direction, so these are explicit and do NOT follow the
+     app's dark toggle: the landing renders identically in either theme. */
+  --landing-ink: #171214;
+  --landing-paper: #f3eee8;
+  --landing-ivory: #fffaf4;
+  --landing-display-rose: #f35d7d;
+  --landing-wine: #8c1f3b;
+  --signal-lime: #c7ff62; /* marketing accent on dark only, used sparingly */
 }
 
 .dark {
@@ -121,6 +131,14 @@
   --color-chart-fruit: var(--chart-fruit);
 
   --font-sans: var(--font-inter), "SF Pro Text", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
+
+  --color-landing-ink: var(--landing-ink);
+  --color-landing-paper: var(--landing-paper);
+  --color-landing-ivory: var(--landing-ivory);
+  --color-landing-rose: var(--landing-display-rose);
+  --color-landing-wine: var(--landing-wine);
+  --color-signal-lime: var(--signal-lime);
 
   --radius-lg: 0.75rem;
 }
@@ -313,6 +331,25 @@ body {
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
+/* ── Landing motion (blueprint §26): drift 15–20s, ticker 28–36s, reveal 500–800ms.
+   All freeze under the global prefers-reduced-motion block below. ── */
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.animate-ticker { animation: ticker 32s linear infinite; }
+
+@keyframes hero-drift {
+  0%, 100% { transform: scale(1.03) translate3d(0, 0, 0); }
+  50% { transform: scale(1.07) translate3d(1.5%, 1%, 0); }
+}
+.animate-hero-drift { animation: hero-drift 19s var(--ease-standard) infinite; will-change: transform; }
+
+.animate-reveal { animation: rise-in 640ms var(--ease-emphasized) both; }
+
+@keyframes soft-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.animate-soft-pulse { animation: soft-pulse 2.4s var(--ease-standard) infinite; }
+
+/* Landing display type — Lora serif, only where the blueprint allows (hook/quote/headlines). */
+.font-display { font-family: var(--font-serif); }
 
 h1, h2, h3 {
   letter-spacing: -0.022em;

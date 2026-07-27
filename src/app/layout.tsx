@@ -1,11 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Lora } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Providers } from "@/ui/providers";
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin", "vietnamese"],
+  display: "swap",
+});
+
+// Lora = the ONLY serif — display marketing + quotes only (blueprint §19). Italic
+// axis carries the landing hook/quote voice; Georgia is the fallback with dấu.
+const lora = Lora({
+  variable: "--font-lora",
   subsets: ["latin", "vietnamese"],
   display: "swap",
 });
@@ -32,7 +40,7 @@ const themeInit = `(function(){try{var t=localStorage.getItem('theme');var d=t?t
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html lang="vi" className={`${inter.variable} ${lora.variable} h-full`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
