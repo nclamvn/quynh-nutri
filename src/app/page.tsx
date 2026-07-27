@@ -77,26 +77,30 @@ export default function LandingPage() {
 
       {/* PRODUCT STAGE */}
       <section className="stage" id="product">
-        <div className="photo" style={{ backgroundImage: `linear-gradient(180deg,transparent 62%,rgba(20,14,16,.7)), url('${stage.src}')` }}>
-          <a className="photo-credit" href={stage.sourceUrl} target="_blank" rel="noopener">Ảnh: {stage.author} / Unsplash ↗</a>
-          <div className="photo-note"><small>Thứ tư / 18:30</small>Canh khổ qua · thịt kho · rau luộc</div>
-        </div>
-        <div className="app">
-          <div className="app-top"><span>Tuần của nhà mình</span><b>21 — 27.07</b><i>•••</i></div>
-          <div className="days"><span>T2</span><span>T3</span><span className="on">T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
-          <div className="meal-head"><div><small>Bữa tối · 4 người</small><h3>Một mâm cơm vừa sức.</h3></div><span className="pill">Độ phủ 92%</span></div>
-          <div className="meal-list">
-            <div className="meal-row"><span className="index">01</span><div><h4>Canh khổ qua nhồi thịt</h4><p>650 g · đã tính phần hao hụt</p></div><b>≈ 28′</b></div>
-            <div className="meal-row"><span className="index">02</span><div><h4>Thịt kho trứng</h4><p>720 g · món nền gia đình</p></div><b>có sẵn</b></div>
-            <div className="meal-row"><span className="index">03</span><div><h4>Rau luộc theo mùa</h4><p>480 g · đổi theo chợ gần nhà</p></div><b>≈ 12′</b></div>
+        <div className="stage-inner">
+          <div className="stage-media">
+            <div className="photo" style={{ backgroundImage: `linear-gradient(180deg,transparent 55%,rgba(20,14,16,.72)), url('${stage.src}')` }}>
+              <a className="photo-credit" href={stage.sourceUrl} target="_blank" rel="noopener">Ảnh: {stage.author} / Unsplash ↗</a>
+              <div className="photo-note"><small>Thứ tư / 18:30</small>Canh khổ qua · thịt kho · rau luộc</div>
+            </div>
+            <div className="app">
+              <div className="app-top"><span>Tuần của nhà mình</span><b>21 — 27.07</b><i>•••</i></div>
+              <div className="days"><span>T2</span><span>T3</span><span className="on">T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
+              <div className="meal-head"><div><small>Bữa tối · 4 người</small><h3>Một mâm cơm vừa sức.</h3></div><span className="pill">Độ phủ 92%</span></div>
+              <div className="meal-list">
+                <div className="meal-row"><span className="index">01</span><div><h4>Canh khổ qua nhồi thịt</h4><p>650 g · đã tính phần hao hụt</p></div><b>≈ 28′</b></div>
+                <div className="meal-row"><span className="index">02</span><div><h4>Thịt kho trứng</h4><p>720 g · món nền gia đình</p></div><b>có sẵn</b></div>
+                <div className="meal-row"><span className="index">03</span><div><h4>Rau luộc theo mùa</h4><p>480 g · đổi theo chợ gần nhà</p></div><b>≈ 12′</b></div>
+              </div>
+              <div className="app-foot"><span>Nhẹ hơn 18 phút so với kế hoạch gốc</span><Link className="foot-cta" href="/sign-up">Xem danh sách chợ</Link></div>
+            </div>
           </div>
-          <div className="app-foot"><span>Nhẹ hơn 18 phút so với kế hoạch gốc</span><Link className="foot-cta" href="/sign-up">Xem danh sách chợ</Link></div>
-        </div>
-        <div className="stage-copy">
-          <small>A living meal system</small>
-          <h2>Kế hoạch không đứng yên sau khi được tạo.</h2>
-          <p>Đổi một món, thiếu một nguyên liệu hay có thêm người ăn — cả định lượng, dinh dưỡng và danh sách chợ được nối lại thành một hệ thống nhất quán.</p>
-          <Link href="/sign-up">Tạo hồ sơ gia đình →</Link>
+          <div className="stage-copy">
+            <small>A living meal system</small>
+            <h2>Kế hoạch không đứng yên sau khi được tạo.</h2>
+            <p>Đổi một món, thiếu một nguyên liệu hay có thêm người ăn — cả định lượng, dinh dưỡng và danh sách chợ được nối lại thành một hệ thống nhất quán.</p>
+            <Link href="/sign-up">Tạo hồ sơ gia đình →</Link>
+          </div>
         </div>
       </section>
 

@@ -100,27 +100,30 @@
   .seal:before { content: "PLAN • COOK • REMEMBER • REPEAT •"; position: absolute; inset: 0.6rem; display: grid; place-items: center; border: 1px dashed rgba(23, 18, 20, 0.25); border-radius: 50%; font-size: 0.42rem; font-weight: 800; letter-spacing: 0.12em; animation: lp-spin 15s linear infinite; }
   .seal b { font: italic 2rem var(--serif); }
 
-  /* stage */
-  .stage { position: relative; min-height: 1110px; padding: 8vw 4vw 10vw; background: #d8cfc6; overflow: hidden; }
-  .stage:after { content: "WEEK / 01"; position: absolute; left: -0.04em; bottom: -0.2em; color: rgba(255, 255, 255, 0.28); font-size: clamp(8rem, 23vw, 24rem); font-weight: 900; letter-spacing: -0.1em; line-height: 1; white-space: nowrap; }
-  .photo { position: absolute; top: 7vw; left: 4vw; width: 51vw; max-width: 780px; aspect-ratio: 0.84; background-size: cover; background-position: 50% 46%; background-repeat: no-repeat; transform: rotate(-2.4deg); box-shadow: 0 30px 80px rgba(23, 18, 20, 0.2); }
+  /* stage — contained grid: [media (photo + app lodged inside)] [copy].
+     No section-wide absolutes, so nothing can collide across the section. */
+  .stage { position: relative; padding: clamp(4rem, 8vw, 7rem) 4vw; background: #d8cfc6; overflow: hidden; }
+  .stage:after { content: "WEEK / 01"; position: absolute; z-index: 0; left: -0.04em; bottom: -0.14em; color: rgba(255, 255, 255, 0.28); font-size: clamp(6rem, 17vw, 18rem); font-weight: 900; letter-spacing: -0.1em; line-height: 1; white-space: nowrap; pointer-events: none; }
+  .stage-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: center; gap: clamp(2rem, 4vw, 4.5rem); max-width: 1280px; margin: auto; }
+  .stage-media { position: relative; width: 100%; }
+  .photo { position: relative; width: 100%; aspect-ratio: 5/6; background-size: cover; background-position: 50% 46%; background-repeat: no-repeat; transform: rotate(-2deg); box-shadow: 0 30px 80px rgba(23, 18, 20, 0.2); }
   .photo-note { position: absolute; left: 1.5rem; bottom: 1.5rem; color: #fff; font-size: 0.88rem; font-weight: 700; }
   .photo-note small { display: block; margin-bottom: 0.25rem; font-size: 0.51rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
   .photo-credit { position: absolute; right: 1rem; top: 1rem; z-index: 2; padding: 0.45rem 0.6rem; background: rgba(18, 12, 15, 0.48); color: white; border: 1px solid rgba(255, 255, 255, 0.28); font-size: 0.47rem; font-weight: 650; letter-spacing: 0.1em; text-decoration: none; text-transform: uppercase; backdrop-filter: blur(10px); transition: 0.2s; }
   .photo-credit:hover { background: rgba(18, 12, 15, 0.76); }
-  .app { position: absolute; z-index: 3; top: 18vw; right: 4vw; width: min(54vw, 860px); padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 1.8rem; background: rgba(255, 250, 244, 0.9); box-shadow: 0 45px 120px rgba(61, 41, 48, 0.25); backdrop-filter: blur(28px) saturate(125%); transform: rotate(1.2deg); }
+  .app { position: absolute; z-index: 3; right: 3%; bottom: 5%; width: min(72%, 340px); padding: 0.9rem; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 1.5rem; background: rgba(255, 250, 244, 0.95); box-shadow: 0 45px 120px rgba(61, 41, 48, 0.25); backdrop-filter: blur(28px) saturate(125%); transform: rotate(1.4deg); }
   .app-top, .days, .meal-head, .meal-row, .app-foot { display: flex; align-items: center; }
   .app-top { justify-content: space-between; padding: 0.65rem 0.5rem 1.15rem; font-size: 0.66rem; }
   .app-top b { font-size: 0.55rem; letter-spacing: 0.13em; }
   .days { justify-content: space-between; padding: 0.62rem; border: 1px solid rgba(23, 18, 20, 0.1); border-radius: 999px; background: rgba(255, 255, 255, 0.62); }
   .days span { display: grid; place-items: center; width: 2.2rem; aspect-ratio: 1; border-radius: 50%; font-size: 0.62rem; font-weight: 800; }
   .days .on { background: var(--ink); color: white; }
-  .meal-head { justify-content: space-between; gap: 2rem; padding: 2.5rem 0.75rem 1.4rem; }
+  .meal-head { justify-content: space-between; gap: 1rem; padding: 1.2rem 0.5rem 1rem; }
   .meal-head small { font-size: 0.54rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(23, 18, 20, 0.5); }
-  .meal-head h3 { margin: 0.35rem 0 0; font: italic 400 clamp(2rem, 4vw, 4rem)/1.08 var(--serif); letter-spacing: -0.056em; }
+  .meal-head h3 { margin: 0.35rem 0 0; font: italic 400 clamp(1.5rem, 2.4vw, 2.2rem)/1.1 var(--serif); letter-spacing: -0.04em; }
   .pill { padding: 0.62rem 0.82rem; border-radius: 999px; background: var(--acid); color: #1e402a; font-size: 0.57rem; font-weight: 850; white-space: nowrap; }
   .meal-list { border-top: 1px solid var(--line); }
-  .meal-row { gap: 1rem; padding: 1.28rem 0.7rem; border-bottom: 1px solid var(--line); }
+  .meal-row { gap: 0.85rem; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--line); }
   .meal-row .index { font: italic 1.45rem var(--serif); color: var(--rose); }
   .meal-row div { flex: 1; }
   .meal-row h4 { margin: 0 0 0.2rem; font-size: 0.84rem; }
@@ -128,7 +131,7 @@
   .meal-row b { font-size: 0.62rem; }
   .app-foot { justify-content: space-between; gap: 1rem; padding: 1.2rem 0.55rem 0.35rem; font-size: 0.6rem; color: rgba(23, 18, 20, 0.6); }
   .app-foot .foot-cta { border: 0; border-radius: 999px; padding: 0.82rem 1rem; background: var(--rose); color: white; font: 700 0.62rem var(--font-sans); text-decoration: none; white-space: nowrap; }
-  .stage-copy { position: absolute; z-index: 4; right: 7vw; bottom: 8vw; width: min(33rem, 42vw); }
+  .stage-copy { position: relative; z-index: 2; width: auto; max-width: 33rem; }
   .stage-copy small { font-size: 0.58rem; font-weight: 850; letter-spacing: 0.15em; text-transform: uppercase; color: var(--wine); }
   .stage-copy h2 { margin: 0.8rem 0 1.1rem; font-size: clamp(2.7rem, 4.7vw, 5.2rem); line-height: 1.06; letter-spacing: -0.063em; }
   .stage-copy p { font-size: 0.97rem; line-height: 1.65; color: var(--muted); }
@@ -177,7 +180,7 @@
   .halo:before, .halo:after { content: ""; position: absolute; inset: 12%; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; }
   .halo:after { inset: 27%; border-color: rgba(199, 255, 98, 0.18); }
   .final > *:not(.halo) { position: relative; z-index: 2; }
-  .final > p { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+  .final > p { margin: 0 0 1.6rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
   .final .display { font-size: clamp(5rem, 12vw, 12rem); line-height: 1.04; }
   .final-actions { display: flex; align-items: center; gap: 2rem; margin-top: 3rem; }
   .final-actions > a:last-child { font-size: 0.72rem; font-weight: 750; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.42); padding-bottom: 0.25rem; }
@@ -202,10 +205,10 @@
     .media-meta, .media-caption { right: 1.2rem; }
     .manifesto { grid-template-columns: 1fr; }
     .manifesto-foot { margin-left: 10%; }
-    .stage { min-height: 1240px; }
-    .photo { width: 72vw; }
-    .app { top: 42vw; width: 74vw; }
-    .stage-copy { right: 6vw; bottom: 7vw; width: 60vw; }
+    .stage-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+    .photo { aspect-ratio: 4/3; }
+    .app { width: min(78%, 340px); }
+    .stage-copy { max-width: none; }
     .memory-head, .truth-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 680px) {
@@ -225,16 +228,13 @@
     .manifesto { padding-inline: 1.2rem; }
     .display { font-size: clamp(3.2rem, 16vw, 5rem); }
     .manifesto-foot { grid-template-columns: 1fr; margin-left: 0; gap: 2rem; }
-    .stage { min-height: 1190px; padding-inline: 1.2rem; }
-    .photo { top: 4rem; left: 1.2rem; width: 86vw; }
-    .app { top: 28rem; right: 1.2rem; width: calc(100vw - 2.4rem); padding: 0.7rem; border-radius: 1.35rem; }
+    .stage { padding-inline: 1.2rem; }
+    .photo { aspect-ratio: 4/5; }
+    .app { right: 2%; bottom: 4%; width: min(84%, 300px); padding: 0.7rem; border-radius: 1.35rem; }
     .days span { width: 1.9rem; }
-    .meal-head { padding-top: 1.8rem; }
-    .meal-head h3 { font-size: 2.4rem; }
     .app-foot { align-items: flex-start; flex-direction: column; }
     .app-foot .foot-cta { width: 100%; text-align: center; }
-    .stage-copy { left: 1.2rem; right: auto; bottom: 4rem; width: calc(100vw - 2.4rem); }
-    .stage-copy h2 { font-size: 3.3rem; }
+    .stage-copy h2 { font-size: clamp(2.4rem, 9vw, 3.2rem); }
     .memory, .truth { padding-inline: 1.2rem; }
     .memory-rows { margin-top: 3rem; }
     .memory-row { grid-template-columns: auto 1fr auto; gap: 1rem; }
