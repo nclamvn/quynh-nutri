@@ -72,8 +72,12 @@
   .btn { display: inline-flex; align-items: center; justify-content: space-between; gap: 2.5rem; padding: 1.08rem 1.2rem 1.08rem 1.4rem; border-radius: 999px; background: var(--rose); color: #fff; text-decoration: none; font-size: 0.78rem; font-weight: 780; box-shadow: 0 18px 50px rgba(243, 93, 125, 0.26); transition: 0.2s; }
   .btn:hover { background: #ff6c8a; transform: translateY(-3px); }
   .text-link { font-size: 0.78rem; font-weight: 750; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.48); padding-bottom: 0.25rem; }
-  .orbital, .proof, .media-meta, .media-caption, .rail { position: absolute; z-index: 4; }
-  .orbital { top: 22%; left: 2.2rem; display: grid; gap: 0.35rem; font-size: 0.54rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.55; }
+  .proof, .media-meta, .media-caption, .rail { position: absolute; z-index: 4; }
+  /* Stat strip — now an in-flow horizontal caption under the hero CTAs (was a
+     cramped floating corner block that fought the eyebrow). */
+  .orbital { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 1.15rem; margin-top: 2.4rem; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.62; }
+  .orbital span { display: flex; align-items: center; }
+  .orbital span:not(:first-child)::before { content: "·"; margin-right: 1.15rem; opacity: 0.5; }
   .proof { right: 7vw; top: 24%; display: flex; align-items: center; gap: 0.7rem; padding: 0.76rem 1rem; border: 1px solid rgba(255, 255, 255, 0.38); border-radius: 999px; background: rgba(18, 12, 15, 0.3); backdrop-filter: blur(14px); transform: rotate(5deg); }
   .proof b { font: italic 2rem var(--serif); }
   .proof span { font-size: 0.56rem; font-weight: 800; letter-spacing: 0.11em; text-transform: uppercase; }
@@ -203,7 +207,7 @@
     .hero-copy { width: auto; padding: 9rem 1.2rem 5rem; }
     .hero h1 { font-size: clamp(4rem, 14vw, 7.2rem); }
     .hero-intro { grid-template-columns: 1fr; margin-left: 16%; }
-    .orbital, .rail { display: none; }
+    .rail { display: none; }
     .proof { right: 1.2rem; }
     .media-meta, .media-caption { right: 1.2rem; }
     .manifesto { grid-template-columns: 1fr; }

@@ -37,7 +37,6 @@ export default function LandingPage() {
       {/* HERO */}
       <header className="hero" id="top">
         <div className="hero-bg" style={{ backgroundImage: `url('${hero.src}')` }} />
-        <div className="orbital"><span>7 ngày</span><span>49 món nền</span><span>1 danh sách chợ</span></div>
         <div className="proof"><b>92</b><span>% độ phủ<small>dữ liệu có căn cứ</small></span></div>
         <div className="media-meta"><span>Family table / 19:12</span><span>Hồ sơ nhà Quỳnh</span></div>
         <a className="hero-credit" href={hero.sourceUrl} target="_blank" rel="noopener">Ảnh: {hero.author} / Unsplash ↗</a>
@@ -53,6 +52,7 @@ export default function LandingPage() {
               <Link className="text-link" href="/overview">Mở ứng dụng ↗</Link>
             </div>
           </div>
+          <div className="orbital"><span>7 ngày</span><span>49 món nền</span><span>1 danh sách chợ</span></div>
         </div>
       </header>
 
