@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "@/ui/store";
+import { MoodSheet } from "@/ui/components/MoodSheet";
 import { useI18n } from "@/i18n/context";
 import type { Lang } from "@/i18n/context";
 import type { Dish, Slot } from "@/domain/types";
@@ -38,6 +39,7 @@ const TODAY = 0; // representative "today" = first day of the plan
 export default function OverviewPage() {
   const { plan, household, dish, commodity, shopping, reroll, optionsFor } = useStore();
   const { t, lang } = useI18n();
+  const [moodOpen, setMoodOpen] = useState(false);
 
   const today = dayDishes(plan, TODAY, dish);
   const nut = dayNutrition(today, household, commodity);
@@ -62,12 +64,15 @@ export default function OverviewPage() {
             <h1 className="text-lg font-semibold -tracking-[0.02em] lg:text-[28px]">{t("ov.title")}</h1>
             <p className="mt-0.5 truncate text-sm text-muted">{t("greeting")} 👋 · {t("household.family", { n: household.size })}</p>
           </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <button
               onClick={() => window.dispatchEvent(new Event("open-assistant"))}
               className="cta-primary flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium text-white sm:flex-none"
             >
               ✨ {t("ov.aiSuggest")}
+            </button>
+            <button onClick={() => setMoodOpen(true)} className="flex shrink-0 items-center gap-1.5 rounded-full border border-hairline px-4 py-2.5 text-sm text-muted active:bg-surface">
+              Hôm nay bạn cần gì?
             </button>
             <button onClick={reroll} className="flex shrink-0 items-center gap-1.5 rounded-full border border-hairline px-4 py-2.5 text-sm text-muted active:bg-surface">
               ↻ {t("common.reroll")}
@@ -212,6 +217,8 @@ export default function OverviewPage() {
           </section>
         </>
       )}
+
+      <MoodSheet open={moodOpen} onClose={() => setMoodOpen(false)} />
     </PageContainer>
   );
 }
