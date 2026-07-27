@@ -31,6 +31,23 @@ function zaloUrl(v: string): string {
   return /^https?:\/\//i.test(v) ? v : `https://zalo.me/${v.replace(/[^\d]/g, "") || v}`;
 }
 
+// P2-4 — push the order via the OS share sheet (where the user picks Zalo and the
+// text lands in the chat). Robust either way the P2-0 spike lands: on a device
+// where share works the text goes straight in; where it's absent/refused we
+// return a signal so the caller can fall back to copy→zalo.me. Never asserts the
+// order was delivered — only that the sheet was opened.
+type ShareResult = "shared" | "cancelled" | "unsupported";
+async function shareOrderText(text: string): Promise<ShareResult> {
+  if (typeof navigator === "undefined" || typeof navigator.share !== "function") return "unsupported";
+  try {
+    if (navigator.canShare && !navigator.canShare({ text })) return "unsupported";
+    await navigator.share({ text });
+    return "shared";
+  } catch (e) {
+    return e instanceof DOMException && e.name === "AbortError" ? "cancelled" : "unsupported";
+  }
+}
+
 export function SupplierOrders() {
   const { suppliers, deleteSupplier, orderSplit, orderFor, markChannelOpened, setOrderStatus, commodity } = useStore();
   const { lang } = useI18n();
@@ -47,7 +64,15 @@ export function SupplierOrders() {
   const existingNames = new Set(suppliers.map((s) => s.name.toLowerCase()));
   const suggestions = SUPPLIER_REGISTRY.filter((s) => !existingNames.has(s.name.toLowerCase())).slice(0, 6);
 
-  const openChannel = (ch: SupplierChannel, so: SupplierOrder) => {
+  const copyThenOpenZalo = async (text: string, value: string) => {
+    try {
+      await navigator.clipboard?.writeText(text);
+      toast("Đã copy đơn — dán vào khung chat Zalo.", "info");
+    } catch { /* clipboard may be blocked; opening Zalo is still useful */ }
+    window.open(zaloUrl(value), "_blank");
+  };
+
+  const openChannel = async (ch: SupplierChannel, so: SupplierOrder) => {
     const cap = channelCapability(ch.kind);
     const text = orderMessage(so, name, { note: "Cảm ơn shop ạ!" });
     if (cap === "open") {
@@ -57,11 +82,15 @@ export function SupplierOrders() {
       // NOT marked sent: the app didn't send anything, the user picks in their cart.
       return;
     }
-    if (ch.kind === "phone_sms") window.open(`sms:${ch.value}?body=${encodeURIComponent(text)}`);
-    else if (ch.kind === "hotline") window.open(`tel:${ch.value.replace(/\s/g, "")}`);
-    else if (ch.kind === "zalo_chat") {
-      navigator.clipboard?.writeText(text).then(() => toast("Đã copy đơn — dán vào khung chat Zalo.", "info")).catch(() => {});
-      window.open(zaloUrl(ch.value), "_blank");
+    if (ch.kind === "phone_sms") {
+      window.open(`sms:${ch.value}?body=${encodeURIComponent(text)}`);
+    } else if (ch.kind === "hotline") {
+      window.open(`tel:${ch.value.replace(/\s/g, "")}`);
+    } else if (ch.kind === "zalo_chat") {
+      // Share-sheet first (P2-4); fall back to copy→zalo.me where share is absent.
+      const r = await shareOrderText(text);
+      if (r === "cancelled") return; // user backed out — nothing opened, don't mark
+      if (r === "unsupported") await copyThenOpenZalo(text, ch.value);
     }
     markChannelOpened(so.supplier.id, ch.kind);
   };
