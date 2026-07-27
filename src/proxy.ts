@@ -1,8 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Everything requires sign-in except the auth pages + static assets.
-const isPublic = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/spike(.*)"]);
+// The editorial landing page and acquisition/auth routes are public.
+const isPublic = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/spike(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   // Canonical host: send www.anngon.io → anngon.io (permanent).
