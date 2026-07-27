@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useStore, type SupplierInput } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
@@ -132,7 +133,8 @@ export function SupplierOrders() {
                     </div>
                     <span className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] ${st.cls}`}>{st.label}</span>
                   </div>
-                  <div className="flex shrink-0 gap-1">
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Link href={`/suppliers/${s.id}`} className="rounded-lg px-2 py-1 text-xs text-brand hover:bg-surface">Chi tiết</Link>
                     <button onClick={() => setEditing(s)} className="rounded-lg px-2 py-1 text-xs text-muted hover:bg-surface" aria-label="Sửa">✎</button>
                     <button onClick={() => confirm(`Xoá "${s.name}"?`) && deleteSupplier(s.id)} className="rounded-lg px-2 py-1 text-xs text-tertiary hover:text-danger" aria-label="Xoá">🗑</button>
                   </div>

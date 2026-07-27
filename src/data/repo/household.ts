@@ -86,6 +86,8 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
 type SupplierRow = {
   id: string; householdId: string; name: string; type: string;
   channels: unknown; hours: string | null; shipFee: string | null; shipArea: string | null; handles: string[];
+  address: string | null; lat: number | null; lng: number | null; storeLocatorUrl: string | null;
+  note: string | null; sources: string[]; needsVerify: boolean;
 };
 function rowToSupplier(r: SupplierRow): Supplier {
   return {
@@ -98,6 +100,12 @@ function rowToSupplier(r: SupplierRow): Supplier {
     shipFee: r.shipFee ?? undefined,
     shipArea: r.shipArea ?? undefined,
     handles: r.handles ?? [],
+    address: r.address ?? undefined,
+    location: r.lat != null && r.lng != null ? { lat: r.lat, lng: r.lng } : undefined,
+    storeLocatorUrl: r.storeLocatorUrl ?? undefined,
+    note: r.note ?? undefined,
+    sources: r.sources?.length ? r.sources : undefined,
+    needsVerify: r.needsVerify || undefined,
   };
 }
 type OrderRow = {
@@ -119,7 +127,7 @@ function rowToOrder(r: OrderRow): Order {
 
 /** Create or update a household supplier. Scoped to the current household so a
  *  user can only touch their own. Registry seeds are code, never written here. */
-export async function saveSupplier(input: Omit<Supplier, "householdId" | "seed" | "needsVerify" | "sources">): Promise<Supplier> {
+export async function saveSupplier(input: Omit<Supplier, "householdId" | "seed">): Promise<Supplier> {
   const db = getDb();
   const householdId = await currentHouseholdId();
   const data = {
@@ -130,6 +138,13 @@ export async function saveSupplier(input: Omit<Supplier, "householdId" | "seed" 
     shipFee: input.shipFee ?? null,
     shipArea: input.shipArea ?? null,
     handles: input.handles ?? [],
+    address: input.address ?? null,
+    lat: input.location?.lat ?? null,
+    lng: input.location?.lng ?? null,
+    storeLocatorUrl: input.storeLocatorUrl ?? null,
+    note: input.note ?? null,
+    sources: input.sources ?? [],
+    needsVerify: input.needsVerify ?? false,
   };
   // Guard update to this household; create attaches to it.
   const existing = input.id ? await db.supplier.findFirst({ where: { id: input.id, householdId }, select: { id: true } }) : null;

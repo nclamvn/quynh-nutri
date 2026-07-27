@@ -11,6 +11,14 @@ const base = (p: P) => ({
   className: p.className,
 });
 
+export const StoreIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 4h16l1 5a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0L3 9Z" />
+    <path d="M5 12v7a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-7" />
+    <path d="M10 20.5v-4.5h4v4.5" />
+  </svg>
+);
+
 export const HealthIcon = (p: P) => (
   <svg {...base(p)}>
     <path d="M20.5 8.5a4.5 4.5 0 0 0-8-2.8A4.5 4.5 0 0 0 3.5 8.5c0 4.2 5.6 7.9 8.5 9.9 2.9-2 8.5-5.7 8.5-9.9Z" />

@@ -23,7 +23,7 @@ export async function persistMemberAllergies(memberId: string, allergies: Allerg
 
 // ── Phase 2 — Supplier & Order (household-owned) ──
 export async function persistSupplier(
-  input: Omit<Supplier, "householdId" | "seed" | "needsVerify" | "sources">,
+  input: Omit<Supplier, "householdId" | "seed">,
 ): Promise<Supplier> {
   return saveSupplier(input);
 }

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { BottomSheet } from "./BottomSheet";
+import { SupplierMapView } from "./SupplierMapView";
 import { useStore, type SupplierInput } from "@/ui/store";
 import { channelCapability } from "@/domain/order";
-import type { Supplier, SupplierType, ChannelKind, SupplierChannel } from "@/domain/types";
+import type { Supplier, SupplierType, ChannelKind, SupplierChannel, GeoPoint } from "@/domain/types";
 
 // Household supplier editor. Registry chains are seeded suggestions elsewhere;
 // this is where the household adds its own shops (the high-value zalo_chat case).
@@ -42,6 +43,13 @@ export function SupplierSheet({ supplier, seed, onClose }: {
   const [type, setType] = useState<SupplierType>("cho");
   const [channels, setChannels] = useState<SupplierChannel[]>([{ kind: "zalo_chat", value: "" }]);
   const [handles, setHandles] = useState<string[]>([]);
+  const [address, setAddress] = useState("");
+  const [location, setLocation] = useState<GeoPoint | undefined>(undefined);
+  const [hours, setHours] = useState("");
+  const [shipInfo, setShipInfo] = useState("");
+  const [storeLocatorUrl, setStoreLocatorUrl] = useState("");
+  // Provenance carried through untouched — the sheet never fabricates or clears it.
+  const [prov, setProv] = useState<{ sources?: string[]; needsVerify?: boolean }>({});
 
   useEffect(() => {
     const s = supplier ?? seed;
@@ -50,6 +58,12 @@ export function SupplierSheet({ supplier, seed, onClose }: {
     setType(s?.type ?? "cho");
     setChannels(s?.channels?.length ? s.channels.map((c) => ({ ...c })) : [{ kind: "zalo_chat", value: "" }]);
     setHandles(s?.handles ?? []);
+    setAddress(s?.address ?? "");
+    setLocation(s?.location);
+    setHours(s?.hours ?? "");
+    setShipInfo(s?.shipFee ?? s?.shipArea ?? "");
+    setStoreLocatorUrl(s?.storeLocatorUrl ?? "");
+    setProv({ sources: s?.sources, needsVerify: s?.needsVerify });
   }, [supplier, seed, open]);
 
   if (!open) return null;
@@ -70,6 +84,13 @@ export function SupplierSheet({ supplier, seed, onClose }: {
       type,
       channels: channels.filter((c) => c.value.trim()).map((c) => ({ kind: c.kind, value: c.value.trim(), label: c.label })),
       handles,
+      address: address.trim() || undefined,
+      location,
+      hours: hours.trim() || undefined,
+      shipFee: shipInfo.trim() || undefined,
+      storeLocatorUrl: storeLocatorUrl.trim() || undefined,
+      sources: prov.sources,
+      needsVerify: prov.needsVerify,
     };
     saveSupplier(input);
     onClose();
@@ -162,6 +183,38 @@ export function SupplierSheet({ supplier, seed, onClose }: {
           </div>
           <p className="mt-1.5 text-[11px] text-tertiary">Dùng để tự chia đơn đi chợ theo từng điểm mua.</p>
         </div>
+
+        {/* Address + optional details */}
+        <div className="space-y-2.5">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Địa chỉ <span className="font-normal text-tertiary">(không bắt buộc)</span></label>
+            <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Số nhà, đường, quận…"
+              className="w-full rounded-[12px] border border-hairline bg-raised px-3.5 py-2.5 text-sm outline-none focus:border-brand"
+            />
+          </div>
+          <div className="flex gap-2">
+            <input value={hours} onChange={(e) => setHours(e.target.value)} placeholder="Giờ mở cửa" className="min-w-0 flex-1 rounded-[12px] border border-hairline bg-raised px-3.5 py-2.5 text-sm outline-none focus:border-brand" />
+            <input value={shipInfo} onChange={(e) => setShipInfo(e.target.value)} placeholder="Giao hàng / phí ship" className="min-w-0 flex-1 rounded-[12px] border border-hairline bg-raised px-3.5 py-2.5 text-sm outline-none focus:border-brand" />
+          </div>
+          {(type === "sieu_thi" || type === "online") && (
+            <input value={storeLocatorUrl} onChange={(e) => setStoreLocatorUrl(e.target.value)} placeholder="Trang tìm chi nhánh (chuỗi)" className="w-full rounded-[12px] border border-hairline bg-raised px-3.5 py-2.5 text-sm outline-none focus:border-brand" />
+          )}
+        </div>
+
+        {/* Map pin — household ground truth. Chains span many branches → skip. */}
+        {(type === "cho" || type === "tiem") && (
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <p className="text-sm font-medium">Vị trí trên bản đồ</p>
+              {location && <button onClick={() => setLocation(undefined)} className="text-[11px] text-tertiary hover:text-danger">Xoá ghim</button>}
+            </div>
+            <SupplierMapView location={location} editable onChange={setLocation} height={190} />
+            <p className="mt-1.5 text-[11px] text-tertiary">{location ? "Kéo ghim để chỉnh vị trí." : "Chạm lên bản đồ để đặt ghim vị trí điểm mua."}</p>
+          </div>
+        )}
 
         <button
           onClick={save}

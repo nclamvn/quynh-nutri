@@ -30,4 +30,12 @@ describe("supplier registry (seed, provenance-disciplined)", () => {
     for (const s of SUPPLIER_REGISTRY)
       for (const c of s.channels) expect(["their_zalo_oa", "their_app_web", "hotline"]).toContain(c.kind);
   });
+
+  it("no chain carries a fabricated map pin — multi-branch chains use storeLocatorUrl, not one coordinate", () => {
+    for (const s of SUPPLIER_REGISTRY) expect(s.location).toBeUndefined();
+  });
+
+  it("every chain records at least one source (provenance, never bare claims)", () => {
+    for (const s of SUPPLIER_REGISTRY) expect((s.sources?.length ?? 0)).toBeGreaterThan(0);
+  });
 });

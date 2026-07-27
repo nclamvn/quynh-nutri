@@ -175,17 +175,24 @@ model Household {
 
 // ── Phase 2 — Supplier & Order (household-owned; chain registry is code-seed) ──
 model Supplier {
-  id          String    @id @default(cuid())
-  householdId String
-  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  name        String
-  type        String     // cho | sieu_thi | tiem | online
-  channels    Json       @default("[]") // [{ kind, value, label }]
-  hours       String?
-  shipFee     String?
-  shipArea    String?
-  handles     String[]   // commodity ids / groups
-  orders      Order[]
+  id              String    @id @default(cuid())
+  householdId     String
+  household       Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name            String
+  type            String     // cho | sieu_thi | tiem | online
+  channels        Json       @default("[]") // [{ kind, value, label }]
+  hours           String?
+  shipFee         String?
+  shipArea        String?
+  handles         String[]   // commodity ids / groups
+  address         String?    // household shop; chains span many branches → omit
+  lat             Float?     // map pin (household shop only; user-set, never invented)
+  lng             Float?
+  storeLocatorUrl String?    // chain branch-finder URL (honest stand-in for one address)
+  note            String?
+  sources         String[]   // provenance for enriched fields
+  needsVerify     Boolean    @default(false)
+  orders          Order[]
 }
 
 model Order {

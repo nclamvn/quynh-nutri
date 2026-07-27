@@ -70,7 +70,7 @@ interface StoreValue {
   setOrderStatus: (supplierId: string, status: OrderStatus) => void;
 }
 
-export type SupplierInput = Omit<Supplier, "householdId" | "seed" | "needsVerify" | "sources">;
+export type SupplierInput = Omit<Supplier, "householdId" | "seed">;
 
 const StoreContext = createContext<StoreValue | null>(null);
 

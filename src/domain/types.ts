@@ -186,6 +186,13 @@ export interface SupplierChannel {
   value: string; // phone / zalo id / url, by kind
   label?: string;
 }
+/** A map pin — real coordinates. Only household-added local shops carry one (the
+ *  household sets it themselves, so it's ground truth). Multi-branch chains never
+ *  get a fabricated pin — they use `storeLocatorUrl` instead. */
+export interface GeoPoint {
+  lat: number;
+  lng: number;
+}
 export interface Supplier {
   id: string;
   householdId?: string; // B1-style, household-owned; null = registry seed (chain)
@@ -196,6 +203,14 @@ export interface Supplier {
   shipFee?: string;
   shipArea?: string;
   handles?: string[]; // commodity ids / groups they sell
+  /** Freeform address (household shop). Chains omit it — they span many branches. */
+  address?: string;
+  /** Map pin (household shop only). Set by the user via pin-drop; never invented. */
+  location?: GeoPoint;
+  /** Chain branch-finder URL — the honest stand-in for a single address on a
+   *  multi-branch chain (the app can't claim one specific branch). */
+  storeLocatorUrl?: string;
+  note?: string;
   seed?: boolean; // from the chain registry (not household-added)
   needsVerify?: boolean; // dataset confidence: source may be stale → show "cần xác minh"
   sources?: string[];
