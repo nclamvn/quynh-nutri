@@ -70,7 +70,13 @@ export default function LandingPage() {
           <h2 className="display">Chúng tôi thiết kế<em>một tuần có thể sống được.</em></h2>
           <div className="manifesto-foot">
             <p>Bữa cơm nhà bắt đầu từ câu hỏi giản dị hơn: tuần này gia đình có bao nhiêu thời gian, ai cần ăn gì và làm sao để người nấu không phải suy nghĩ lại từ đầu mỗi chiều.</p>
-            <span className="seal"><b>Q</b></span>
+            <span className="seal">
+              <svg className="seal-ring" viewBox="0 0 120 120" aria-hidden="true">
+                <defs><path id="sealPath" d="M60,20 a40,40 0 1,1 -0.01,0" fill="none" /></defs>
+                <text><textPath href="#sealPath" startOffset="0" textLength="251" lengthAdjust="spacing">PLAN · COOK · REMEMBER · REPEAT ·</textPath></text>
+              </svg>
+              <b>Q</b>
+            </span>
           </div>
         </div>
       </section>

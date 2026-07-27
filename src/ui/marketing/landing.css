@@ -104,8 +104,13 @@
   .manifesto-foot { display: grid; grid-template-columns: minmax(18rem, 33rem) auto; align-items: center; gap: 4rem; margin: 3rem 0 0 24%; }
   .manifesto-foot p { font-size: 1.03rem; line-height: 1.68; color: var(--muted); }
   .seal { position: relative; display: grid; place-items: center; width: 8rem; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; }
-  .seal:before { content: "PLAN • COOK • REMEMBER • REPEAT •"; position: absolute; inset: 0.6rem; display: grid; place-items: center; border: 1px dashed rgba(23, 18, 20, 0.25); border-radius: 50%; font-size: 0.42rem; font-weight: 800; letter-spacing: 0.12em; animation: lp-spin 15s linear infinite; }
-  .seal b { font: italic 2rem var(--serif); }
+  /* dashed inner ring is static (never rotates → can't overlap anything) */
+  .seal::after { content: ""; position: absolute; inset: 0.55rem; border: 1px dashed rgba(23, 18, 20, 0.25); border-radius: 50%; }
+  /* the wordmark runs ON a circular path (SVG), so it stays on the ring and never
+     crosses the centre Q — only the ring layer spins. */
+  .seal-ring { position: absolute; inset: 0; width: 100%; height: 100%; animation: lp-spin 22s linear infinite; }
+  .seal-ring text { font-family: var(--font-sans); font-size: 8px; font-weight: 800; text-transform: uppercase; fill: rgba(23, 18, 20, 0.5); }
+  .seal b { position: relative; z-index: 1; font: italic 2rem var(--serif); }
 
   /* stage — contained grid: [media (photo + app lodged inside)] [copy].
      No section-wide absolutes, so nothing can collide across the section. */
