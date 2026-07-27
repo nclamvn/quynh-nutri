@@ -1,36 +1,156 @@
 import type { Metadata } from "next";
-import { LandingHeader } from "@/ui/marketing/LandingHeader";
-import { Hero } from "@/ui/marketing/Hero";
-import { Ticker } from "@/ui/marketing/Ticker";
-import { Manifesto } from "@/ui/marketing/Manifesto";
-import { ProductStage } from "@/ui/marketing/ProductStage";
-import { MemoryRows } from "@/ui/marketing/MemoryRows";
-import { DataTruth } from "@/ui/marketing/DataTruth";
-import { BrandQuote } from "@/ui/marketing/BrandQuote";
-import { FinalCTA } from "@/ui/marketing/FinalCTA";
-import { LandingFooter } from "@/ui/marketing/LandingFooter";
+import Link from "next/link";
+import { LANDING_MEDIA } from "@/data/landing-media";
+import "@/ui/marketing/landing.css";
 
-// Public marketing landing (blueprint §5, order LOCKED). Server component — the
-// sections are static + CSS motion; no app shell, no store needed.
+// Public editorial landing (blueprint §5 order LOCKED), ported from the owner's
+// approved mock. Server component — static markup + CSS motion, scoped under `.lp`.
+// Real photos are local (see landing-media.ts); CTAs go to real Clerk routes.
 export const metadata: Metadata = {
   title: "Bữa cơm nhà — Một tuần ăn ngon, vừa sức và có căn cứ",
   description:
     "Hệ thống lập bữa cho gia đình Việt: xoay món, cân lượng, gộp chợ và nói thật độ chắc của từng con số.",
 };
 
+const hero = LANDING_MEDIA.hero;
+const stage = LANDING_MEDIA.stage;
+
 export default function LandingPage() {
   return (
-    <main className="bg-landing-ink">
-      <LandingHeader />
-      <Hero />
-      <Ticker />
-      <Manifesto />
-      <ProductStage />
-      <MemoryRows />
-      <DataTruth />
-      <BrandQuote />
-      <FinalCTA />
-      <LandingFooter />
+    <main className="lp">
+      <div className="grain-layer" aria-hidden />
+
+      {/* NAV */}
+      <nav className="nav">
+        <Link className="brand" href="/">
+          <span className="brand-mark">Q</span>
+          <span>Bữa cơm nhà<small>meal system for real families</small></span>
+        </Link>
+        <div className="nav-links">
+          <a href="#philosophy">Cách hoạt động</a>
+          <a href="#data">Dữ liệu</a>
+          <a href="#product">Sản phẩm</a>
+        </div>
+        <Link className="nav-cta" href="/sign-up">Bắt đầu một tuần <span>↗</span></Link>
+      </nav>
+
+      {/* HERO */}
+      <header className="hero" id="top">
+        <div className="hero-bg" style={{ backgroundImage: `url('${hero.src}')` }} />
+        <div className="orbital"><span>7 ngày</span><span>49 món nền</span><span>1 danh sách chợ</span></div>
+        <div className="proof"><b>92</b><span>% độ phủ<small>dữ liệu có căn cứ</small></span></div>
+        <div className="media-meta"><span>Family table / 19:12</span><span>Hồ sơ nhà Quỳnh</span></div>
+        <a className="hero-credit" href={hero.sourceUrl} target="_blank" rel="noopener">Ảnh: {hero.author} / Unsplash ↗</a>
+        <div className="media-caption"><i className="dot" />Kế hoạch đang thích nghi theo tuần này</div>
+        <div className="rail"><span>SCROLL TO SET THE TABLE</span><i /></div>
+        <div className="hero-copy">
+          <p className="eyebrow"><span className="round-no">01</span>Meal planning, nhưng dành cho nhà mình</p>
+          <h1><span className="soft">Mỗi bữa cơm</span><span className="strong">đều có</span><span className="accent">một lý do.</span></h1>
+          <div className="hero-intro">
+            <p>Một hệ thống lập bữa cho gia đình Việt, biết xoay món, cân lượng, gộp chợ và nói thật độ chắc của từng con số.</p>
+            <div className="actions">
+              <Link className="btn" href="/sign-up">Lập tuần đầu tiên <span>→</span></Link>
+              <a className="text-link" href="#philosophy">Xem câu chuyện ↗</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* TICKER */}
+      <div className="ticker"><div className="ticker-track">
+        <span>XOAY MÓN THÔNG MINH</span><b>✦</b><span>ĐỊNH LƯỢNG CÓ NGUỒN</span><b>✦</b><span>ĐI CHỢ MỘT LẦN, DÙNG CẢ TUẦN</span><b>✦</b><span>KHÔNG PHÁN SỐ CHÍNH XÁC GIẢ</span><b>✦</b>
+        <span>XOAY MÓN THÔNG MINH</span><b>✦</b><span>ĐỊNH LƯỢNG CÓ NGUỒN</span><b>✦</b><span>ĐI CHỢ MỘT LẦN, DÙNG CẢ TUẦN</span><b>✦</b><span>KHÔNG PHÁN SỐ CHÍNH XÁC GIẢ</span><b>✦</b>
+      </div></div>
+
+      {/* MANIFESTO */}
+      <section className="manifesto" id="philosophy">
+        <div className="section-label"><span className="round-no">02</span>Quan điểm thiết kế</div>
+        <div>
+          <p className="manifesto-lead">Không phải thêm một app đếm calo.</p>
+          <h2 className="display">Chúng tôi thiết kế<em>một tuần có thể sống được.</em></h2>
+          <div className="manifesto-foot">
+            <p>Bữa cơm nhà bắt đầu từ câu hỏi giản dị hơn: tuần này gia đình có bao nhiêu thời gian, ai cần ăn gì và làm sao để người nấu không phải suy nghĩ lại từ đầu mỗi chiều.</p>
+            <span className="seal"><b>Q</b></span>
+          </div>
+        </div>
+      </section>
+
+      {/* PRODUCT STAGE */}
+      <section className="stage" id="product">
+        <div className="photo" style={{ backgroundImage: `linear-gradient(180deg,transparent 62%,rgba(20,14,16,.7)), url('${stage.src}')` }}>
+          <a className="photo-credit" href={stage.sourceUrl} target="_blank" rel="noopener">Ảnh: {stage.author} / Unsplash ↗</a>
+          <div className="photo-note"><small>Thứ tư / 18:30</small>Canh khổ qua · thịt kho · rau luộc</div>
+        </div>
+        <div className="app">
+          <div className="app-top"><span>Tuần của nhà mình</span><b>21 — 27.07</b><i>•••</i></div>
+          <div className="days"><span>T2</span><span>T3</span><span className="on">T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
+          <div className="meal-head"><div><small>Bữa tối · 4 người</small><h3>Một mâm cơm vừa sức.</h3></div><span className="pill">Độ phủ 92%</span></div>
+          <div className="meal-list">
+            <div className="meal-row"><span className="index">01</span><div><h4>Canh khổ qua nhồi thịt</h4><p>650 g · đã tính phần hao hụt</p></div><b>≈ 28′</b></div>
+            <div className="meal-row"><span className="index">02</span><div><h4>Thịt kho trứng</h4><p>720 g · món nền gia đình</p></div><b>có sẵn</b></div>
+            <div className="meal-row"><span className="index">03</span><div><h4>Rau luộc theo mùa</h4><p>480 g · đổi theo chợ gần nhà</p></div><b>≈ 12′</b></div>
+          </div>
+          <div className="app-foot"><span>Nhẹ hơn 18 phút so với kế hoạch gốc</span><Link className="foot-cta" href="/sign-up">Xem danh sách chợ</Link></div>
+        </div>
+        <div className="stage-copy">
+          <small>A living meal system</small>
+          <h2>Kế hoạch không đứng yên sau khi được tạo.</h2>
+          <p>Đổi một món, thiếu một nguyên liệu hay có thêm người ăn — cả định lượng, dinh dưỡng và danh sách chợ được nối lại thành một hệ thống nhất quán.</p>
+          <Link href="/sign-up">Tạo hồ sơ gia đình →</Link>
+        </div>
+      </section>
+
+      {/* MEMORY */}
+      <section className="memory" id="memory">
+        <div className="memory-head">
+          <div className="section-label"><span className="round-no">03</span>Trí nhớ gia đình</div>
+          <h2 className="display">Một hệ thống biết<em>nhà mình là ai.</em></h2>
+        </div>
+        <div className="memory-rows">
+          <article className="memory-row"><span className="num">01</span><h3>Nhớ khẩu vị</h3><p>Món cả nhà thích, món con không ăn, phần của từng người và những lần đổi món đều trở thành trí nhớ dùng được.</p><span>↗</span></article>
+          <article className="memory-row"><span className="num">02</span><h3>Hiểu nhịp tuần</h3><p>Ngày bận thì nấu gọn. Cuối tuần thì thong thả. Kế hoạch được xây quanh đời sống, không bắt đời sống chạy theo thực đơn.</p><span>↗</span></article>
+          <article className="memory-row"><span className="num">03</span><h3>Nói thật về dữ liệu</h3><p>Mỗi con số dinh dưỡng tự khai độ chắc. Thiếu dữ liệu được nói là thiếu, thay vì biến ước lượng thành một lời khẳng định đẹp mắt.</p><span>↗</span></article>
+        </div>
+      </section>
+
+      {/* DATA TRUTH */}
+      <section className="truth" id="data">
+        <div className="truth-top"><span>04 / Provenance as a product feature</span><span>Không trang trí bằng sự chắc chắn giả</span></div>
+        <div className="truth-grid">
+          <div><p className="manifesto-lead">Dữ liệu biết tự nghi ngờ</p><h2 className="display">Con số nào cũng phải biết<em>mình chắc đến đâu.</em></h2></div>
+          <p>Thay vì dán một con số đẹp lên món ăn, Bữa cơm nhà đo độ phủ theo khối lượng nguyên liệu đã được đối chiếu. Giao diện thay đổi theo mức tin cậy để người dùng nhìn thấy cả kết quả lẫn giới hạn.</p>
+        </div>
+        <div className="trust">
+          <article><span className="n">01</span><div><small>Đã đối chiếu</small><h3>Dùng số</h3></div><p>Độ phủ từ 85%</p></article>
+          <article><span className="n">02</span><div><small>Còn dao động</small><h3>Neo khoảng</h3></div><p>Độ phủ 60–85%</p></article>
+          <article><span className="n">03</span><div><small>Chưa đủ chắc</small><h3>Chỉ hiện khoảng</h3></div><p>Độ phủ dưới 60%</p></article>
+        </div>
+        <div className="ribbon"><span>corroborated</span><i /><span>anchored range</span><i /><span>honest estimate</span><i /><strong>single source of truth</strong></div>
+      </section>
+
+      {/* QUOTE */}
+      <section className="quote">
+        <blockquote>Ăn ngon không bắt đầu từ ý chí. Nó bắt đầu từ một kế hoạch đủ thực tế để cả nhà cùng theo.</blockquote>
+        <div className="quote-meta"><span>Q&apos;s Kitchen principle</span><span>Made for Vietnamese homes</span></div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="final" id="cta">
+        <div className="halo" />
+        <p>Tuần mới bắt đầu từ một câu hỏi cũ.</p>
+        <h2 className="display">Tối nay<em>ăn gì?</em></h2>
+        <div className="final-actions">
+          <Link className="btn" href="/sign-up">Để Bữa cơm nhà lên tuần đầu tiên <span>↗</span></Link>
+          <Link href="/sign-in">Tôi đã có tài khoản</Link>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer>
+        <div><span className="footer-mark">Q</span><p>Bữa cơm nhà<small>Kế hoạch bữa cơm gia đình Việt.</small></p></div>
+        <p>© 2026 Q&apos;s Kitchen · ảnh qua Unsplash ({hero.author}, {stage.author})</p>
+        <div><a href="#product">Sản phẩm</a><a href="#data">Dữ liệu</a><Link href="/sign-in">Đăng nhập</Link></div>
+      </footer>
     </main>
   );
 }
