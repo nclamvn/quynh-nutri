@@ -17,12 +17,20 @@ describe("supplier registry (seed, provenance-disciplined)", () => {
     }
   });
 
-  it("stale-source chains are flagged needs-verify, not seeded as certain", () => {
-    expect(SUPPLIER_REGISTRY_BY_ID.reg_aeon.needsVerify).toBe(true);
-    expect(SUPPLIER_REGISTRY_BY_ID.reg_convenience.needsVerify).toBe(true);
-    // corroborated chains carry no needs-verify flag
-    expect(SUPPLIER_REGISTRY_BY_ID.reg_bhx.needsVerify).toBeUndefined();
-    expect(SUPPLIER_REGISTRY_BY_ID.reg_coopmart.needsVerify).toBeUndefined();
+  it("only chains with unconfirmed data are flagged needs-verify (post-refinery)", () => {
+    // Kept ⚠: order hotline / VinID→WIN transition / no official hotline / single-source CSKH.
+    for (const id of ["reg_bhx", "reg_winmart", "reg_grabmart", "reg_familymart"])
+      expect(SUPPLIER_REGISTRY_BY_ID[id].needsVerify).toBe(true);
+    // Core-corroborated chains carry no flag after the refinery.
+    for (const id of ["reg_coopmart", "reg_bigc", "reg_aeon", "reg_circlek", "reg_gs25"])
+      expect(SUPPLIER_REGISTRY_BY_ID[id].needsVerify).toBeUndefined();
+  });
+
+  it("chains with a corroborated branch finder carry a storeLocatorUrl (not a fake address)", () => {
+    for (const id of ["reg_bhx", "reg_coopmart", "reg_bigc", "reg_aeon", "reg_circlek", "reg_gs25", "reg_familymart"]) {
+      expect(SUPPLIER_REGISTRY_BY_ID[id].storeLocatorUrl).toMatch(/^https:\/\//);
+      expect(SUPPLIER_REGISTRY_BY_ID[id].address).toBeUndefined(); // no fabricated single address
+    }
   });
 
   it("chains are all `their_*`/hotline — the app can't push its order into a chain cart", () => {
