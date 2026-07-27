@@ -169,6 +169,37 @@ model Household {
   members        Member[]
   dishes         HouseholdDish[]
   weekPlans      WeekPlan[]
+  suppliers      Supplier[]
+  orders         Order[]
+}
+
+// ── Phase 2 — Supplier & Order (household-owned; chain registry is code-seed) ──
+model Supplier {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  type        String     // cho | sieu_thi | tiem | online
+  channels    Json       @default("[]") // [{ kind, value, label }]
+  hours       String?
+  shipFee     String?
+  shipArea    String?
+  handles     String[]   // commodity ids / groups
+  orders      Order[]
+}
+
+model Order {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  supplierId  String
+  supplier    Supplier   @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  weekRef     String
+  lines       Json       @default("[]") // [{ commodityId, qtyGross, unit }]
+  status      String     @default("draft") // draft | sent | confirmed | delivered
+  channelUsed String?
+  sentAt      DateTime?
+  note        String?
 }
 
 model Member {

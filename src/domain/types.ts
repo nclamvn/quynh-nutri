@@ -171,3 +171,47 @@ export interface WeekPlan {
   weekStart: string; // ISO date
   slots: PlannedSlot[];
 }
+
+// ─── Phase 2 — Supplier & Order (see BLUEPRINT §3 amend + dataset) ───
+// The 5 channel kinds are NOT equal in capability: the app can only push its own
+// order TEXT into the first three; `their_*` only opens the chain's own channel
+// (their cart) — the app never claims to have sent an order there.
+export type ChannelKind = "zalo_chat" | "hotline" | "phone_sms" | "their_zalo_oa" | "their_app_web";
+export type SupplierType = "cho" | "sieu_thi" | "tiem" | "online";
+/** app auto-advances ONLY to `sent` ("channel opened"); confirmed/delivered are human-set. */
+export type OrderStatus = "draft" | "sent" | "confirmed" | "delivered";
+
+export interface SupplierChannel {
+  kind: ChannelKind;
+  value: string; // phone / zalo id / url, by kind
+  label?: string;
+}
+export interface Supplier {
+  id: string;
+  householdId?: string; // B1-style, household-owned; null = registry seed (chain)
+  name: string;
+  type: SupplierType;
+  channels: SupplierChannel[];
+  hours?: string;
+  shipFee?: string;
+  shipArea?: string;
+  handles?: string[]; // commodity ids / groups they sell
+  seed?: boolean; // from the chain registry (not household-added)
+  needsVerify?: boolean; // dataset confidence: source may be stale → show "cần xác minh"
+  sources?: string[];
+}
+export interface OrderLine {
+  commodityId: string;
+  qtyGross: number; // PURCHASED grams (gross-up edibleYield), not edible grams
+  unit: string;
+}
+export interface Order {
+  id: string;
+  supplierId: string;
+  weekRef: string;
+  lines: OrderLine[];
+  status: OrderStatus;
+  channelUsed?: ChannelKind;
+  sentAt?: string;
+  note?: string;
+}
