@@ -64,19 +64,23 @@ export default function OverviewPage() {
             <h1 className="text-lg font-semibold -tracking-[0.02em] lg:text-[28px]">{t("ov.title")}</h1>
             <p className="mt-0.5 truncate text-sm text-muted">{t("greeting")} 👋 · {t("household.family", { n: household.size })}</p>
           </div>
-          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+          {/* Mobile: primary CTA full-width, two secondary split below (all same pill,
+             one line each). ≥sm: one horizontal row (desktop unchanged). */}
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <button
               onClick={() => window.dispatchEvent(new Event("open-assistant"))}
-              className="cta-primary flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium text-white sm:flex-none"
+              className="cta-primary flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium text-white sm:w-auto"
             >
               ✨ {t("ov.aiSuggest")}
             </button>
-            <button onClick={() => setMoodOpen(true)} className="flex shrink-0 items-center gap-1.5 rounded-full border border-hairline px-4 py-2.5 text-sm text-muted active:bg-surface">
-              Hôm nay bạn cần gì?
-            </button>
-            <button onClick={reroll} className="flex shrink-0 items-center gap-1.5 rounded-full border border-hairline px-4 py-2.5 text-sm text-muted active:bg-surface">
-              ↻ {t("common.reroll")}
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => setMoodOpen(true)} className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-hairline px-4 py-2.5 text-sm text-muted active:bg-surface sm:flex-none">
+                Hôm nay bạn cần gì?
+              </button>
+              <button onClick={reroll} className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-hairline px-4 py-2.5 text-sm text-muted active:bg-surface sm:flex-none">
+                ↻ {t("common.reroll")}
+              </button>
+            </div>
           </div>
         </div>
       </header>
