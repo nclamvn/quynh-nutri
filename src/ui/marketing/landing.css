@@ -58,11 +58,14 @@
   /* line-height loosened well past the mock's 0.78 → Vietnamese stacks TWO marks
      per glyph (ố=o+◌̂+◌́, ộ=o+◌̂+◌̣) that overrun neighbouring lines at tight
      leading. 1.04 clears them while keeping the poster feel. */
-  .hero h1 { max-width: 1150px; margin: 0; font-size: clamp(4.6rem, 9.8vw, 10rem); line-height: 1.04; letter-spacing: -0.086em; font-weight: 820; }
+  .hero h1 { max-width: 1150px; margin: 0; font-size: clamp(4.6rem, 9.8vw, 10rem); line-height: 1.06; letter-spacing: -0.086em; font-weight: 820; }
   .hero h1 span { display: block; }
-  .soft { display: block; margin-bottom: 0.05em; font: italic 400 0.55em/1.15 var(--serif); letter-spacing: -0.055em; }
-  .strong { text-transform: uppercase; }
-  .accent { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--rose); letter-spacing: -0.066em; }
+  /* Explicit inter-line gaps: uppercase Vietnamese caps stack marks (Ề = Ê + ◌̀)
+     that overshoot cap-height and poke into the line above at any tight leading —
+     line-height alone can't clear it, so the strong/accent lines carry a margin. */
+  .soft { display: block; font: italic 400 0.55em/1.12 var(--serif); letter-spacing: -0.055em; }
+  .strong { display: block; margin-top: 0.14em; text-transform: uppercase; }
+  .accent { display: block; margin-top: 0.06em; font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--rose); letter-spacing: -0.066em; }
   .hero-intro { display: grid; grid-template-columns: minmax(18rem, 32rem) auto; align-items: end; gap: 3rem; margin: 2.4rem 0 0 38%; }
   .hero-intro p { margin: 0; font-size: clamp(1rem, 1.3vw, 1.25rem); line-height: 1.55; opacity: 0.86; }
   .actions { display: flex; align-items: center; gap: 1.35rem; }
