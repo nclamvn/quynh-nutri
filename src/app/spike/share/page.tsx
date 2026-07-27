@@ -80,7 +80,7 @@ export default function ShareSpike() {
             supported === null ? "text-tertiary" : supported ? "text-accent" : "text-danger"
           }`}
         >
-          {supported === null ? "đang kiểm tra…" : supported ? "CÓ hỗ trợ" : "KHÔNG hỗ trợ"}
+          {supported === null ? "đang kiểm tra…" : supported ? "Có hỗ trợ" : "Không hỗ trợ"}
         </span>
       </div>
 
