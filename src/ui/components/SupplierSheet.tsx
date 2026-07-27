@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BottomSheet } from "./BottomSheet";
 import { SupplierMapView } from "./SupplierMapView";
 import { useStore, type SupplierInput } from "@/ui/store";
+import { toast } from "@/ui/toast";
 import { channelCapability } from "@/domain/order";
 import type { Supplier, SupplierType, ChannelKind, SupplierChannel, GeoPoint } from "@/domain/types";
 
@@ -50,6 +51,41 @@ export function SupplierSheet({ supplier, seed, onClose }: {
   const [storeLocatorUrl, setStoreLocatorUrl] = useState("");
   // Provenance carried through untouched — the sheet never fabricates or clears it.
   const [prov, setProv] = useState<{ sources?: string[]; needsVerify?: boolean }>({});
+  // Geocode: a machine-suggested pin (B0, amber) becomes ground truth (B1, rose)
+  // once the household drags or the pin is otherwise confirmed.
+  const [suggested, setSuggested] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const geoCache = useRef(new Map<string, GeoPoint | null>());
+
+  const geocode = async () => {
+    const q = address.trim();
+    if (q.length < 4) return;
+    const key = q.toLowerCase().replace(/\s+/g, " ");
+    if (geoCache.current.has(key)) {
+      const hit = geoCache.current.get(key);
+      if (hit) { setLocation(hit); setSuggested(true); } else { toast("Không tìm được địa chỉ — hãy đặt ghim tay.", "info"); }
+      return;
+    }
+    setGeoLoading(true);
+    try {
+      const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+      const j = await res.json();
+      const r = j?.result;
+      if (r && Number.isFinite(r.lat) && Number.isFinite(r.lng)) {
+        const p = { lat: r.lat, lng: r.lng };
+        geoCache.current.set(key, p);
+        setLocation(p);
+        setSuggested(true);
+      } else {
+        geoCache.current.set(key, null);
+        toast("Không tìm được địa chỉ — hãy đặt ghim tay.", "info");
+      }
+    } catch {
+      toast("Không tìm được địa chỉ — hãy đặt ghim tay.", "info");
+    } finally {
+      setGeoLoading(false);
+    }
+  };
 
   useEffect(() => {
     const s = supplier ?? seed;
@@ -64,6 +100,8 @@ export function SupplierSheet({ supplier, seed, onClose }: {
     setShipInfo(s?.shipFee ?? s?.shipArea ?? "");
     setStoreLocatorUrl(s?.storeLocatorUrl ?? "");
     setProv({ sources: s?.sources, needsVerify: s?.needsVerify });
+    // A saved supplier's pin is already confirmed ground truth (B1), not a suggestion.
+    setSuggested(false);
   }, [supplier, seed, open]);
 
   if (!open) return null;
@@ -207,12 +245,32 @@ export function SupplierSheet({ supplier, seed, onClose }: {
         {/* Map pin — household ground truth. Chains span many branches → skip. */}
         {(type === "cho" || type === "tiem") && (
           <div>
-            <div className="mb-1.5 flex items-center justify-between">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
               <p className="text-sm font-medium">Vị trí trên bản đồ</p>
-              {location && <button onClick={() => setLocation(undefined)} className="text-[11px] text-tertiary hover:text-danger">Xoá ghim</button>}
+              <div className="flex items-center gap-2">
+                {address.trim().length >= 4 && (
+                  <button onClick={geocode} disabled={geoLoading} className="text-[11px] font-medium text-brand disabled:opacity-50">
+                    {geoLoading ? "Đang tìm…" : "Tìm từ địa chỉ"}
+                  </button>
+                )}
+                {location && <button onClick={() => { setLocation(undefined); setSuggested(false); }} className="text-[11px] text-tertiary hover:text-danger">Xoá ghim</button>}
+              </div>
             </div>
-            <SupplierMapView location={location} editable onChange={setLocation} height={190} />
-            <p className="mt-1.5 text-[11px] text-tertiary">{location ? "Kéo ghim để chỉnh vị trí." : "Chạm lên bản đồ để đặt ghim vị trí điểm mua."}</p>
+            <SupplierMapView
+              location={location}
+              editable
+              suggested={suggested}
+              onChange={(p) => { setLocation(p); setSuggested(false); }}
+              height={190}
+            />
+            <p className={`mt-1.5 text-[11px] ${suggested ? "text-amber" : "text-tertiary"}`}>
+              {suggested
+                ? "Ghim gợi ý từ địa chỉ — kéo để xác nhận đúng vị trí (vị trí bạn chốt mới là chuẩn)."
+                : location
+                ? "Kéo ghim để chỉnh vị trí."
+                : "Chạm lên bản đồ, hoặc nhập địa chỉ rồi bấm “Tìm từ địa chỉ”."}
+            </p>
+            <p className="mt-0.5 text-[10px] text-tertiary">Bản đồ © OpenStreetMap · gợi ý vị trí có thể lệch.</p>
           </div>
         )}
 

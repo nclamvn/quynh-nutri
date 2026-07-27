@@ -20,6 +20,7 @@ export function SupplierMapView(props: {
   onChange?: (p: GeoPoint) => void;
   height?: number;
   className?: string;
+  suggested?: boolean;
 }) {
   return <SupplierMap {...props} />;
 }
