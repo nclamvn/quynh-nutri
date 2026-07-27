@@ -28,6 +28,10 @@ const SYSTEM = [
 export async function POST(req: Request) {
   try {
     const { mood, dishes } = await req.json();
+    // E2E/CI: deterministic warmth, no LLM/key/network.
+    if (process.env.E2E_MOCK_AI === "1") {
+      return Response.json({ warmth: "Hôm nay chọn mấy món gọn nhẹ, đỡ phải nghĩ nhiều nhé." });
+    }
     const label = MOOD_LABEL[mood as string] ?? "hôm nay";
     const list = Array.isArray(dishes)
       ? dishes.map((d: { name?: string }) => `- ${d?.name ?? ""}`).filter((s) => s.length > 2).join("\n")

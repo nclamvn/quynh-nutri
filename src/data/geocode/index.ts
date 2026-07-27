@@ -30,8 +30,22 @@ function goongProvider(key: string): GeocodeProvider {
   };
 }
 
+// Deterministic mock for E2E/CI — never calls Nominatim (rate limit 1 req/s). Keeps
+// the "Bến Thành → confidence ~0" case so the honesty test sees an imprecise suggestion.
+const MockProvider: GeocodeProvider = {
+  name: "nominatim",
+  async geocode(address) {
+    const a = address.toLowerCase();
+    if (a.includes("bến thành") || a.includes("ben thanh"))
+      return { lat: 10.786448, lng: 106.7036312, confidence: 0.00006, source: "nominatim", label: "mock: Bến Thành (imprecise)" };
+    if (a.trim().length >= 4) return { lat: 10.7769, lng: 106.7009, confidence: 0.5, source: "nominatim", label: "mock: TP.HCM" };
+    return null;
+  },
+};
+
 /** Provider selection; swapping never touches domain/UI (deviation #1: adapter). */
 export function pickProvider(env: Record<string, string | undefined> = process.env): GeocodeProvider {
+  if (env.E2E_MOCK_GEOCODE === "1") return MockProvider;
   return providerNameForEnv(env) === "goong" ? goongProvider(env.GOONG_API_KEY as string) : NominatimProvider;
 }
 

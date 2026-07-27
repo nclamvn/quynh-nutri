@@ -45,3 +45,9 @@ refinery/candidates-*.json
 refinery/REVIEW.md
 refinery/approved.txt
 refinery/approved-dishes.ts
+
+# E2E generated artifacts (regenerable via `npm run test:e2e`)
+/test-results/
+/playwright-report/
+/e2e/__screens__/
+/e2e/.auth/
