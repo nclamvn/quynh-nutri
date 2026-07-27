@@ -40,15 +40,26 @@ describe("detectCrisis — deterministic safety gate", () => {
     }
   });
 
-  it("does NOT false-trigger on everyday venting or morbid idioms", () => {
-    for (const t of ["đang stress quá", "mệt muốn xỉu", "đói chết được", "chán cơm quá", "buồn ngủ", "hôm nay hơi buồn", ""]) {
-      expect(detectCrisis(t).crisis).toBe(false);
-    }
+  it("catches INDIRECT despair / self-as-burden (how depression actually speaks)", () => {
+    // These carry no direct "muốn chết" — the earlier narrow matcher would miss them.
+    expect(detectCrisis("con sẽ tốt hơn nếu không có tôi").crisis).toBe(true);
+    expect(detectCrisis("mọi người sẽ tốt hơn nếu không có tôi").crisis).toBe(true);
+    expect(detectCrisis("tôi không trụ nổi nữa").crisis).toBe(true);
+    expect(detectCrisis("mình không thấy lối thoát").crisis).toBe(true);
+    expect(detectCrisis("everyone is better off without me").crisis).toBe(true);
   });
 
-  it("postpartum lowers the threshold for a few specific phrases", () => {
+  it("catches PPD self-blame/burden ONLY in a postpartum context (venting-ish otherwise)", () => {
+    expect(detectCrisis("mình là một người mẹ tồi", { postpartum: true }).crisis).toBe(true);
+    expect(detectCrisis("mình là một người mẹ tồi", { postpartum: false }).crisis).toBe(false);
     expect(detectCrisis("mình ghét con", { postpartum: false }).crisis).toBe(false);
     expect(detectCrisis("mình ghét con", { postpartum: true }).crisis).toBe(true);
+  });
+
+  it("does NOT false-trigger on everyday venting, morbid idioms, or 'mẹ tôi' (my mother)", () => {
+    for (const t of ["đang stress quá", "mệt muốn xỉu", "đói chết được", "chán cơm quá", "buồn ngủ", "hôm nay hơi buồn", "mẹ tôi nấu ăn ngon", ""]) {
+      expect(detectCrisis(t, { postpartum: true }).crisis).toBe(false);
+    }
   });
 });
 

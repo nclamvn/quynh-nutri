@@ -22,25 +22,43 @@ function fold(s: string): string {
 
 // Intent phrases (NOT bare morbid words like "chết" — avoids false alarms on
 // "đói chết được"). Stored folded. severity "crisis" = self-harm/suicide intent.
+// severity "crisis" = self-harm/suicide intent, INCLUDING indirect "self-as-burden"
+// forms (how depression — esp. postpartum — often actually speaks; no direct verb).
 const CRISIS_PHRASES = [
   "muon chet", "chi muon chet", "khong muon song", "chan song", "chan khong muon song",
   "tu tu", "tu sat", "tu lam hai", "lam hai ban than", "lam dau ban than", "tu hai minh",
   "cat tay minh", "ket thuc cuoc doi", "ket thuc tat ca", "chet cho xong", "chet cho roi",
-  "bien mat khoi cuoc doi", "khong thiet song",
+  "bien mat khoi cuoc doi", "khong thiet song", "khong con muon ton tai",
+  // indirect self-as-burden — high signal, catch for everyone
+  "con se tot hon neu khong co toi", "moi nguoi se tot hon neu khong co toi",
+  "the gioi tot hon khi khong co toi", "gia dinh tot hon khi khong co toi",
+  "khong co toi moi nguoi se on hon",
   // EN
   "kill myself", "want to die", "end my life", "end it all", "suicide", "self harm",
   "self-harm", "hurt myself", "dont want to live", "do not want to live", "no reason to live",
+  "better off without me", "everyone better off without me",
 ];
 // severity "watch" = distress beyond "hôm nay hơi mệt" — still stop suggesting food.
+// Leans toward catching indirect despair (a false positive here is mild; a miss is not).
 const DISTRESS_PHRASES = [
   "tuyet vong", "vo vong", "vo gia tri", "khong con y nghia", "khong thiet an", "khong thiet gi",
-  "trong rong", "be tac", "khong chiu noi nua", "khong chiu dung noi", "guc nga hoan toan",
-  "kiet que", "mat ngu nhieu ngay", "mat ngu trien mien", "buon keo dai", "khoc suot",
-  "hopeless", "worthless", "cant cope", "can't cope", "cant go on", "can't go on", "empty inside", "no point",
+  "trong rong", "be tac", "be tac hoan toan", "khong chiu noi nua", "khong chiu dung noi",
+  "guc nga hoan toan", "kiet que", "mat ngu nhieu ngay", "mat ngu trien mien", "buon keo dai", "khoc suot",
+  // indirect despair / can't-hold-on / no-way-out
+  "khong tru noi nua", "khong tru duoc nua", "khong gong noi nua", "khong gong duoc nua",
+  "khong the tiep tuc nua", "khong chiu them duoc", "muon buong bo tat ca", "muon tu bo tat ca",
+  "khong thay loi thoat", "khong con loi thoat", "mat het hy vong", "khong muon o day nua",
+  "moi thu that vo nghia", "song khong con y nghia",
+  "hopeless", "worthless", "cant cope", "can't cope", "cant go on", "can't go on",
+  "empty inside", "no point", "cant hold on", "can't hold on", "no way out",
 ];
-// Only checked when the household has a postpartum member (lower threshold).
+// Only checked when the household has a postpartum member (lower threshold). PPD
+// self-blame / burden phrasings that are venting-ish out of context but are real
+// signals for a new mother.
 const POSTPARTUM_PHRASES = [
   "ghet con", "so lam hai con", "khong thuong con duoc", "hoi han sinh con", "khong lo cho con noi",
+  "la me toi", "mot nguoi me toi", "khong xung dang lam me",
+  "la ganh nang cho con", "la ganh nang cho gia dinh", "con xung dang nguoi me tot hon",
 ];
 
 export function detectCrisis(text: string | undefined, opts?: { postpartum?: boolean }): { crisis: boolean; severity?: CrisisSeverity } {

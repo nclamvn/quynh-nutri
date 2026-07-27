@@ -14,14 +14,28 @@ export const SUPPORT_RESOURCES: SupportResource[] = [
   {
     name: "Đường dây nóng Ngày Mai",
     detail: "096 306 1414",
-    hours: "13:00–20:30, Thứ 4 đến Chủ Nhật",
+    // SAFETY: list the exact days — Wed/Fri/Sat/Sun, NO Thursday. A dash-range
+    // "T4–CN" reads as continuous (incl. Thursday) → someone in crisis could call
+    // on a day no one answers. Do NOT collapse to a range.
+    hours: "13:00–20:30 · Thứ 4, Thứ 6, Thứ 7, Chủ Nhật",
     url: "https://duongdaynongngaymai.vn/",
-    // Free, non-judgmental, confidential psychological support hotline.
+    // Free, non-judgmental, confidential psychological listening line.
     sources: [
       "duongdaynongngaymai.vn (trang chính thức)",
-      "svvn.tienphong.vn",
-      "laodong.vn",
-      "findahelpline.com/organizations/ngay-mai",
+      "DoanhnhanPlus",
+      "Bệnh viện Lê Lợi (2026)",
+    ],
+  },
+  {
+    name: "Cấp cứu trầm cảm (BV Tâm thần TP.HCM)",
+    detail: "1900 1267",
+    hours: "24/7 · chuyên tâm lý",
+    // Fills the after-hours gap outside Ngày Mai's fixed days. Corroborated by the
+    // hospital's official site + VOV + a state health station.
+    sources: [
+      "bvtt-tphcm.org.vn (trang chính thức)",
+      "vov.gov.vn",
+      "medinet.gov.vn",
     ],
   },
   {

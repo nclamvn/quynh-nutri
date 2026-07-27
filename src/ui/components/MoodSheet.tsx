@@ -39,6 +39,7 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const [result, setResult] = useState<Advisory | null>(null);
   const [warmth, setWarmth] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showSupport, setShowSupport] = useState(false); // voluntary parallel path
 
   const postpartum =
     household.lactatingMember ||
@@ -70,7 +71,7 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
     }
   };
 
-  const reset = () => { setResult(null); setWarmth(null); };
+  const reset = () => { setResult(null); setWarmth(null); setShowSupport(false); };
   const close = () => { reset(); setText(""); onClose(); };
 
   const addToPlan = (dishId: string) => {
@@ -115,7 +116,15 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
         {result?.mode === "crisis" && <CrisisCare postpartum={postpartum} onBack={reset} />}
 
-        {result?.mode === "suggest" && (
+        {result?.mode === "suggest" && showSupport && (
+          <div className="space-y-3">
+            <button onClick={() => setShowSupport(false)} className="text-xs text-muted hover:text-ink">← Quay lại gợi ý</button>
+            <p className="text-[15px] font-medium text-ink">Nếu hôm nay nặng hơn “hơi mệt”, nói với ai đó là điều nên làm.</p>
+            <ResourceList postpartum={postpartum} />
+          </div>
+        )}
+
+        {result?.mode === "suggest" && !showSupport && (
           <div className="space-y-3">
             <button onClick={reset} className="text-xs text-muted hover:text-ink">← Chọn lại</button>
             <p className="text-sm leading-relaxed text-ink">{loading ? result.practicalNote : warmth ?? result.practicalNote}</p>
@@ -155,6 +164,11 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
             )}
             {result.caffeineNote && <p className="text-xs text-muted">Nếu khó ngủ, hạn chế cà phê/trà từ chiều.</p>}
             <p className="text-[11px] text-tertiary">{DISCLAIMER}</p>
+            {/* Parallel, quiet path to support — catches an indirect distress the gate
+                may not have flagged. Never harms; a missed signal would. */}
+            <button onClick={() => setShowSupport(true)} className="text-xs text-muted underline-offset-2 hover:text-ink hover:underline">
+              Cần người lắng nghe? Xem nguồn hỗ trợ
+            </button>
           </div>
         )}
       </div>
@@ -162,13 +176,9 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
   );
 }
 
-function CrisisCare({ postpartum, onBack }: { postpartum: boolean; onBack: () => void }) {
+function ResourceList({ postpartum }: { postpartum: boolean }) {
   return (
-    <div className="space-y-3">
-      <p className="text-[15px] font-medium text-ink">Nghe như hôm nay thật sự nặng nề. Bạn không phải đối mặt một mình.</p>
-      <p className="text-sm leading-relaxed text-muted">
-        Mình xin phép không gợi ý món lúc này — điều đáng làm hơn là tìm một người để nói cùng.
-      </p>
+    <>
       {postpartum && (
         <p className="rounded-[12px] border border-amber/30 bg-amber-weak p-3 text-sm leading-relaxed text-amber">{POSTPARTUM_SUPPORT_NOTE}</p>
       )}
@@ -193,6 +203,18 @@ function CrisisCare({ postpartum, onBack }: { postpartum: boolean; onBack: () =>
           <li key={i}>{g}</li>
         ))}
       </ul>
+    </>
+  );
+}
+
+function CrisisCare({ postpartum, onBack }: { postpartum: boolean; onBack: () => void }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-[15px] font-medium text-ink">Nghe như hôm nay thật sự nặng nề. Bạn không phải đối mặt một mình.</p>
+      <p className="text-sm leading-relaxed text-muted">
+        Mình xin phép không gợi ý món lúc này — điều đáng làm hơn là tìm một người để nói cùng.
+      </p>
+      <ResourceList postpartum={postpartum} />
       <button onClick={onBack} className="text-xs text-muted hover:text-ink">← Quay lại</button>
     </div>
   );
