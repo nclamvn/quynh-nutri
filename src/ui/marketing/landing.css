@@ -239,28 +239,43 @@
   .truth-grid .display { font-size: clamp(3.4rem, 6.6vw, 7rem); }
   .truth-grid .display em { color: var(--landing-display-rose); }
   .truth-grid > p { margin: 0; line-height: 1.72; color: rgba(255, 250, 244, 0.62); }
-  /* demo chip — morphs gray→honey→green once on view: watch confidence grow. */
-  .confidence { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
-  .confidence small { font-size: 0.62rem; line-height: 1.5; color: rgba(255, 250, 244, 0.5); }
-  .truth.in-view .conf-chip { animation: lp-confidence 2.6s var(--ease-standard) both; }
+  .confidence { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
+  .confidence small { max-width: 22rem; font-size: 0.62rem; line-height: 1.5; color: rgba(255, 250, 244, 0.5); }
 
   .trust { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(255, 255, 255, 0.14); }
-  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 0.9rem; padding: 2.2rem 1.4rem; border-right: 1px solid rgba(255, 255, 255, 0.1); opacity: 1; }
+  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 1.15rem; padding: 2.4rem 1.4rem; border-right: 1px solid rgba(255, 255, 255, 0.1); opacity: 1; }
   .trust article:last-child { border-right: 0; }
   .truth.in-view .trust article { animation: lp-rise 0.65s var(--ease-emphasized) both; animation-delay: calc(var(--i, 0) * 110ms); }
 
-  /* ONE chip system — every tier is the same box (height, padding, radius, type).
-     Only colour + glow change. Owner fix: no game-sign glow, no size drift. */
-  .conf-chip, .tier-chip { display: inline-flex; align-items: center; gap: 0.5rem; align-self: flex-start; height: 2.15rem; padding: 0 0.85rem; border-radius: 999px; border: 1px solid; font-size: 0.94rem; font-weight: 760; font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1; }
-  .conf-chip { color: var(--data-low); border-color: color-mix(in srgb, var(--data-low) 38%, transparent); }
-  /* refined dot — a quiet indicator, not a bullet; no glow */
-  .tier-dot { width: 0.36rem; height: 0.36rem; border-radius: 50%; background: currentColor; flex: none; }
-  .tier-chip .cov { font-size: 0.72rem; font-weight: 700; opacity: 0.66; }
-  /* glow = certainty, dialled to "a lamp in a dark room" — soft + diffuse, never a
-     neon border. ok subtle · mid softer · low NONE (that dimness IS the statement). */
-  .tier-ok  { color: var(--data-ok);  border-color: color-mix(in srgb, var(--data-ok) 46%, transparent);  background: color-mix(in srgb, var(--data-ok) 11%, transparent);  box-shadow: 0 0 15px color-mix(in srgb, var(--data-ok) 15%, transparent); }
-  .tier-mid { color: var(--data-mid); border-color: color-mix(in srgb, var(--data-mid) 42%, transparent); background: color-mix(in srgb, var(--data-mid) 9%, transparent);  box-shadow: 0 0 11px color-mix(in srgb, var(--data-mid) 10%, transparent); }
-  .tier-low { color: var(--data-low); border-color: color-mix(in srgb, var(--data-low) 36%, transparent); background: transparent; opacity: 0.8; }
+  /* COVERAGE GAUGE — độ chắc = độ phủ, made visual. A ring drawn to the coverage %
+     with the kcal number in the middle; tier drives colour + a soft "lamp" glow
+     (ok subtle · mid softer · low none). pathLength=100 → arc offset = 100−coverage.
+     Base = the FILLED ring (visible with no JS / reduced-motion); .in-view only
+     ADDS the draw-in entrance. */
+  .gauge { position: relative; width: clamp(104px, 11vw, 128px); aspect-ratio: 1; flex: none; }
+  .gauge svg { width: 100%; height: 100%; overflow: visible; }
+  .g-track { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 4.5; }
+  .g-arc { fill: none; stroke: currentColor; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--cov) * 100); transform: rotate(-90deg); transform-origin: 50% 50%; }
+  .truth.in-view .g-arc { animation: g-fill 1.15s var(--ease-emphasized) both; animation-delay: calc(0.25s + var(--i, 0) * 0.16s); }
+  @keyframes g-fill { from { stroke-dashoffset: 100; } }
+  .g-mid { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; line-height: 1; }
+  .g-mid b { font-size: clamp(1.1rem, 1.9vw, 1.45rem); font-weight: 820; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ivory); }
+  .g-mid i { margin-top: 0.24rem; font-style: normal; font-size: 0.5rem; font-weight: 850; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 250, 244, 0.4); }
+  .g-cov { margin-top: 0.34rem; font-size: 0.72rem; font-weight: 800; font-variant-numeric: tabular-nums; color: currentColor; }
+  .tier-ok  { color: var(--data-ok); }
+  .tier-mid { color: var(--data-mid); }
+  .tier-low { color: var(--data-low); }
+  .tier-ok  .g-arc { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--data-ok) 42%, transparent)); }
+  .tier-mid .g-arc { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--data-mid) 26%, transparent)); }
+  .tier-low .g-arc { filter: none; }
+  .tier-low .g-cov { opacity: 0.82; }
+  /* demo ring — brightens gray→honey→green as it fills */
+  .truth.in-view .gauge-demo .g-arc { animation: g-demo 2.4s var(--ease-standard) both; }
+  @keyframes g-demo {
+    0%   { stroke-dashoffset: 100; stroke: var(--data-low); }
+    45%  { stroke: var(--data-mid); }
+    100% { stroke-dashoffset: calc(100 - var(--cov) * 100); stroke: var(--data-ok); }
+  }
   .trust small { font-size: 0.6rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
   .trust h3 { margin: 0.3rem 0 0.4rem; font: italic 400 clamp(1.7rem, 2.6vw, 2.5rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ivory); }
   .trust p { margin: 0; font-size: 0.84rem; line-height: 1.5; font-weight: 500; color: rgba(255, 250, 244, 0.6); }
