@@ -5,10 +5,10 @@ import { DataTruth } from "@/ui/marketing/DataTruth";
 import "@/ui/marketing/landing.css";
 
 // Public editorial landing (blueprint §5 order LOCKED), ported from the owner's
-// approved mock. Server component — static markup + CSS motion, scoped under `.lp`.
+// approved mock. Server component – static markup + CSS motion, scoped under `.lp`.
 // Real photos are local (see landing-media.ts); CTAs go to real Clerk routes.
 export const metadata: Metadata = {
-  title: "Bữa cơm nhà — Một tuần ăn ngon, vừa sức và có căn cứ",
+  title: "Bữa cơm nhà – Một tuần ăn ngon, vừa sức và có căn cứ",
   description:
     "Hệ thống lập bữa cho gia đình Việt: xoay món, cân lượng, gộp chợ và nói thật độ chắc của từng con số.",
 };
@@ -17,7 +17,7 @@ const hero = LANDING_MEDIA.hero;
 const stage = LANDING_MEDIA.stage;
 
 // Self-hosted Vietnamese-dish squares for the hero marquee (credits in
-// public/landing/marquee/CREDITS.md). Decorative — visualises "49 món nền".
+// public/landing/marquee/CREDITS.md). Decorative – visualises "49 món nền".
 const MARQUEE = [
   "pho-bo", "banh-mi", "goi-cuon", "cha-gio", "bun-bo-hue", "bun", "bun-chay",
 ].map((f) => `/landing/marquee/${f}.jpg`);
@@ -106,7 +106,7 @@ export default function LandingPage() {
               <div className="photo-note"><small>Thứ tư / 18:30</small>Canh khổ qua · thịt kho · rau luộc</div>
             </div>
             <div className="app">
-              <div className="app-top"><span>Tuần của nhà mình</span><b>21 — 27.07</b><i>•••</i></div>
+              <div className="app-top"><span>Tuần của nhà mình</span><b>21 – 27.07</b><i>•••</i></div>
               <div className="days"><span>T2</span><span>T3</span><span className="on">T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
               <div className="meal-head"><div><small>Bữa tối · 4 người</small><h3>Một mâm cơm vừa sức.</h3></div><span className="pill">Độ phủ 92%</span></div>
               <div className="meal-list">
@@ -120,7 +120,7 @@ export default function LandingPage() {
           <div className="stage-copy">
             <small>A living meal system</small>
             <h2>Kế hoạch không đứng yên sau khi được tạo.</h2>
-            <p>Đổi một món, thiếu một nguyên liệu hay có thêm người ăn — cả định lượng, dinh dưỡng và danh sách chợ được nối lại thành một hệ thống nhất quán.</p>
+            <p>Đổi một món, thiếu một nguyên liệu hay có thêm người ăn – cả định lượng, dinh dưỡng và danh sách chợ được nối lại thành một hệ thống nhất quán.</p>
             <Link href="/sign-up">Tạo hồ sơ gia đình →</Link>
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* DATA TRUTH — cinematic (client island for scroll reveal) */}
+      {/* DATA TRUTH – cinematic (client island for scroll reveal) */}
       <DataTruth />
 
       {/* QUOTE */}
