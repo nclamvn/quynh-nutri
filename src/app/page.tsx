@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LANDING_MEDIA } from "@/data/landing-media";
 import { Manifesto } from "@/ui/marketing/Manifesto";
 import { Memory } from "@/ui/marketing/Memory";
+import { FinalCTA } from "@/ui/marketing/FinalCTA";
 import { DataTruth } from "@/ui/marketing/DataTruth";
 import "@/ui/marketing/landing.css";
 
@@ -124,16 +125,8 @@ export default function LandingPage() {
         <div className="quote-meta"><span>Q&apos;s Kitchen principle</span><span>Made for Vietnamese homes</span></div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="final" id="cta">
-        <div className="halo" />
-        <p>Tuần mới bắt đầu từ một câu hỏi cũ.</p>
-        <h2 className="display">Tối nay<em>ăn gì?</em></h2>
-        <div className="final-actions">
-          <Link className="btn" href="/sign-up">Để Bữa cơm nhà lên tuần đầu tiên <span>↗</span></Link>
-          <Link href="/sign-in">Tôi đã có tài khoản</Link>
-        </div>
-      </section>
+      {/* FINAL CTA — "Tối nay ăn gì?" climax (Step 2: tương phản khổ) */}
+      <FinalCTA />
 
       {/* FOOTER */}
       <footer>
