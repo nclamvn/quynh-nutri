@@ -5,7 +5,7 @@
 // longer touches it (passthrough → browser + CDN handle it). Bumping CACHE also
 // makes `activate` purge the old cache on the next load, so any client stuck on a
 // stale v1 entry self-heals.
-const CACHE = "bua-com-v2";
+const CACHE = "bua-com-v3";
 const SHELL = ["/week", "/shopping", "/dishes", "/nutrition", "/settings", "/manifest.webmanifest", "/icon.svg"];
 
 self.addEventListener("install", (e) => {
@@ -27,6 +27,9 @@ self.addEventListener("fetch", (e) => {
   // let the browser/CDN deliver them so they're always the latest deploy.
   if (url.origin !== self.location.origin) return;
   if (url.pathname === "/") return;
+  // Immutable hashed build assets — let the browser cache them natively. The SW
+  // must never mediate these, or a stale/mismatched chunk can break the whole page.
+  if (url.pathname.startsWith("/_next/")) return;
 
   const isNav = request.mode === "navigate";
   e.respondWith(

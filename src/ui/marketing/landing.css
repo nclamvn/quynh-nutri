@@ -16,6 +16,14 @@
   42%  { color: #e6b75e; border-color: rgba(230, 183, 94, 0.42); box-shadow: 0 0 11px rgba(230, 183, 94, 0.13); }
   100% { color: #73c79d; border-color: rgba(115, 199, 157, 0.46); box-shadow: 0 0 15px rgba(115, 199, 157, 0.16); }
 }
+/* coverage-gauge keyframes — MUST live at top level (never nested inside .lp,
+   which is invalid CSS and can make strict parsers drop the whole .lp block). */
+@keyframes g-fill { from { stroke-dashoffset: 100; } }
+@keyframes g-demo {
+  0%   { stroke-dashoffset: 100; stroke: var(--data-low); }
+  45%  { stroke: var(--data-mid); }
+  100% { stroke-dashoffset: calc(100 - var(--cov) * 100); stroke: var(--data-ok); }
+}
 
 .lp {
   --ink: #171214;
@@ -257,7 +265,6 @@
   .g-track { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 4.5; }
   .g-arc { fill: none; stroke: currentColor; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--cov) * 100); transform: rotate(-90deg); transform-origin: 50% 50%; }
   .truth.in-view .g-arc { animation: g-fill 1.15s var(--ease-emphasized) both; animation-delay: calc(0.25s + var(--i, 0) * 0.16s); }
-  @keyframes g-fill { from { stroke-dashoffset: 100; } }
   .g-mid { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; line-height: 1; }
   .g-mid b { font-size: clamp(1.1rem, 1.9vw, 1.45rem); font-weight: 820; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ivory); }
   .g-mid i { margin-top: 0.24rem; font-style: normal; font-size: 0.5rem; font-weight: 850; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 250, 244, 0.4); }
@@ -271,11 +278,6 @@
   .tier-low .g-cov { opacity: 0.82; }
   /* demo ring — brightens gray→honey→green as it fills */
   .truth.in-view .gauge-demo .g-arc { animation: g-demo 2.4s var(--ease-standard) both; }
-  @keyframes g-demo {
-    0%   { stroke-dashoffset: 100; stroke: var(--data-low); }
-    45%  { stroke: var(--data-mid); }
-    100% { stroke-dashoffset: calc(100 - var(--cov) * 100); stroke: var(--data-ok); }
-  }
   .trust small { font-size: 0.6rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
   .trust h3 { margin: 0.3rem 0 0.4rem; font: italic 400 clamp(1.7rem, 2.6vw, 2.5rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ivory); }
   .trust p { margin: 0; font-size: 0.84rem; line-height: 1.5; font-weight: 500; color: rgba(255, 250, 244, 0.6); }
