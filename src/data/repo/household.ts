@@ -15,11 +15,13 @@ async function currentHouseholdId(): Promise<string> {
   const existing = await db.household.findUnique({ where: { userId }, select: { id: true } });
   if (existing) return existing.id;
   const t = DEFAULT_HOUSEHOLD;
+  // "Bắt đầu trống": a brand-new household declares its OWN family — no generic
+  // template members, size 0 until they add people (portions follow member count).
   const created = await db.household.create({
     data: {
       userId,
       name: t.name,
-      size: t.size,
+      size: 0,
       marketMode: t.marketMode,
       cookTimeCapMin: t.cookTimeCapMin,
       busyDays: t.busyDays,
@@ -28,7 +30,7 @@ async function currentHouseholdId(): Promise<string> {
       favorites: [],
       notes: [],
       pantry: [],
-      members: { create: t.members.map((m) => ({ role: m.role, sex: m.sex ?? null, ageBand: m.ageBand ?? null, activity: m.activity, allergies: [] })) },
+      members: { create: [] },
     },
     select: { id: true },
   });

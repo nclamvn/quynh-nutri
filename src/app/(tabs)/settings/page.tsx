@@ -5,9 +5,9 @@ import { useI18n } from "@/i18n/context";
 import { useTheme } from "@/ui/theme";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
-import { HealthProfileSheet } from "@/ui/components/HealthProfileSheet";
+import { MemberSheet, type MemberSubject } from "@/ui/components/MemberSheet";
 import { useState } from "react";
-import type { Member, DietRestriction } from "@/domain/types";
+import type { DietRestriction } from "@/domain/types";
 import type { DayName, Household } from "@/domain/types";
 
 const DIET_RESTRICTIONS: DietRestriction[] = ["vegetarian", "pescatarian", "no_pork", "no_beef"];
@@ -19,7 +19,7 @@ export default function SettingsPage() {
   const { household, updateHousehold } = useStore();
   const { t, lang, setLang } = useI18n();
   const { theme, setTheme } = useTheme();
-  const [profileMember, setProfileMember] = useState<Member | null>(null);
+  const [subject, setSubject] = useState<MemberSubject>(null);
 
   const toggleBusy = (d: DayName) => {
     const has = household.busyDays.includes(d);
@@ -52,30 +52,29 @@ export default function SettingsPage() {
             <p className="mb-2 text-sm font-medium">{t("settings.members")}</p>
             <ul className="space-y-1.5">
               {household.members.map((m) => {
-                const ls = m.healthProfile?.lifeStage;
+                const nm = m.name?.trim() || (m.role === "adult" ? (m.sex === "M" ? "Người lớn (Nam)" : "Người lớn (Nữ)") : `Trẻ ${m.ageBand ?? ""}`);
                 return (
                   <li key={m.id}>
                     <button
-                      onClick={() => setProfileMember(m)}
+                      onClick={() => setSubject(m)}
                       className="flex w-full items-center gap-3 rounded-[12px] border border-hairline bg-surface/40 px-3 py-2 text-left text-sm transition-colors hover:bg-surface"
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-weak text-[11px] font-medium text-brand-ink">
                         {m.role === "adult" ? (m.sex === "M" ? "B" : "M") : "T"}
                       </span>
-                      <span className="min-w-0 flex-1 truncate">{m.role === "adult" ? (m.sex === "M" ? "Người lớn (Nam)" : "Người lớn (Nữ)") : `Trẻ ${m.ageBand}`}</span>
-                      {ls && ls !== "none" && (
-                        <span className="shrink-0 rounded-full bg-brand-weak px-2 py-0.5 text-[10px] text-brand-ink">{t(`health.stage.${ls}`)}</span>
-                      )}
+                      <span className="min-w-0 flex-1 truncate">{nm}</span>
                       {m.allergies && m.allergies.length > 0 && (
-                        <span className="shrink-0 rounded-full bg-danger-weak px-2 py-0.5 text-[10px] text-danger">⚠ {m.allergies.length}</span>
+                        <span className="shrink-0 rounded-full bg-amber-weak px-2 py-0.5 text-[10px] text-amber">cần tránh {m.allergies.length}</span>
                       )}
-                      <span className="shrink-0 text-xs text-muted">{m.activity}</span>
                       <span aria-hidden className="shrink-0 text-tertiary">›</span>
                     </button>
                   </li>
                 );
               })}
             </ul>
+            <button onClick={() => setSubject("new")} className="mt-2 w-full rounded-[12px] border border-dashed border-hairline py-2 text-sm font-medium text-brand">
+              + Thêm thành viên
+            </button>
           </div>
         </Section>
 
@@ -140,7 +139,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <HealthProfileSheet member={profileMember} onClose={() => setProfileMember(null)} />
+      <MemberSheet subject={subject} onClose={() => setSubject(null)} />
     </PageContainer>
   );
 }

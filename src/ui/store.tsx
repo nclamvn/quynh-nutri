@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen, MemberState, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord } from "@/domain/types";
 import { splitOrders, type OrderSplit } from "@/domain/order";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -45,6 +45,9 @@ interface StoreValue {
   updateMemberAllergies: (memberId: string, allergies: Allergen[]) => void;
   addMemberState: (memberId: string, state: Omit<MemberState, "id">) => void;
   removeMemberState: (memberId: string, stateId: string) => void;
+  addMember: (base: MemberBaseInput) => void;
+  editMember: (id: string, base: MemberBaseInput) => void;
+  removeMember: (id: string) => void;
   // UI-3/5: favorites + fork (B1)
   isFavorite: (id: string) => boolean;
   toggleFavorite: (id: string) => void;
@@ -77,6 +80,7 @@ interface StoreValue {
 }
 
 export type SupplierInput = Omit<Supplier, "householdId" | "seed">;
+export type MemberBaseInput = Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes">;
 
 const StoreContext = createContext<StoreValue | null>(null);
 
@@ -271,6 +275,47 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     import("@/app/actions").then(({ removeMemberState }) => removeMemberState(stateId)).catch(() => toast(SAVE_FAIL_MSG, "error"));
   }, []);
 
+  // ── Member declaration (base layer) — "kê khai thành viên". size follows the
+  //    declared member count so portions match the family that actually exists. ──
+  const addMember = useCallback((base: MemberBaseInput) => {
+    touched.current.household = true;
+    const tempId = `tmp-m-${Date.now()}`;
+    let count = 0;
+    setHousehold((h) => {
+      const members = [...h.members, { id: tempId, activity: "moderate" as Activity, ...base }];
+      count = members.length;
+      return { ...h, members, size: members.length };
+    });
+    import("@/app/actions")
+      .then(async ({ persistMember, persistState }) => {
+        const realId = await persistMember(base);
+        setHousehold((h) => ({ ...h, members: h.members.map((m) => (m.id === tempId ? { ...m, id: realId } : m)) }));
+        await persistState({ size: count });
+      })
+      .catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+
+  const editMember = useCallback((id: string, base: MemberBaseInput) => {
+    touched.current.household = true;
+    setHousehold((h) => ({ ...h, members: h.members.map((m) => (m.id === id ? { ...m, ...base } : m)) }));
+    if (id.startsWith("tmp-")) return; // reconcile pending; edit lands after realId
+    import("@/app/actions").then(({ persistMember }) => persistMember({ id, ...base })).catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+
+  const removeMember = useCallback((id: string) => {
+    touched.current.household = true;
+    let count = 0;
+    setHousehold((h) => {
+      const members = h.members.filter((m) => m.id !== id);
+      count = members.length;
+      return { ...h, members, size: members.length };
+    });
+    if (id.startsWith("tmp-")) return;
+    import("@/app/actions")
+      .then(async ({ removeMember: rm, persistState }) => { await rm(id); await persistState({ size: count }); })
+      .catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+
   const addNote = useCallback((text: string) => {
     const t = text.trim();
     if (!t) return;
@@ -448,6 +493,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     updateMemberAllergies,
     addMemberState,
     removeMemberState,
+    addMember,
+    editMember,
+    removeMember,
     isFavorite,
     toggleFavorite,
     favoriteDishes,

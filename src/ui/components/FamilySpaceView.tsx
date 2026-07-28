@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useStore } from "@/ui/store";
 import { familySpace } from "@/domain/family";
 import { detectConflicts } from "@/domain/constraints";
+import { MemberSheet, type MemberSubject } from "./MemberSheet";
 import type { Member, MemberState, MemberStateKind } from "@/domain/types";
 
 // "Không gian gia đình sống" — the whole family in ONE frame the cook sees, plus
@@ -40,9 +41,21 @@ export function FamilySpaceView() {
   const space = useMemo(() => familySpace(household.members, now), [household.members, now]);
   const conflicts = useMemo(() => detectConflicts(household.members), [household.members]);
   const [openFor, setOpenFor] = useState<string | null>(null);
+  const [subject, setSubject] = useState<MemberSubject>(null);
 
   if (household.members.length === 0) {
-    return <p className="px-1 text-sm text-tertiary">Chưa có ai trong nhà. Thêm thành viên để bắt đầu.</p>;
+    return (
+      <>
+        <div className="card flex flex-col items-center gap-3 p-6 text-center">
+          <p className="text-sm text-tertiary">Chưa có ai trong nhà mình.</p>
+          <button onClick={() => setSubject("new")} className="cta-primary rounded-full px-5 py-2.5 text-sm font-medium text-white">
+            + Thêm thành viên
+          </button>
+          <p className="text-[11px] text-tertiary">Kể tôi nghe nhà mình có những ai — thực đơn sẽ theo đó.</p>
+        </div>
+        <MemberSheet subject={subject} onClose={() => setSubject(null)} />
+      </>
+    );
   }
 
   const addState = (memberId: string, preset: (typeof STATE_PRESETS)[number], days: number) => {
@@ -68,13 +81,16 @@ export function FamilySpaceView() {
           <p className="text-[12px] leading-relaxed text-amber">{c.note}</p>
         </div>
       ))}
+      <button onClick={() => setSubject("new")} className="mb-3 w-full rounded-xl border border-dashed border-hairline py-2.5 text-sm font-medium text-brand">
+        + Thêm thành viên
+      </button>
       <ul data-stagger className="grid grid-cols-1 gap-3">
       {space.needs.map((need, i) => {
         const m = household.members.find((x) => x.id === need.memberId)!;
         return (
           <li key={need.memberId} style={{ "--i": i } as React.CSSProperties}>
             <div className="card p-4">
-              <div className="flex items-center gap-3">
+              <button onClick={() => setSubject(m)} className="flex w-full items-center gap-3 text-left">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-weak text-sm font-medium text-brand-ink">{roleMark(m)}</span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{displayName(m)}</p>
@@ -94,7 +110,8 @@ export function FamilySpaceView() {
                     )}
                   </div>
                 </div>
-              </div>
+                <span aria-hidden className="shrink-0 text-[11px] font-medium text-brand">Sửa</span>
+              </button>
 
               {/* Today's states — self-expiring; each removable ("khỏi rồi"). */}
               {need.activeStates.length > 0 && (
@@ -144,6 +161,7 @@ export function FamilySpaceView() {
         );
       })}
       </ul>
+      <MemberSheet subject={subject} onClose={() => setSubject(null)} />
     </>
   );
 }
