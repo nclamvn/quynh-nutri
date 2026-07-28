@@ -2,7 +2,7 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { getDb } from "@/lib/db";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
-import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName, HealthProfile, Supplier, SupplierChannel, SupplierType, Order, OrderLine, OrderStatus, ChannelKind, PurchaseRecord, PurchaseLine, OnTime } from "@/domain/types";
+import type { Household, PantryItem, DietRestriction, Allergen, Activity, MemberRole, DayName, HealthProfile, Member, MemberState, Supplier, SupplierChannel, SupplierType, Order, OrderLine, OrderStatus, ChannelKind, PurchaseRecord, PurchaseLine, OnTime } from "@/domain/types";
 
 const HH_ID = DEFAULT_HOUSEHOLD.id; // template / unauth fallback
 
@@ -50,7 +50,7 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
   const id = await currentHouseholdId();
   const row = await db.household.findUnique({
     where: { id },
-    include: { members: true, suppliers: true, orders: true, purchases: true },
+    include: { members: { include: { states: true } }, suppliers: true, orders: true, purchases: true },
   });
   if (!row) return { household: DEFAULT_HOUSEHOLD, favorites: [], notes: [], pantry: [], suppliers: [], orders: [], purchases: [] };
 
@@ -65,12 +65,23 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
     restrictions: (row.restrictions as DietRestriction[]) ?? [],
     members: row.members.map((m) => ({
       id: m.id,
+      name: m.name ?? undefined,
       role: m.role as MemberRole,
       sex: (m.sex as "M" | "F" | null) ?? undefined,
       ageBand: m.ageBand ?? undefined,
       activity: m.activity as Activity,
       allergies: (m.allergies as Allergen[]) ?? [],
+      habits: m.habits ?? [],
+      conditions: m.conditions ?? [],
+      dislikes: m.dislikes ?? [],
       healthProfile: (m.healthProfile as unknown as HealthProfile) ?? undefined,
+      states: m.states.map((s) => ({
+        id: s.id,
+        kind: s.kind as MemberState["kind"],
+        value: s.value,
+        validFrom: s.validFrom.toISOString(),
+        validUntil: s.validUntil ? s.validUntil.toISOString() : undefined,
+      })),
     })),
   };
   return {
@@ -260,4 +271,61 @@ export async function saveMemberAllergies(memberId: string, allergies: Allergen[
   const db = getDb();
   const householdId = await currentHouseholdId();
   await db.member.updateMany({ where: { id: memberId, householdId }, data: { allergies } });
+}
+
+// ─── "Không gian gia đình sống" — Member base-layer CRUD + dynamic states ───
+type MemberBase = Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes">;
+
+/** Create or update a member's BASE layer. Scoped to the current household. */
+export async function saveMember(input: MemberBase & { id?: string }): Promise<string> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  const data = {
+    name: input.name ?? null,
+    role: input.role,
+    sex: input.sex ?? null,
+    ageBand: input.ageBand ?? null,
+    allergies: input.allergies ?? [],
+    habits: input.habits ?? [],
+    conditions: input.conditions ?? [],
+    dislikes: input.dislikes ?? [],
+  };
+  if (input.id) {
+    await db.member.updateMany({ where: { id: input.id, householdId }, data });
+    return input.id;
+  }
+  const created = await db.member.create({ data: { householdId, activity: "moderate", ...data } });
+  return created.id;
+}
+
+/** Remove a member (and, via cascade, their states). Scoped to the household. */
+export async function deleteMember(memberId: string): Promise<void> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  await db.member.deleteMany({ where: { id: memberId, householdId } });
+}
+
+/** Add a dynamic state to a member. `validUntil` (ISO) makes it self-expire; a
+ *  day-scoped state simply stops mattering after. Ownership checked via the join. */
+export async function addMemberState(memberId: string, state: Omit<MemberState, "id">): Promise<void> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  const owned = await db.member.findFirst({ where: { id: memberId, householdId }, select: { id: true } });
+  if (!owned) return;
+  await db.memberState.create({
+    data: {
+      memberId,
+      kind: state.kind,
+      value: state.value,
+      validFrom: new Date(state.validFrom),
+      validUntil: state.validUntil ? new Date(state.validUntil) : null,
+    },
+  });
+}
+
+/** Remove a dynamic state early (e.g. "khỏi rồi"). Scoped to the household. */
+export async function deleteMemberState(stateId: string): Promise<void> {
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  await db.memberState.deleteMany({ where: { id: stateId, member: { householdId } } });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen, MemberState, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord } from "@/domain/types";
 import { splitOrders, type OrderSplit } from "@/domain/order";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -42,6 +42,8 @@ interface StoreValue {
   updateHousehold: (patch: Partial<Household>) => void;
   updateMemberHealthProfile: (memberId: string, profile: HealthProfile | null) => void;
   updateMemberAllergies: (memberId: string, allergies: Allergen[]) => void;
+  addMemberState: (memberId: string, state: Omit<MemberState, "id">) => void;
+  removeMemberState: (memberId: string, stateId: string) => void;
   // UI-3/5: favorites + fork (B1)
   isFavorite: (id: string) => boolean;
   toggleFavorite: (id: string) => void;
@@ -240,6 +242,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     import("@/app/actions").then(({ persistMemberAllergies }) => persistMemberAllergies(memberId, allergies)).catch(() => toast(SAVE_FAIL_MSG, "error"));
   }, []);
 
+  // ── "Không gian gia đình sống" — dynamic per-member states (self-expiring) ──
+  const addMemberState = useCallback((memberId: string, state: Omit<MemberState, "id">) => {
+    touched.current.household = true;
+    const tempId = `tmp-${Date.now()}`;
+    setHousehold((h) => ({
+      ...h,
+      members: h.members.map((m) => (m.id === memberId ? { ...m, states: [...(m.states ?? []), { ...state, id: tempId }] } : m)),
+    }));
+    import("@/app/actions").then(({ persistMemberState }) => persistMemberState(memberId, state)).catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+
+  const removeMemberState = useCallback((memberId: string, stateId: string) => {
+    touched.current.household = true;
+    setHousehold((h) => ({
+      ...h,
+      members: h.members.map((m) => (m.id === memberId ? { ...m, states: (m.states ?? []).filter((s) => s.id !== stateId) } : m)),
+    }));
+    if (stateId.startsWith("tmp-")) return; // never persisted
+    import("@/app/actions").then(({ removeMemberState }) => removeMemberState(stateId)).catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+
   const addNote = useCallback((text: string) => {
     const t = text.trim();
     if (!t) return;
@@ -415,6 +438,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     updateHousehold,
     updateMemberHealthProfile,
     updateMemberAllergies,
+    addMemberState,
+    removeMemberState,
     isFavorite,
     toggleFavorite,
     favoriteDishes,

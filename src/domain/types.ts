@@ -122,16 +122,46 @@ export interface Dish {
   isFavorite?: boolean;
 }
 
+// ─── "Không gian gia đình sống" (Phase: family space) ───
+// A member has TWO layers: a static BASE (declared once, edited rarely) and a
+// dynamic STATE layer that OVERRIDES the base while in effect and SELF-EXPIRES —
+// "hôm nay ốm" carries a valid_until and simply stops mattering after, so no
+// transient mood ever becomes a permanent label stuck on a person.
+export type MemberStateKind = "illness" | "mood" | "context";
+
+export interface MemberState {
+  id: string;
+  kind: MemberStateKind;
+  /** Free value within the kind, e.g. "sốt" / "mệt" / "thi cử". App-internal;
+   *  the UI shows warm phrasing, never the raw enum. */
+  value: string;
+  /** ISO dates. valid_until omitted = open-ended (rare; most states are a day). */
+  validFrom: string;
+  validUntil?: string;
+}
+
 export interface Member {
   id: string;
+  /** Warm display name ("Bố", "Bé Na"). */
+  name?: string;
   role: MemberRole;
   sex?: "M" | "F";
   ageBand?: string;
   activity: Activity;
-  /** Allergens this member must avoid (dinner is shared → household-wide effect). */
+  // ── BASE layer (static) ──
+  /** Allergens this member must avoid — the HARD-SAFETY tier (dinner is shared →
+   *  household-wide effect). Never soft-penalised; see domain/family. */
   allergies?: Allergen[];
+  /** Everyday eating habits ("ăn chay thứ 2", "ít cay"). Free tags. */
+  habits?: string[];
+  /** Standing conditions ("tiểu đường") — the MEDICAL tier (execute-not-prescribe). */
+  conditions?: string[];
+  /** Dishes/ingredients disliked — the PREFERENCE tier (soft-avoid, never banned). */
+  dislikes?: string[];
   /** Life-stage / health profile (T1: pregnancy & postpartum, wellness mode). */
   healthProfile?: HealthProfile;
+  // ── STATE layer (dynamic, self-expiring) ──
+  states?: MemberState[];
 }
 
 export interface Household {

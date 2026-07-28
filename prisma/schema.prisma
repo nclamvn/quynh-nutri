@@ -227,12 +227,31 @@ model Member {
   id          String     @id @default(cuid())
   householdId String
   household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String?
   role        MemberRole
   sex         String?
   ageBand     String?
   activity    Activity   @default(moderate)
-  allergies   String[] // shellfish, fish, egg, …
+  // ── BASE layer (static) ──
+  allergies   String[] // shellfish, fish, egg, … — HARD-SAFETY tier
+  habits      String[] // everyday eating habits
+  conditions  String[] // standing conditions — MEDICAL tier (execute-not-prescribe)
+  dislikes    String[] // disliked dishes/ingredients — PREFERENCE tier
   healthProfile Json?    // { lifeStage, mode } — T1 special diets (wellness only)
+  // ── STATE layer (dynamic, self-expiring) ──
+  states      MemberState[]
+}
+
+// Dynamic state that overrides the base while in effect, then SELF-EXPIRES via
+// validUntil — no transient "hôm nay ốm" ever becomes a permanent label.
+model MemberState {
+  id         String    @id @default(cuid())
+  memberId   String
+  member     Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  kind       String    // illness | mood | context
+  value      String
+  validFrom  DateTime  @default(now())
+  validUntil DateTime?
 }
 
 // ─── Planning ────────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
 import { HealthProfileSheet } from "@/ui/components/HealthProfileSheet";
 import { HealthDisclaimer } from "@/ui/components/HealthDisclaimer";
+import { FamilySpaceView } from "@/ui/components/FamilySpaceView";
 import type { Member } from "@/domain/types";
 
 const CLINICAL = ["Tiểu đường type 2", "Tăng huyết áp", "Mỡ máu", "Gout", "Bệnh thận"];
@@ -23,9 +24,15 @@ export default function HealthPage() {
     <PageContainer>
       <PageHeader title={t("health.pageTitle")} subtitle={t("health.pageSub")} />
 
+      {/* "Nhà mình hôm nay" — the whole family in one frame + today's states */}
+      <section className="mb-6">
+        <h2 className="mb-2 px-1 text-xs font-medium text-muted">Nhà mình hôm nay</h2>
+        <FamilySpaceView />
+      </section>
+
       {/* Life stage + allergies per member — the discoverable T1 entry */}
       <section className="mb-6">
-        <h2 className="mb-2 px-1 text-xs font-medium text-muted">{t("health.membersTitle")}</h2>
+        <h2 className="mb-2 px-1 text-xs font-medium text-muted">Hồ sơ từng người</h2>
         <ul data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {household.members.map((m, i) => {
             const ls = m.healthProfile?.lifeStage;
