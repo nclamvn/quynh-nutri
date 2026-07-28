@@ -24,6 +24,12 @@ const stage = LANDING_MEDIA.stage;
 const MARQUEE = [
   "pho-bo", "banh-mi", "goi-cuon", "cha-gio", "bun-bo-hue", "bun", "bun-chay",
 ].map((f) => `/landing/marquee/${f}.jpg`);
+// Far layer reuses the same verified dishes, rotated so it never twins the near
+// row. 8 copies each → half the track is wider than any viewport, so the
+// translateX(-50%) loop is seamless. Different speeds per layer = parallax depth.
+const MARQUEE_FAR = [...MARQUEE.slice(3), ...MARQUEE.slice(0, 3)];
+const marqueeImgs = (arr: string[]) =>
+  Array.from({ length: 8 }).flatMap(() => arr);
 
 export default function LandingPage() {
   return (
@@ -47,11 +53,18 @@ export default function LandingPage() {
       {/* HERO */}
       <header className="hero" id="top">
         <div className="hero-bg" style={{ backgroundImage: `url('${hero.src}')` }} />
+        {/* "Bàn tiệc trôi qua" — two parallax layers (far drifts slow + small +
+           soft; near drifts faster, varied sizes, staggered) so it reads as a
+           table being laid, not a conveyor belt. Transform-only motion (GPU). */}
         <div className="hero-marquee" aria-hidden>
-          {/* Repeat enough copies that one half of the track is wider than any
-             viewport → translateX(-50%) loops seamlessly with no gap at wide screens. */}
-          <div className="hero-marquee-track">
-            {Array.from({ length: 8 }).flatMap(() => MARQUEE).map((src, i) => (
+          <div className="mq-layer mq-far">
+            {marqueeImgs(MARQUEE_FAR).map((src, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={i} src={src} alt="" loading="lazy" />
+            ))}
+          </div>
+          <div className="mq-layer mq-near">
+            {marqueeImgs(MARQUEE).map((src, i) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img key={i} src={src} alt="" loading="lazy" />
             ))}
