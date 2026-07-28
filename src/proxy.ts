@@ -23,6 +23,12 @@ export default clerkMiddleware(async (auth, req) => {
   // on a deployed domain. A redirect lets the sign-in page bootstrap the dev browser.
   const { userId, redirectToSignIn } = await auth();
   if (!userId) return redirectToSignIn();
+}, {
+  // Send signed-out users to the app's OWN /sign-in (same origin), NOT Clerk's
+  // Account Portal (accounts.anngon.io): the cross-origin RSC redirect from
+  // anngon.io was blocked by CORS. The app renders <SignIn/> inline at /sign-in.
+  signInUrl: "/sign-in",
+  signUpUrl: "/sign-up",
 });
 
 export const config = {
