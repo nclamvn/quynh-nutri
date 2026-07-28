@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LANDING_MEDIA } from "@/data/landing-media";
+import { Manifesto } from "@/ui/marketing/Manifesto";
+import { Memory } from "@/ui/marketing/Memory";
 import { DataTruth } from "@/ui/marketing/DataTruth";
 import "@/ui/marketing/landing.css";
 
@@ -78,24 +80,8 @@ export default function LandingPage() {
         <span>XOAY MÓN THÔNG MINH</span><b>✦</b><span>ĐỊNH LƯỢNG CÓ NGUỒN</span><b>✦</b><span>ĐI CHỢ MỘT LẦN, DÙNG CẢ TUẦN</span><b>✦</b><span>KHÔNG PHÁN SỐ CHÍNH XÁC GIẢ</span><b>✦</b>
       </div></div>
 
-      {/* MANIFESTO */}
-      <section className="manifesto" id="philosophy">
-        <div className="section-label"><span className="round-no">02</span>Quan điểm thiết kế</div>
-        <div>
-          <p className="manifesto-lead">Không phải thêm một app đếm calo.</p>
-          <h2 className="display">Chúng tôi thiết kế<em>một tuần có thể sống được.</em></h2>
-          <div className="manifesto-foot">
-            <p>Bữa cơm nhà bắt đầu từ câu hỏi giản dị hơn: tuần này gia đình có bao nhiêu thời gian, ai cần ăn gì và làm sao để người nấu không phải suy nghĩ lại từ đầu mỗi chiều.</p>
-            <span className="seal">
-              <svg className="seal-ring" viewBox="0 0 120 120" aria-hidden="true">
-                <defs><path id="sealPath" d="M60,20 a40,40 0 1,1 -0.01,0" fill="none" /></defs>
-                <text><textPath href="#sealPath" startOffset="0" textLength="251" lengthAdjust="spacing">PLAN · COOK · REMEMBER · REPEAT ·</textPath></text>
-              </svg>
-              <b>Q</b>
-            </span>
-          </div>
-        </div>
-      </section>
+      {/* MANIFESTO — enriched (client island for reveal) */}
+      <Manifesto />
 
       {/* PRODUCT STAGE */}
       <section className="stage" id="product">
@@ -126,18 +112,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* MEMORY */}
-      <section className="memory" id="memory">
-        <div className="memory-head">
-          <div className="section-label"><span className="round-no">03</span>Trí nhớ gia đình</div>
-          <h2 className="display">Một hệ thống&nbsp;biết<em>nhà mình là ai.</em></h2>
-        </div>
-        <div className="memory-rows">
-          <article className="memory-row"><span className="num">01</span><h3>Nhớ khẩu vị</h3><p>Món cả nhà thích, món con không ăn, phần của từng người và những lần đổi món đều trở thành trí nhớ dùng được.</p><span>↗</span></article>
-          <article className="memory-row"><span className="num">02</span><h3>Hiểu nhịp tuần</h3><p>Ngày bận thì nấu gọn. Cuối tuần thì thong thả. Kế hoạch được xây quanh đời sống, không bắt đời sống chạy theo thực đơn.</p><span>↗</span></article>
-          <article className="memory-row"><span className="num">03</span><h3>Nói thật về dữ liệu</h3><p>Mỗi con số dinh dưỡng tự khai độ chắc. Thiếu dữ liệu được nói là thiếu, thay vì biến ước lượng thành một lời khẳng định đẹp mắt.</p><span>↗</span></article>
-        </div>
-      </section>
+      {/* MEMORY — enriched (client island for reveal) */}
+      <Memory />
 
       {/* DATA TRUTH – cinematic (client island for scroll reveal) */}
       <DataTruth />
