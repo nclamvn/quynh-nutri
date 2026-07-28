@@ -8,6 +8,14 @@
 @keyframes lp-ping { 70% { box-shadow: 0 0 0 10px transparent; } }
 @keyframes lp-rail { 0%, 100% { transform: scaleX(0.35); opacity: 0.35; } 50% { transform: scaleX(1); opacity: 1; } }
 @keyframes lp-spin { to { transform: rotate(360deg); } }
+/* Step 1 data-truth: sequential reveal + the one-time "confidence grows" demo
+   (gray → honey → green). Frozen to the final (green) state under reduced-motion. */
+@keyframes lp-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes lp-confidence {
+  0%   { color: #8f878c; border-color: rgba(143, 135, 140, 0.45); box-shadow: none; }
+  42%  { color: #e6b75e; border-color: rgba(230, 183, 94, 0.55); box-shadow: 0 0 18px rgba(230, 183, 94, 0.28); }
+  100% { color: #73c79d; border-color: rgba(115, 199, 157, 0.6);  box-shadow: 0 0 24px rgba(115, 199, 157, 0.34); }
+}
 
 .lp {
   --ink: #171214;
@@ -179,31 +187,47 @@
   .memory-row p { margin: 0; max-width: 39rem; line-height: 1.55; color: rgba(255, 250, 244, 0.64); }
   .memory-row:hover p { color: white; }
 
-  /* truth */
-  .truth { padding: clamp(6rem, 10vw, 10rem) 4vw 4vw; background: var(--ivory); }
-  .truth-top { display: flex; justify-content: space-between; padding-bottom: 1rem; border-bottom: 1px solid var(--line); font-size: 0.55rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(23, 18, 20, 0.52); }
-  .truth-grid { display: grid; grid-template-columns: 1.6fr 0.7fr; align-items: end; gap: 6vw; padding: 5.5rem 0 4.8rem; }
-  .truth-grid .display { font-size: clamp(3.6rem, 7vw, 7.3rem); }
-  .truth-grid .display em { color: var(--wine); }
-  .truth-grid > p { margin: 0; line-height: 1.72; color: var(--muted); }
-  .trust { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
-  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 1.1rem; padding: 1.8rem 1.4rem; border-right: 1px solid var(--line); }
+  /* truth — CINEMATIC (Step 1). A deep-charcoal room between the cream sections:
+     you scroll from light INTO the dark, where the numbers glow like lamps.
+     "Certainty = brightness" — ≥85% glows green, 60–85% glows honey, <60% does NOT
+     glow (unsure earns no light). Semantic colours stay inviolable: green/honey/gray,
+     NEVER red; rose is brand only. Glow is restrained (a lamp, not a game sign). */
+  --data-ok: #73c79d;   /* dark-bg tints of the app semantics */
+  --data-mid: #e6b75e;
+  --data-low: #8f878c;
+  .truth { padding: clamp(6rem, 10vw, 10rem) 4vw clamp(3rem, 6vw, 5rem); background: var(--ink); color: var(--ivory); }
+  .truth-top { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.14); font-size: 0.55rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 250, 244, 0.45); }
+  .truth-grid { display: grid; grid-template-columns: 1.6fr 0.8fr; align-items: end; gap: 6vw; padding: 5rem 0 4.5rem; }
+  .truth-grid .display { font-size: clamp(3.4rem, 6.6vw, 7rem); }
+  .truth-grid .display em { color: var(--landing-display-rose); }
+  .truth-grid > p { margin: 0; line-height: 1.72; color: rgba(255, 250, 244, 0.62); }
+  /* demo chip — morphs gray→honey→green once on view: watch confidence grow. */
+  .confidence { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+  .confidence small { font-size: 0.62rem; line-height: 1.5; color: rgba(255, 250, 244, 0.5); }
+  .conf-chip { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.9rem; border-radius: 999px; border: 1px solid var(--data-low); color: var(--data-low); font-size: 0.9rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+  .conf-chip .tier-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
+  .truth.in-view .conf-chip { animation: lp-confidence 2.6s var(--ease-standard) both; }
+
+  .trust { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(255, 255, 255, 0.14); }
+  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 1.15rem; padding: 2.2rem 1.4rem; border-right: 1px solid rgba(255, 255, 255, 0.1); opacity: 1; }
   .trust article:last-child { border-right: 0; }
-  /* B2 — ProvenanceChip made visible: the number changes SHAPE with certainty, in the
-     tier colour (green/honey/gray, never red). Show-don't-tell of the D3 thesis. */
-  .tier-chip { display: inline-flex; align-items: center; gap: 0.5rem; align-self: flex-start; padding: 0.5rem 0.8rem; border-radius: 999px; border: 1px solid; font-size: 0.86rem; font-weight: 750; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .tier-chip .tier-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
-  .tier-chip .cov { font-size: 0.66rem; font-weight: 800; opacity: 0.85; }
-  .tier-ok { color: var(--tier-ok); border-color: color-mix(in srgb, var(--tier-ok) 45%, transparent); background: color-mix(in srgb, var(--tier-ok) 9%, transparent); }
-  .tier-mid { color: var(--tier-mid); border-color: color-mix(in srgb, var(--tier-mid) 45%, transparent); background: color-mix(in srgb, var(--tier-mid) 9%, transparent); }
-  .tier-low { color: var(--tier-low); border-color: color-mix(in srgb, var(--tier-low) 45%, transparent); background: color-mix(in srgb, var(--tier-low) 10%, transparent); }
-  .trust small { font-size: 0.58rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(23, 18, 20, 0.52); }
-  .trust h3 { margin: 0.35rem 0 0.5rem; font: italic 400 clamp(1.6rem, 2.6vw, 2.4rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ink); }
-  .trust p { margin: 0; font-size: 0.82rem; line-height: 1.5; font-weight: 500; color: var(--muted); }
-  .tier-demo { margin: 1.4rem 0 0; font-size: 0.7rem; color: rgba(23, 18, 20, 0.5); }
-  .ribbon { display: flex; align-items: center; gap: 1rem; padding-top: 2rem; font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; }
-  .ribbon i { flex: 1; height: 1px; background: var(--line); }
-  .ribbon strong { color: var(--wine); }
+  .truth.in-view .trust article { animation: lp-rise 0.65s var(--ease-emphasized) both; animation-delay: calc(var(--i, 0) * 110ms); }
+
+  .tier-chip { display: inline-flex; align-items: center; gap: 0.55rem; align-self: flex-start; padding: 0.6rem 0.95rem; border-radius: 999px; border: 1px solid; font-size: 1.02rem; font-weight: 780; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tier-chip .tier-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+  .tier-chip .cov { font-size: 0.72rem; font-weight: 800; opacity: 0.9; }
+  /* glow = certainty. Low tier gets NO glow, dimmer — that dimness IS the statement. */
+  .tier-ok  { color: var(--data-ok);  border-color: color-mix(in srgb, var(--data-ok) 55%, transparent);  background: color-mix(in srgb, var(--data-ok) 14%, transparent);  box-shadow: 0 0 26px color-mix(in srgb, var(--data-ok) 32%, transparent), inset 0 0 14px color-mix(in srgb, var(--data-ok) 12%, transparent); }
+  .tier-mid { color: var(--data-mid); border-color: color-mix(in srgb, var(--data-mid) 52%, transparent); background: color-mix(in srgb, var(--data-mid) 12%, transparent); box-shadow: 0 0 20px color-mix(in srgb, var(--data-mid) 26%, transparent); }
+  .tier-low { color: var(--data-low); border-color: color-mix(in srgb, var(--data-low) 40%, transparent); background: transparent; opacity: 0.82; }
+  .tier-low .tier-dot { box-shadow: none; }
+  .trust small { font-size: 0.6rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
+  .trust h3 { margin: 0.4rem 0 0.5rem; font: italic 400 clamp(1.7rem, 2.6vw, 2.5rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ivory); }
+  .trust p { margin: 0; font-size: 0.84rem; line-height: 1.5; font-weight: 500; color: rgba(255, 250, 244, 0.6); }
+  .tier-demo { margin: 1.6rem 0 0; font-size: 0.72rem; color: rgba(255, 250, 244, 0.42); }
+  .ribbon { display: flex; align-items: center; gap: 1rem; padding-top: 2.4rem; font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
+  .ribbon i { flex: 1; height: 1px; background: rgba(255, 255, 255, 0.14); }
+  .ribbon strong { color: var(--landing-display-rose); }
 
   /* quote */
   .quote { position: relative; padding: clamp(7rem, 13vw, 14rem) 8vw; background: var(--rose); color: white; text-align: center; overflow: hidden; }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LANDING_MEDIA } from "@/data/landing-media";
+import { DataTruth } from "@/ui/marketing/DataTruth";
 import "@/ui/marketing/landing.css";
 
 // Public editorial landing (blueprint §5 order LOCKED), ported from the owner's
@@ -136,30 +137,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* DATA TRUTH */}
-      <section className="truth" id="data">
-        <div className="truth-top"><span>04 / Provenance as a product feature</span><span>Không trang trí bằng sự chắc chắn giả</span></div>
-        <div className="truth-grid">
-          <div><p className="manifesto-lead">Dữ liệu biết tự nghi ngờ</p><h2 className="display">Con số nào cũng phải biết<em>mình chắc đến đâu.</em></h2></div>
-          <p>Thay vì dán một con số đẹp lên món ăn, Bữa cơm nhà đo độ phủ theo khối lượng nguyên liệu đã được đối chiếu. Giao diện thay đổi theo mức tin cậy để người dùng nhìn thấy cả kết quả lẫn giới hạn.</p>
-        </div>
-        <div className="trust">
-          <article>
-            <span className="tier-chip tier-ok"><b>520 kcal</b><i className="tier-dot" /><span className="cov">92%</span></span>
-            <div><small>Đã đối chiếu</small><h3>Hiện số</h3><p>Độ phủ từ 85% — hiện đúng con số kèm độ phủ.</p></div>
-          </article>
-          <article>
-            <span className="tier-chip tier-mid"><b>~520 kcal</b><i className="tier-dot" /><span className="cov">72%</span></span>
-            <div><small>Còn dao động</small><h3>Neo trong khoảng</h3><p>60–85% — số neo, không giả vờ chính xác.</p></div>
-          </article>
-          <article>
-            <span className="tier-chip tier-low"><b>500–580</b><i className="tier-dot" /><span className="cov">45%</span></span>
-            <div><small>Chưa đủ chắc</small><h3>Chỉ hiện khoảng</h3><p>Dưới 60% — không đưa ra một con số đơn lẻ.</p></div>
-          </article>
-        </div>
-        <p className="tier-demo">Số minh hoạ — trong app, con số đổi hình theo độ phủ dữ liệu thật.</p>
-        <div className="ribbon"><span>corroborated</span><i /><span>anchored range</span><i /><span>honest estimate</span><i /><strong>single source of truth</strong></div>
-      </section>
+      {/* DATA TRUTH — cinematic (client island for scroll reveal) */}
+      <DataTruth />
 
       {/* QUOTE */}
       <section className="quote">
