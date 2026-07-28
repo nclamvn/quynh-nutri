@@ -15,6 +15,12 @@ export const metadata: Metadata = {
 const hero = LANDING_MEDIA.hero;
 const stage = LANDING_MEDIA.stage;
 
+// Self-hosted Vietnamese-dish squares for the hero marquee (credits in
+// public/landing/marquee/CREDITS.md). Decorative — visualises "49 món nền".
+const MARQUEE = [
+  "pho-bo", "banh-mi", "goi-cuon", "cha-gio", "bun-bo-hue", "bun", "bun-chay",
+].map((f) => `/landing/marquee/${f}.jpg`);
+
 export default function LandingPage() {
   return (
     <main className="lp">
@@ -37,8 +43,15 @@ export default function LandingPage() {
       {/* HERO */}
       <header className="hero" id="top">
         <div className="hero-bg" style={{ backgroundImage: `url('${hero.src}')` }} />
+        <div className="hero-marquee" aria-hidden>
+          <div className="hero-marquee-track">
+            {[...MARQUEE, ...MARQUEE].map((src, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={i} src={src} alt="" loading="lazy" />
+            ))}
+          </div>
+        </div>
         <div className="proof"><b>92</b><span>% độ phủ<small>dữ liệu có căn cứ</small></span></div>
-        <div className="media-meta"><span>Family table / 19:12</span><span>Hồ sơ nhà Quỳnh</span></div>
         <a className="hero-credit" href={hero.sourceUrl} target="_blank" rel="noopener">Ảnh: {hero.author} / Unsplash ↗</a>
         <div className="media-caption"><i className="dot" />Kế hoạch đang thích nghi theo tuần này</div>
         <div className="rail"><span>SCROLL TO SET THE TABLE</span><i /></div>
@@ -114,7 +127,7 @@ export default function LandingPage() {
       <section className="memory" id="memory">
         <div className="memory-head">
           <div className="section-label"><span className="round-no">03</span>Trí nhớ gia đình</div>
-          <h2 className="display">Một hệ thống biết<em>nhà mình là ai.</em></h2>
+          <h2 className="display">Một hệ thống&nbsp;biết<em>nhà mình là ai.</em></h2>
         </div>
         <div className="memory-rows">
           <article className="memory-row"><span className="num">01</span><h3>Nhớ khẩu vị</h3><p>Món cả nhà thích, món con không ăn, phần của từng người và những lần đổi món đều trở thành trí nhớ dùng được.</p><span>↗</span></article>
@@ -131,10 +144,20 @@ export default function LandingPage() {
           <p>Thay vì dán một con số đẹp lên món ăn, Bữa cơm nhà đo độ phủ theo khối lượng nguyên liệu đã được đối chiếu. Giao diện thay đổi theo mức tin cậy để người dùng nhìn thấy cả kết quả lẫn giới hạn.</p>
         </div>
         <div className="trust">
-          <article><span className="n">01</span><div><small>Đã đối chiếu</small><h3>Dùng số</h3></div><p>Độ phủ từ 85%</p></article>
-          <article><span className="n">02</span><div><small>Còn dao động</small><h3>Neo khoảng</h3></div><p>Độ phủ 60–85%</p></article>
-          <article><span className="n">03</span><div><small>Chưa đủ chắc</small><h3>Chỉ hiện khoảng</h3></div><p>Độ phủ dưới 60%</p></article>
+          <article>
+            <span className="tier-chip tier-ok"><b>520 kcal</b><i className="tier-dot" /><span className="cov">92%</span></span>
+            <div><small>Đã đối chiếu</small><h3>Hiện số</h3><p>Độ phủ từ 85% — hiện đúng con số kèm độ phủ.</p></div>
+          </article>
+          <article>
+            <span className="tier-chip tier-mid"><b>~520 kcal</b><i className="tier-dot" /><span className="cov">72%</span></span>
+            <div><small>Còn dao động</small><h3>Neo trong khoảng</h3><p>60–85% — số neo, không giả vờ chính xác.</p></div>
+          </article>
+          <article>
+            <span className="tier-chip tier-low"><b>500–580</b><i className="tier-dot" /><span className="cov">45%</span></span>
+            <div><small>Chưa đủ chắc</small><h3>Chỉ hiện khoảng</h3><p>Dưới 60% — không đưa ra một con số đơn lẻ.</p></div>
+          </article>
         </div>
+        <p className="tier-demo">Số minh hoạ — trong app, con số đổi hình theo độ phủ dữ liệu thật.</p>
         <div className="ribbon"><span>corroborated</span><i /><span>anchored range</span><i /><span>honest estimate</span><i /><strong>single source of truth</strong></div>
       </section>
 

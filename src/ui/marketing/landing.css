@@ -19,6 +19,11 @@
   --line: rgba(23, 18, 20, 0.18);
   --muted: rgba(23, 18, 20, 0.62);
   --serif: var(--font-serif);
+  /* Data-truth tier colours — the app's "one colour one meaning" palette, kept as
+     scoped landing vars so no raw hex scatters. Green/honey/gray, never red. */
+  --tier-ok: #469b75;
+  --tier-mid: #c58a21;
+  --tier-low: #989195;
 
   position: relative;
   overflow: clip;
@@ -29,6 +34,9 @@
   letter-spacing: -0.014em;
 
   a { color: inherit; }
+
+  /* A3 — no orphan: balance every display heading so no line ends with 1 word. */
+  :is(.display, .hero h1, .quote blockquote, .stage-copy h2) { text-wrap: balance; }
 
   .grain-layer {
     position: fixed; inset: 0; z-index: 100; pointer-events: none;
@@ -90,6 +98,15 @@
   .rail { left: 2.2rem; bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; font-size: 0.53rem; letter-spacing: 0.16em; }
   .rail i { width: 3rem; height: 1px; background: currentColor; animation: lp-rail 2.4s ease-in-out infinite; transform-origin: left; }
 
+  /* B1 — dish-photo marquee filling the empty top band of the hero. Absolute (out of
+     flow → never pushes the hook), edge-faded, self-hosted squares. Reuses lp-ticker
+     so the global reduced-motion block freezes it. */
+  .hero-marquee { position: absolute; z-index: 3; top: 5.4rem; left: 0; right: 0; overflow: hidden; pointer-events: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+  .hero-marquee-track { display: flex; gap: 0.7rem; width: max-content; padding: 0 0.35rem; animation: lp-ticker 46s linear infinite; }
+  .hero-marquee img { width: 82px; height: 82px; border-radius: 13px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28); opacity: 0.94; }
+
   /* ticker */
   .ticker { overflow: hidden; background: var(--rose); color: white; border-block: 1px solid rgba(23, 18, 20, 0.25); }
   .ticker-track { display: flex; width: max-content; align-items: center; gap: 1.6rem; padding: 0.73rem 0; font-size: 0.67rem; font-weight: 850; letter-spacing: 0.14em; white-space: nowrap; animation: lp-ticker 30s linear infinite; }
@@ -115,7 +132,7 @@
   /* stage — contained grid: [media (photo + app lodged inside)] [copy].
      No section-wide absolutes, so nothing can collide across the section. */
   .stage { position: relative; padding: clamp(4rem, 8vw, 7rem) 4vw; background: #d8cfc6; overflow: hidden; }
-  .stage:after { content: "WEEK / 01"; position: absolute; z-index: 0; left: -0.04em; bottom: -0.14em; color: rgba(255, 255, 255, 0.28); font-size: clamp(6rem, 17vw, 18rem); font-weight: 900; letter-spacing: -0.1em; line-height: 1; white-space: nowrap; pointer-events: none; }
+  .stage:after { content: "WEEK / 01"; position: absolute; z-index: 0; left: -0.03em; bottom: -0.3em; color: rgba(255, 255, 255, 0.2); font-size: clamp(4.2rem, 12vw, 13rem); font-weight: 900; letter-spacing: -0.1em; line-height: 1; white-space: nowrap; pointer-events: none; }
   .stage-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: center; gap: clamp(2rem, 4vw, 4.5rem); max-width: 1280px; margin: auto; }
   .stage-media { position: relative; width: 100%; }
   .photo { position: relative; width: 100%; aspect-ratio: 5/6; background-size: cover; background-position: 50% 46%; background-repeat: no-repeat; transform: rotate(-2deg); box-shadow: 0 30px 80px rgba(23, 18, 20, 0.2); }
@@ -170,12 +187,20 @@
   .truth-grid .display em { color: var(--wine); }
   .truth-grid > p { margin: 0; line-height: 1.72; color: var(--muted); }
   .trust { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
-  .trust article { min-height: 20rem; display: flex; flex-direction: column; justify-content: space-between; padding: 1.4rem; border-right: 1px solid var(--line); }
-  .trust article:last-child { border: 0; }
-  .trust .n { font: italic 1.2rem var(--serif); color: var(--rose); }
-  .trust small { font-size: 0.55rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(23, 18, 20, 0.52); }
-  .trust h3 { margin: 0.4rem 0 0; font: italic 400 clamp(2rem, 3.6vw, 4rem)/1.08 var(--serif); letter-spacing: -0.05em; }
-  .trust p { margin: 0; font-size: 0.66rem; font-weight: 800; }
+  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 1.1rem; padding: 1.8rem 1.4rem; border-right: 1px solid var(--line); }
+  .trust article:last-child { border-right: 0; }
+  /* B2 — ProvenanceChip made visible: the number changes SHAPE with certainty, in the
+     tier colour (green/honey/gray, never red). Show-don't-tell of the D3 thesis. */
+  .tier-chip { display: inline-flex; align-items: center; gap: 0.5rem; align-self: flex-start; padding: 0.5rem 0.8rem; border-radius: 999px; border: 1px solid; font-size: 0.86rem; font-weight: 750; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tier-chip .tier-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
+  .tier-chip .cov { font-size: 0.66rem; font-weight: 800; opacity: 0.85; }
+  .tier-ok { color: var(--tier-ok); border-color: color-mix(in srgb, var(--tier-ok) 45%, transparent); background: color-mix(in srgb, var(--tier-ok) 9%, transparent); }
+  .tier-mid { color: var(--tier-mid); border-color: color-mix(in srgb, var(--tier-mid) 45%, transparent); background: color-mix(in srgb, var(--tier-mid) 9%, transparent); }
+  .tier-low { color: var(--tier-low); border-color: color-mix(in srgb, var(--tier-low) 45%, transparent); background: color-mix(in srgb, var(--tier-low) 10%, transparent); }
+  .trust small { font-size: 0.58rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(23, 18, 20, 0.52); }
+  .trust h3 { margin: 0.35rem 0 0.5rem; font: italic 400 clamp(1.6rem, 2.6vw, 2.4rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ink); }
+  .trust p { margin: 0; font-size: 0.82rem; line-height: 1.5; font-weight: 500; color: var(--muted); }
+  .tier-demo { margin: 1.4rem 0 0; font-size: 0.7rem; color: rgba(23, 18, 20, 0.5); }
   .ribbon { display: flex; align-items: center; gap: 1rem; padding-top: 2rem; font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; }
   .ribbon i { flex: 1; height: 1px; background: var(--line); }
   .ribbon strong { color: var(--wine); }
