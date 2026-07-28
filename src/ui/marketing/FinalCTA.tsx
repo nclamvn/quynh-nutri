@@ -19,10 +19,11 @@ export function FinalCTA() {
         <img src="/landing/marquee/bun.jpg" alt="" loading="lazy" />
       </figure>
       <div className="final-inner">
-        <p className="final-eyebrow">Tuần mới bắt đầu từ một câu hỏi cũ</p>
-        <h2 className="display final-q">Tối nay<em>ăn gì?</em></h2>
+        <p className="final-eyebrow">Tuần mới, nhẹ đầu hơn</p>
+        <h2 className="display final-q">Tối nay <em>ăn gì?</em></h2>
+        <p className="final-desc">Mình bắt đầu từ đó. Cho Bữa cơm nhà biết số người, khẩu vị và những ngày bạn thường bận – phần còn lại sẽ được sắp thành một tuần rõ ràng, vừa sức và dễ thay đổi.</p>
         <div className="final-actions">
-          <Link className="btn" href="/sign-up">Để Bữa cơm nhà lên tuần đầu tiên <span>↗</span></Link>
+          <Link className="btn" href="/sign-up">Lên thực đơn tuần đầu tiên <span>↗</span></Link>
           <Link href="/sign-in">Tôi đã có tài khoản</Link>
         </div>
       </div>

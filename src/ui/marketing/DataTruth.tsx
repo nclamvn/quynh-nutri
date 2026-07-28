@@ -53,16 +53,17 @@ export function DataTruth() {
 
   return (
     <section ref={ref} className={`truth${inView ? " in-view" : ""}`} id="data">
-      <div className="truth-top"><span>04 / Provenance as a product feature</span><span>Không trang trí bằng sự chắc chắn giả</span></div>
+      <div className="truth-top"><span>05 · Dữ liệu dinh dưỡng</span><span>Minh bạch thay vì chính xác giả</span></div>
 
       <div className="truth-grid">
         <div>
-          <p className="manifesto-lead">Dữ liệu biết tự nghi ngờ</p>
-          <h2 className="display">Con số nào cũng phải biết<em>mình chắc đến đâu.</em></h2>
+          <p className="manifesto-lead">Biết đến đâu, nói rõ đến đó</p>
+          <h2 className="display">Con số nào cũng nói rõ <em>mình chắc đến đâu.</em></h2>
+          <p>Một con số dinh dưỡng chỉ thực sự hữu ích khi bạn biết nó được tính từ đâu và còn bao nhiêu phần chưa chắc chắn.</p>
         </div>
         <div className="confidence">
           {/* demo ring — fills up while morphing xám → xanh, to show "càng nhiều
-              nguyên liệu đối chiếu, con số càng chắc". */}
+              nguyên liệu đối chiếu, mức đối chiếu càng cao". */}
           <div className="gauge gauge-demo tier-ok" style={{ "--cov": 0.9 } as React.CSSProperties}>
             <svg viewBox="0 0 120 120" aria-hidden="true">
               <circle className="g-track" cx="60" cy="60" r="52" pathLength={100} />
@@ -70,27 +71,27 @@ export function DataTruth() {
             </svg>
             <div className="g-mid"><b>540</b><i>kcal</i></div>
           </div>
-          <small>Càng nhiều nguyên liệu được đối chiếu, con số càng chắc – vòng đầy dần và sáng từ xám sang xanh.</small>
+          <small>Càng nhiều nguyên liệu được đối chiếu, mức đối chiếu càng cao – vòng đầy dần và sáng từ xám sang xanh.</small>
         </div>
       </div>
 
       <div className="trust">
         <article style={{ "--i": 0 } as React.CSSProperties}>
           <Gauge tier="ok" cov={92} value="520" unit="kcal" />
-          <div><small>Đã đối chiếu</small><h3>Hiện số</h3><p>Độ phủ từ 85% – hiện đúng con số kèm độ phủ.</p></div>
+          <div><small>Đủ dữ liệu</small><h3>Đã đối chiếu tốt</h3><p>Hiện một giá trị ước tính, kèm mức dữ liệu đã được kiểm tra.</p></div>
         </article>
         <article style={{ "--i": 1 } as React.CSSProperties}>
-          <Gauge tier="mid" cov={72} value="~520" unit="kcal" />
-          <div><small>Còn dao động</small><h3>Neo trong khoảng</h3><p>60–85% – số neo, không giả vờ chính xác.</p></div>
+          <Gauge tier="mid" cov={72} value="500–550" />
+          <div><small>Còn sai số</small><h3>Còn một phần chưa chắc</h3><p>Hiện một khoảng hợp lý, thay vì tạo cảm giác chính xác tuyệt đối.</p></div>
         </article>
         <article style={{ "--i": 2 } as React.CSSProperties}>
-          <Gauge tier="low" cov={45} value="500–580" />
-          <div><small>Chưa đủ chắc</small><h3>Chỉ hiện khoảng</h3><p>Dưới 60% – không đưa ra một con số đơn lẻ.</p></div>
+          <Gauge tier="low" cov={45} value="480–580" />
+          <div><small>Thiếu dữ liệu</small><h3>Chưa đủ căn cứ</h3><p>Chỉ hiện một khoảng rộng, hoặc báo chưa đủ dữ liệu để kết luận.</p></div>
         </article>
       </div>
 
-      <p className="tier-demo">Số minh hoạ – trong app, vòng độ phủ đổi theo dữ liệu thật của từng món.</p>
-      <div className="ribbon"><span>corroborated</span><i /><span>anchored range</span><i /><span>honest estimate</span><i /><strong>single source of truth</strong></div>
+      <p className="tier-demo">Các con số trên chỉ để minh hoạ. Trong ứng dụng, mức đối chiếu thay đổi theo dữ liệu thực tế của từng món và nguyên liệu.</p>
+      <div className="ribbon"><span>đã đối chiếu</span><i /><span>còn sai số</span><i /><span>chưa đủ dữ liệu</span><i /><strong>nói thật độ chắc</strong></div>
     </section>
   );
 }

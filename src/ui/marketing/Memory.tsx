@@ -4,9 +4,9 @@ import { Blossom } from "@/ui/components/Blossom";
 import { useInView } from "./useInView";
 
 const ROWS = [
-  { n: "01", title: "Nhớ khẩu vị", desc: "Món cả nhà thích, món con không ăn, phần của từng người và những lần đổi món đều trở thành trí nhớ dùng được." },
-  { n: "02", title: "Hiểu nhịp tuần", desc: "Ngày bận thì nấu gọn. Cuối tuần thì thong thả. Kế hoạch được xây quanh đời sống, không bắt đời sống chạy theo thực đơn." },
-  { n: "03", title: "Nói thật về dữ liệu", desc: "Mỗi con số dinh dưỡng tự khai độ chắc. Thiếu dữ liệu được nói là thiếu, thay vì biến ước lượng thành một lời khẳng định đẹp mắt." },
+  { n: "01", title: "Nhớ điều cả nhà thích", desc: "Món bố thích, món con không ăn, khẩu phần của từng người và những lần đổi món đều được ghi nhớ cho tuần sau." },
+  { n: "02", title: "Biết ngày nào nên nấu gọn", desc: "Ngày bận thì ưu tiên món nhanh. Cuối tuần có thể dành chỗ cho một bữa cầu kỳ và thong thả hơn." },
+  { n: "03", title: "Thành thật về dữ liệu", desc: "Dữ liệu đủ đến đâu, sản phẩm nói rõ đến đó. Ước lượng vẫn là ước lượng, không được trình bày như một con số tuyệt đối." },
 ];
 
 // Enriched (owner: 03 was too plain) — a low-opacity botanical line-art + a small
@@ -19,13 +19,13 @@ export function Memory() {
       <Blossom variant="line" size={280} className="memory-bloom" />
       <div className="memory-head">
         <div className="memory-head-side">
-          <div className="section-label"><span className="round-no">03</span>Trí nhớ gia đình</div>
+          <div className="section-label"><span className="round-no">03</span>Càng dùng càng giống nhà mình</div>
           <figure className="memory-photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/landing/marquee/goi-cuon.jpg" alt="" loading="lazy" />
           </figure>
         </div>
-        <h2 className="display">Một hệ thống&nbsp;biết<em>nhà mình là ai.</em></h2>
+        <h2 className="display">Không chỉ nhớ món. <em>Nhớ cả cách gia đình mình sống.</em></h2>
       </div>
       <div className="memory-rows">
         {ROWS.map((r, i) => (
