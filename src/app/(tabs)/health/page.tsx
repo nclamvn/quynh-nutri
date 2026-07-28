@@ -15,10 +15,9 @@ export default function HealthPage() {
     <PageContainer>
       <PageHeader title={t("health.pageTitle")} subtitle={t("health.pageSub")} />
 
-      {/* "Nhà mình" — declare the family + see the whole household in one frame
-          (add / edit / remove members, allergies, today's states). */}
+      {/* Declare the family + see the whole household in one frame (add / edit /
+          remove members, allergies, today's states). */}
       <section className="mb-6">
-        <h2 className="mb-2 px-1 text-xs font-medium text-muted">Nhà mình</h2>
         <FamilySpaceView />
       </section>
 

@@ -15,12 +15,12 @@ export const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
     group: "group.main",
     items: [
       { href: "/overview", key: "nav.overview", icon: OverviewIcon },
+      { href: "/health", key: "nav.health", icon: HealthIcon },
       { href: "/week", key: "nav.week", icon: CalendarIcon },
       { href: "/shopping", key: "nav.shopping", icon: BasketIcon },
       { href: "/suppliers", key: "nav.suppliers", icon: StoreIcon },
       { href: "/dishes", key: "nav.dishes", icon: BowlIcon },
       { href: "/nutrition", key: "nav.nutrition", icon: ChartIcon },
-      { href: "/health", key: "nav.health", icon: HealthIcon },
     ],
   },
   {
