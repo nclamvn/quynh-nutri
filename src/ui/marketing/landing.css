@@ -112,7 +112,7 @@
   .hero-marquee { position: absolute; z-index: 3; top: 5.4rem; left: 0; right: 0; overflow: hidden; pointer-events: none;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
             mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
-  .hero-marquee-track { display: flex; gap: 0.7rem; width: max-content; padding: 0 0.35rem; animation: lp-ticker 46s linear infinite; }
+  .hero-marquee-track { display: flex; gap: 0.7rem; width: max-content; padding: 0 0.35rem; animation: lp-ticker 55s linear infinite; will-change: transform; }
   .hero-marquee img { width: 82px; height: 82px; border-radius: 13px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28); opacity: 0.94; }
 
   /* ticker */

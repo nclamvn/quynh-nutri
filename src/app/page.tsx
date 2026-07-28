@@ -45,8 +45,10 @@ export default function LandingPage() {
       <header className="hero" id="top">
         <div className="hero-bg" style={{ backgroundImage: `url('${hero.src}')` }} />
         <div className="hero-marquee" aria-hidden>
+          {/* Repeat enough copies that one half of the track is wider than any
+             viewport → translateX(-50%) loops seamlessly with no gap at wide screens. */}
           <div className="hero-marquee-track">
-            {[...MARQUEE, ...MARQUEE].map((src, i) => (
+            {Array.from({ length: 8 }).flatMap(() => MARQUEE).map((src, i) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img key={i} src={src} alt="" loading="lazy" />
             ))}
