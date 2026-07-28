@@ -12,9 +12,9 @@
    (gray → honey → green). Frozen to the final (green) state under reduced-motion. */
 @keyframes lp-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes lp-confidence {
-  0%   { color: #8f878c; border-color: rgba(143, 135, 140, 0.45); box-shadow: none; }
-  42%  { color: #e6b75e; border-color: rgba(230, 183, 94, 0.55); box-shadow: 0 0 18px rgba(230, 183, 94, 0.28); }
-  100% { color: #73c79d; border-color: rgba(115, 199, 157, 0.6);  box-shadow: 0 0 24px rgba(115, 199, 157, 0.34); }
+  0%   { color: #8f878c; border-color: rgba(143, 135, 140, 0.38); box-shadow: none; }
+  42%  { color: #e6b75e; border-color: rgba(230, 183, 94, 0.42); box-shadow: 0 0 11px rgba(230, 183, 94, 0.13); }
+  100% { color: #73c79d; border-color: rgba(115, 199, 157, 0.46); box-shadow: 0 0 15px rgba(115, 199, 157, 0.16); }
 }
 
 .lp {
@@ -242,25 +242,27 @@
   /* demo chip — morphs gray→honey→green once on view: watch confidence grow. */
   .confidence { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
   .confidence small { font-size: 0.62rem; line-height: 1.5; color: rgba(255, 250, 244, 0.5); }
-  .conf-chip { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.9rem; border-radius: 999px; border: 1px solid var(--data-low); color: var(--data-low); font-size: 0.9rem; font-weight: 750; font-variant-numeric: tabular-nums; }
-  .conf-chip .tier-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
   .truth.in-view .conf-chip { animation: lp-confidence 2.6s var(--ease-standard) both; }
 
   .trust { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(255, 255, 255, 0.14); }
-  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 1.15rem; padding: 2.2rem 1.4rem; border-right: 1px solid rgba(255, 255, 255, 0.1); opacity: 1; }
+  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 0.9rem; padding: 2.2rem 1.4rem; border-right: 1px solid rgba(255, 255, 255, 0.1); opacity: 1; }
   .trust article:last-child { border-right: 0; }
   .truth.in-view .trust article { animation: lp-rise 0.65s var(--ease-emphasized) both; animation-delay: calc(var(--i, 0) * 110ms); }
 
-  .tier-chip { display: inline-flex; align-items: center; gap: 0.55rem; align-self: flex-start; padding: 0.6rem 0.95rem; border-radius: 999px; border: 1px solid; font-size: 1.02rem; font-weight: 780; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .tier-chip .tier-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
-  .tier-chip .cov { font-size: 0.72rem; font-weight: 800; opacity: 0.9; }
-  /* glow = certainty. Low tier gets NO glow, dimmer — that dimness IS the statement. */
-  .tier-ok  { color: var(--data-ok);  border-color: color-mix(in srgb, var(--data-ok) 55%, transparent);  background: color-mix(in srgb, var(--data-ok) 14%, transparent);  box-shadow: 0 0 26px color-mix(in srgb, var(--data-ok) 32%, transparent), inset 0 0 14px color-mix(in srgb, var(--data-ok) 12%, transparent); }
-  .tier-mid { color: var(--data-mid); border-color: color-mix(in srgb, var(--data-mid) 52%, transparent); background: color-mix(in srgb, var(--data-mid) 12%, transparent); box-shadow: 0 0 20px color-mix(in srgb, var(--data-mid) 26%, transparent); }
-  .tier-low { color: var(--data-low); border-color: color-mix(in srgb, var(--data-low) 40%, transparent); background: transparent; opacity: 0.82; }
-  .tier-low .tier-dot { box-shadow: none; }
+  /* ONE chip system — every tier is the same box (height, padding, radius, type).
+     Only colour + glow change. Owner fix: no game-sign glow, no size drift. */
+  .conf-chip, .tier-chip { display: inline-flex; align-items: center; gap: 0.5rem; align-self: flex-start; height: 2.15rem; padding: 0 0.85rem; border-radius: 999px; border: 1px solid; font-size: 0.94rem; font-weight: 760; font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1; }
+  .conf-chip { color: var(--data-low); border-color: color-mix(in srgb, var(--data-low) 38%, transparent); }
+  /* refined dot — a quiet indicator, not a bullet; no glow */
+  .tier-dot { width: 0.36rem; height: 0.36rem; border-radius: 50%; background: currentColor; flex: none; }
+  .tier-chip .cov { font-size: 0.72rem; font-weight: 700; opacity: 0.66; }
+  /* glow = certainty, dialled to "a lamp in a dark room" — soft + diffuse, never a
+     neon border. ok subtle · mid softer · low NONE (that dimness IS the statement). */
+  .tier-ok  { color: var(--data-ok);  border-color: color-mix(in srgb, var(--data-ok) 46%, transparent);  background: color-mix(in srgb, var(--data-ok) 11%, transparent);  box-shadow: 0 0 15px color-mix(in srgb, var(--data-ok) 15%, transparent); }
+  .tier-mid { color: var(--data-mid); border-color: color-mix(in srgb, var(--data-mid) 42%, transparent); background: color-mix(in srgb, var(--data-mid) 9%, transparent);  box-shadow: 0 0 11px color-mix(in srgb, var(--data-mid) 10%, transparent); }
+  .tier-low { color: var(--data-low); border-color: color-mix(in srgb, var(--data-low) 36%, transparent); background: transparent; opacity: 0.8; }
   .trust small { font-size: 0.6rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
-  .trust h3 { margin: 0.4rem 0 0.5rem; font: italic 400 clamp(1.7rem, 2.6vw, 2.5rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ivory); }
+  .trust h3 { margin: 0.3rem 0 0.4rem; font: italic 400 clamp(1.7rem, 2.6vw, 2.5rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ivory); }
   .trust p { margin: 0; font-size: 0.84rem; line-height: 1.5; font-weight: 500; color: rgba(255, 250, 244, 0.6); }
   .tier-demo { margin: 1.6rem 0 0; font-size: 0.72rem; color: rgba(255, 250, 244, 0.42); }
   .ribbon { display: flex; align-items: center; gap: 1rem; padding-top: 2.4rem; font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
@@ -280,11 +282,13 @@
   .final { position: relative; overflow: hidden; min-height: 100svh; display: grid; align-content: end; justify-items: start; padding: clamp(6rem, 16vh, 12rem) clamp(1.4rem, 5vw, 5rem) clamp(3.5rem, 9vh, 7rem); background: var(--ink); color: var(--ivory); text-align: left; }
   /* a single clean plated dish floating in the top-right void — the appetite the
      question asks about, made real. Circular crop reads as the plate itself. */
-  .final-dish { position: absolute; z-index: 0; top: calc(min(62vw, 950px) * -0.2); right: calc(min(62vw, 950px) * -0.2); margin: 0; width: min(62vw, 950px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 1px solid rgba(255, 250, 244, 0.1); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55); pointer-events: none; }
+  .final-dish { position: absolute; z-index: 0; top: calc(min(58vw, 880px) * -0.18); right: calc(min(58vw, 880px) * -0.3); margin: 0; width: min(58vw, 880px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 1px solid rgba(255, 250, 244, 0.1); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55); pointer-events: none; }
   .final-dish img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .final.in-view .final-dish { animation: lp-rise 1s 0.2s var(--ease-emphasized) both; }
   .final-inner { position: relative; z-index: 2; width: 100%; max-width: 1500px; }
-  .final-eyebrow { margin: 0 0 clamp(1.4rem, 3vh, 2.6rem); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.17em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
+  /* max-width keeps the eyebrow inside the clean left column so the big top-right
+     dish can never cross it, even on short-wide windows (owner's real-device bug). */
+  .final-eyebrow { max-width: min(28rem, 46%); margin: 0 0 clamp(1.4rem, 3vh, 2.6rem); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.17em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
   /* edge-to-edge scale; generous leading + top padding so stacked VN diacritics
      ("Tối", "ăn", "gì") are never clipped */
   .final-q { max-width: none; font-size: clamp(4rem, 16.5vw, 15rem); line-height: 1.08; letter-spacing: -0.05em; padding-top: 0.08em; }
