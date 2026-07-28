@@ -88,7 +88,9 @@
      that overshoot cap-height and poke into the line above at any tight leading —
      line-height alone can't clear it, so the strong/accent lines carry a margin. */
   .soft { display: block; font: italic 400 0.55em/1.12 var(--serif); letter-spacing: -0.055em; }
-  .strong { display: block; margin-top: 0.14em; text-transform: uppercase; }
+  /* "PHẢI NGHĨ" — serif, refined weight (thanh tao) instead of the heavy blocky
+     sans; sits in the same serif family as the soft + accent lines. */
+  .strong { display: block; margin-top: 0.08em; font-family: var(--serif); font-weight: 500; text-transform: uppercase; letter-spacing: -0.008em; }
   .accent { display: block; margin-top: 0.06em; font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--rose); letter-spacing: -0.066em; }
   .hero-intro { display: grid; grid-template-columns: minmax(18rem, 32rem) auto; align-items: end; gap: 3rem; margin: 2.4rem 0 0 38%; }
   .hero-intro p { margin: 0; font-size: clamp(1rem, 1.3vw, 1.25rem); line-height: 1.55; opacity: 0.86; }
@@ -362,7 +364,7 @@
     .hero-intro { margin: 2rem 0 0; gap: 1.6rem; }
     .actions { align-items: flex-start; flex-direction: column; }
     .btn { width: 100%; }
-    .proof { top: 35%; transform: scale(0.84) rotate(5deg); transform-origin: right; }
+    .proof { top: 40%; transform: scale(0.8) rotate(5deg); transform-origin: right; }
     .media-caption { left: 1.2rem; right: auto; bottom: 1.2rem; }
     .manifesto { padding-inline: 1.2rem; }
     .display { font-size: clamp(3.2rem, 16vw, 5rem); }
@@ -379,9 +381,15 @@
     .memory-row { grid-template-columns: auto 1fr auto; gap: 1rem; }
     .memory-row p { grid-column: 2/4; }
     .truth-top span:last-child { display: none; }
+    /* mobile: the three tiers read as ONE scale — compact horizontal rows (ring
+       left, text right), close together, so all three fit in one glance instead
+       of floating far apart down the page. */
     .trust { grid-template-columns: 1fr; }
-    .trust article { min-height: 15rem; border-right: 0; border-bottom: 1px solid var(--line); }
+    .trust article { min-height: auto; flex-direction: row; align-items: center; gap: 1.3rem; padding: 1.5rem 0.2rem; border-right: 0; border-bottom: 1px solid var(--line); }
     .trust article:last-child { border-bottom: 0; }
+    .trust article .gauge { width: 92px; }
+    .trust article > div { min-width: 0; }
+    .g-mid b { font-size: 1.05rem; }
     .ribbon { flex-wrap: wrap; }
     .quote { padding-inline: 1.2rem; }
     .quote blockquote { font-size: clamp(2.7rem, 13vw, 4.7rem); }

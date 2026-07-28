@@ -15,3 +15,8 @@ commercial use, no permission needed; attribution appreciated (given below).
 
 All 7 photo pages were fetched to confirm the photographer name (no fabricated
 credit). A candidate whose author could not be verified was dropped.
+
+## Final CTA — plated meal
+| File | Photographer | Source | License |
+|---|---|---|---|
+| ../final-meal.jpg | Elvira Syamsir | https://unsplash.com/photos/j3MHdbdG0jQ | Unsplash License |

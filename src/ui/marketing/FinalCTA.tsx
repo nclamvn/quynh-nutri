@@ -16,7 +16,7 @@ export function FinalCTA() {
     <section ref={ref} className={`final${inView ? " in-view" : ""}`} id="cta">
       <figure className="final-dish" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/landing/marquee/bun.jpg" alt="" loading="lazy" />
+        <img src="/landing/final-meal.jpg" alt="" loading="lazy" />
       </figure>
       <div className="final-inner">
         <p className="final-eyebrow">Tuần mới, nhẹ đầu hơn</p>
