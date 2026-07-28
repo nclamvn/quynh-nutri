@@ -9,6 +9,7 @@ import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
 import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
 import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
+import { dishSafety, safetyReason } from "@/domain/constraints";
 import { getHouseholdState, persistState } from "@/app/actions";
 import { toast } from "@/ui/toast";
 
@@ -181,6 +182,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const changeSlot = useCallback(
     (day: number, slot: Slot, dishId: string) => {
+      // P0 SAFETY GATE: never place a dish that trips a household allergen — even
+      // via a direct swap (defence-in-depth beyond optionsFor's filter, fail-closed).
+      const d = resolveDish(dishId, REPERTOIRE, b1) ?? REPERTOIRE_BY_ID[dishId];
+      if (d) {
+        const s = dishSafety(d, household, commodities);
+        if (!s.safe) { toast(safetyReason(s) ?? "Món này không an toàn cho nhà mình — đã bỏ qua.", "error"); return; }
+      }
       editPlan((slots) => {
         const idx = slots.findIndex((s) => s.day === day && s.slot === slot);
         if (idx >= 0) slots[idx] = { ...slots[idx], dishId };
@@ -188,7 +196,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return slots;
       });
     },
-    [editPlan],
+    [editPlan, b1, household],
   );
 
   const toggleLock = useCallback(

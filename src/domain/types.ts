@@ -129,6 +129,19 @@ export interface Dish {
 // transient mood ever becomes a permanent label stuck on a person.
 export type MemberStateKind = "illness" | "mood" | "context";
 
+// Tiered constraint (TIP-B). Derived from a Member — never hardcoded — so the
+// engine solves by rank: hard_safety (allergy) is absolute; the rest are softer.
+export type ConstraintTier = "hard_safety" | "medical" | "preference" | "state";
+export interface Constraint {
+  memberId: string;
+  memberName: string;
+  tier: ConstraintTier;
+  /** The concrete rule value: an allergen / condition / disliked term / state. */
+  rule: string;
+  /** Provenance — a human reason ("dị ứng của bé Na"). Shown on a suggestion. */
+  source: string;
+}
+
 export interface MemberState {
   id: string;
   kind: MemberStateKind;

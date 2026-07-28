@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useStore } from "@/ui/store";
 import { familySpace } from "@/domain/family";
+import { detectConflicts } from "@/domain/constraints";
 import type { Member, MemberState, MemberStateKind } from "@/domain/types";
 
 // "Không gian gia đình sống" — the whole family in ONE frame the cook sees, plus
@@ -37,6 +38,7 @@ export function FamilySpaceView() {
   // Recompute "active" against now on each render — expired states just drop out.
   const now = useMemo(() => new Date().toISOString(), [household.members]);
   const space = useMemo(() => familySpace(household.members, now), [household.members, now]);
+  const conflicts = useMemo(() => detectConflicts(household.members), [household.members]);
   const [openFor, setOpenFor] = useState<string | null>(null);
 
   if (household.members.length === 0) {
@@ -57,7 +59,16 @@ export function FamilySpaceView() {
   const stateLabel = (s: MemberState) => STATE_PRESETS.find((p) => p.value === s.value)?.label ?? s.value;
 
   return (
-    <ul data-stagger className="grid grid-cols-1 gap-3">
+    <>
+      {/* Trade-off — the app doesn't pretend to have a perfect answer; the human
+          decides. Honey/amber, warm, never alarming. */}
+      {conflicts.map((c, i) => (
+        <div key={i} className="mb-3 flex items-start gap-2 rounded-xl border border-amber/25 bg-amber-weak px-3 py-2.5">
+          <span aria-hidden className="mt-0.5 text-amber">◆</span>
+          <p className="text-[12px] leading-relaxed text-amber">{c.note}</p>
+        </div>
+      ))}
+      <ul data-stagger className="grid grid-cols-1 gap-3">
       {space.needs.map((need, i) => {
         const m = household.members.find((x) => x.id === need.memberId)!;
         return (
@@ -132,6 +143,7 @@ export function FamilySpaceView() {
           </li>
         );
       })}
-    </ul>
+      </ul>
+    </>
   );
 }
