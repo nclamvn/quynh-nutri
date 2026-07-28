@@ -258,10 +258,11 @@
      the screen is deliberately empty (the breath). Nothing added beyond eyebrow
      + question + one CTA — the emptiness IS the design. */
   .final { position: relative; overflow: hidden; min-height: 100svh; display: grid; align-content: end; justify-items: start; padding: clamp(6rem, 16vh, 12rem) clamp(1.4rem, 5vw, 5rem) clamp(3.5rem, 9vh, 7rem); background: var(--ink); color: var(--ivory); text-align: left; }
-  /* one quiet ring bleeding off a corner — gives the void depth, not clutter */
-  .halo { position: absolute; z-index: 0; top: -22%; right: -14%; width: min(70vw, 820px); aspect-ratio: 1; border: 1px solid rgba(243, 93, 125, 0.2); border-radius: 50%; box-shadow: 0 0 120px rgba(243, 93, 125, 0.07), inset 0 0 120px rgba(243, 93, 125, 0.04); pointer-events: none; }
-  .halo:before, .halo:after { content: ""; position: absolute; inset: 12%; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 50%; }
-  .halo:after { inset: 27%; border-color: rgba(199, 255, 98, 0.13); }
+  /* a single clean plated dish floating in the top-right void — the appetite the
+     question asks about, made real. Circular crop reads as the plate itself. */
+  .final-dish { position: absolute; z-index: 0; top: clamp(2.5rem, 6vh, 5.5rem); right: clamp(1.5rem, 4vw, 5rem); margin: 0; width: min(33vw, 380px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 1px solid rgba(255, 250, 244, 0.1); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55); pointer-events: none; }
+  .final-dish img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .final.in-view .final-dish { animation: lp-rise 1s 0.2s var(--ease-emphasized) both; }
   .final-inner { position: relative; z-index: 2; width: 100%; max-width: 1500px; }
   .final-eyebrow { margin: 0 0 clamp(1.4rem, 3vh, 2.6rem); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.17em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
   /* edge-to-edge scale; generous leading + top padding so stacked VN diacritics
@@ -340,6 +341,10 @@
     .final-q { font-size: clamp(3.6rem, 22vw, 6.6rem); }
     .final-actions { width: 100%; flex-direction: column; align-items: flex-start; }
     .final-actions .btn { width: 100%; text-align: center; }
+    /* mobile: section dish photos shown FULL width, centered, untilted */
+    .manifesto-photo, .memory-photo { width: 100%; max-width: none; aspect-ratio: 4/3; transform: none; margin-inline: auto; }
+    .manifesto-side, .memory-head-side { align-items: center; text-align: center; }
+    .final-dish { top: clamp(2.5rem, 8vh, 6rem); left: 50%; right: auto; width: min(72vw, 310px); margin-left: calc(min(72vw, 310px) / -2); }
     footer { grid-template-columns: 1fr; align-items: start; padding-inline: 1.2rem; }
     footer > p { order: 3; }
     footer > div:last-child { justify-self: start; }

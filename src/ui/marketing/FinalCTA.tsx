@@ -14,7 +14,10 @@ export function FinalCTA() {
   const { ref, inView } = useInView<HTMLElement>(0.15);
   return (
     <section ref={ref} className={`final${inView ? " in-view" : ""}`} id="cta">
-      <div className="halo" aria-hidden="true" />
+      <figure className="final-dish" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/landing/marquee/bun.jpg" alt="" loading="lazy" />
+      </figure>
       <div className="final-inner">
         <p className="final-eyebrow">Tuần mới bắt đầu từ một câu hỏi cũ</p>
         <h2 className="display final-q">Tối nay<em>ăn gì?</em></h2>
