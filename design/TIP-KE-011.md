@@ -125,4 +125,3 @@ flower/brand lockup is always a real link back to the public landing page.
 - No new UI dependency.
 - Keep the existing landing page art direction.
 - Respect `prefers-reduced-motion` and existing color semantics.
-

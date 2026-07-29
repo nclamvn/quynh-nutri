@@ -122,4 +122,3 @@ hero are explicit Blueprint decisions in TIP-KE-011, not implementation drift.
 The next visual phase, if approved separately, should focus on content-level
 primitives (forms, empty states, table/list density) rather than changing the
 shell again. The shell now provides a stable alignment contract.
-
