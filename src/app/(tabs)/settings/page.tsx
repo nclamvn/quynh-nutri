@@ -30,111 +30,115 @@ export default function SettingsPage() {
     <PageContainer>
       <PageHeader title={t("settings.title")} />
 
-      <div className="max-w-[760px] space-y-5">
-        <Section title={t("settings.secAppearance")}>
-          <Row label={t("settings.language")}>
-            <Segmented options={[["vi", "Tiếng Việt"], ["en", "English"]]} value={lang} onChange={(v) => setLang(v as "vi" | "en")} />
-          </Row>
-          <Row label={t("settings.theme")}>
-            <Segmented
-              options={[["light", t("settings.themeLight")], ["dark", t("settings.themeDark")]]}
-              value={theme}
-              onChange={(v) => setTheme(v as "light" | "dark")}
-            />
-          </Row>
-        </Section>
+      <div data-settings-grid className="grid w-full gap-5 xl:grid-cols-2">
+        <div className="space-y-5">
+          <Section title={t("settings.secAppearance")}>
+            <Row label={t("settings.language")}>
+              <Segmented options={[["vi", "Tiếng Việt"], ["en", "English"]]} value={lang} onChange={(v) => setLang(v as "vi" | "en")} />
+            </Row>
+            <Row label={t("settings.theme")}>
+              <Segmented
+                options={[["light", t("settings.themeLight")], ["dark", t("settings.themeDark")]]}
+                value={theme}
+                onChange={(v) => setTheme(v as "light" | "dark")}
+              />
+            </Row>
+          </Section>
 
-        <Section title={t("settings.secHousehold")}>
-          <Row label={t("settings.size")}>
-            <Stepper value={household.size} onChange={(n) => updateHousehold({ size: Math.max(1, n) })} />
-          </Row>
-          <div>
-            <p className="mb-2 text-sm font-medium">{t("settings.members")}</p>
-            <ul className="space-y-1.5">
-              {household.members.map((m) => {
-                const nm = m.name?.trim() || (m.role === "adult" ? (m.sex === "M" ? "Người lớn (Nam)" : "Người lớn (Nữ)") : `Trẻ ${m.ageBand ?? ""}`);
-                return (
-                  <li key={m.id}>
+          <Section title={t("settings.secRhythm")}>
+            <Row label={t("settings.marketMode")}>
+              <Segmented
+                options={MARKET_MODES.map((m) => [m, m] as [string, string])}
+                value={household.marketMode}
+                onChange={(v) => updateHousehold({ marketMode: v as Household["marketMode"] })}
+              />
+            </Row>
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("settings.busyDays")}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {DAYS.map((d, i) => {
+                  const on = household.busyDays.includes(d);
+                  return (
                     <button
-                      onClick={() => setSubject(m)}
-                      className="flex w-full items-center gap-3 rounded-[12px] border border-hairline bg-surface/40 px-3 py-2 text-left text-sm transition-colors hover:bg-surface"
+                      key={d}
+                      onClick={() => toggleBusy(d)}
+                      className={`control-chip rounded-full border px-3 text-xs ${on ? "border-amber bg-amber-weak text-amber" : "border-hairline text-muted"}`}
                     >
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-weak text-[11px] font-medium text-brand-ink">
-                        {m.role === "adult" ? (m.sex === "M" ? "B" : "M") : "T"}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate">{nm}</span>
-                      {m.allergies && m.allergies.length > 0 && (
-                        <span className="shrink-0 rounded-full bg-amber-weak px-2 py-0.5 text-[10px] text-amber">cần tránh {m.allergies.length}</span>
-                      )}
-                      <span aria-hidden className="shrink-0 text-tertiary">›</span>
+                      {t(`day.${i}`)}
                     </button>
-                  </li>
-                );
-              })}
-            </ul>
-            <button onClick={() => setSubject("new")} className="mt-2 w-full rounded-[12px] border border-dashed border-hairline py-2 text-sm font-medium text-brand">
-              + Thêm thành viên
-            </button>
-          </div>
-        </Section>
+                  );
+                })}
+              </div>
+            </div>
+            <Row label={t("settings.lactating")}>
+              <button
+                onClick={() => updateHousehold({ lactatingMember: !household.lactatingMember })}
+                className={`relative h-6 w-11 rounded-full transition ${household.lactatingMember ? "bg-brand" : "bg-hairline"}`}
+              >
+                <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${household.lactatingMember ? "left-[22px]" : "left-0.5"}`} />
+              </button>
+            </Row>
+          </Section>
+        </div>
 
-        <Section title={t("settings.secRhythm")}>
-          <Row label={t("settings.marketMode")}>
-            <Segmented
-              options={MARKET_MODES.map((m) => [m, m] as [string, string])}
-              value={household.marketMode}
-              onChange={(v) => updateHousehold({ marketMode: v as Household["marketMode"] })}
-            />
-          </Row>
-          <div>
-            <p className="mb-2 text-sm font-medium">{t("settings.busyDays")}</p>
+        <div className="space-y-5">
+          <Section title={t("settings.secHousehold")}>
+            <Row label={t("settings.size")}>
+              <Stepper value={household.size} onChange={(n) => updateHousehold({ size: Math.max(1, n) })} />
+            </Row>
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("settings.members")}</p>
+              <ul className="space-y-1.5">
+                {household.members.map((m) => {
+                  const nm = m.name?.trim() || (m.role === "adult" ? (m.sex === "M" ? "Người lớn (Nam)" : "Người lớn (Nữ)") : `Trẻ ${m.ageBand ?? ""}`);
+                  return (
+                    <li key={m.id}>
+                      <button
+                        onClick={() => setSubject(m)}
+                        className="flex min-h-10 w-full items-center gap-3 rounded-[12px] border border-hairline bg-surface/40 px-3 py-2 text-left text-sm transition-colors hover:bg-surface"
+                      >
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-weak text-[11px] font-medium text-brand-ink">
+                          {m.role === "adult" ? (m.sex === "M" ? "B" : "M") : "T"}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate">{nm}</span>
+                        {m.allergies && m.allergies.length > 0 && (
+                          <span className="shrink-0 rounded-full bg-amber-weak px-2 py-0.5 text-[10px] text-amber">cần tránh {m.allergies.length}</span>
+                        )}
+                        <span aria-hidden className="shrink-0 text-tertiary">›</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <button onClick={() => setSubject("new")} className="mt-2 min-h-10 w-full rounded-[12px] border border-dashed border-hairline px-3 text-sm font-medium text-brand">
+                + Thêm thành viên
+              </button>
+            </div>
+          </Section>
+
+          <Section title={t("settings.diet")}>
             <div className="flex flex-wrap gap-1.5">
-              {DAYS.map((d, i) => {
-                const on = household.busyDays.includes(d);
+              {DIET_RESTRICTIONS.map((r) => {
+                const on = (household.restrictions ?? []).includes(r);
                 return (
                   <button
-                    key={d}
-                    onClick={() => toggleBusy(d)}
-                    className={`rounded-full border px-3 py-1 text-xs ${on ? "border-amber bg-amber-weak text-amber" : "border-hairline text-muted"}`}
+                    key={r}
+                    aria-pressed={on}
+                    onClick={() => {
+                      const cur = household.restrictions ?? [];
+                      updateHousehold({ restrictions: on ? cur.filter((x) => x !== r) : [...cur, r] });
+                    }}
+                    className={`control-chip rounded-full border px-3 text-xs ${on ? "border-brand bg-brand-weak text-brand" : "border-hairline text-muted"}`}
                   >
-                    {t(`day.${i}`)}
+                    {on ? "✓ " : ""}{t(`restriction.${r}`)}
                   </button>
                 );
               })}
             </div>
-          </div>
-          <Row label={t("settings.lactating")}>
-            <button
-              onClick={() => updateHousehold({ lactatingMember: !household.lactatingMember })}
-              className={`relative h-6 w-11 rounded-full transition ${household.lactatingMember ? "bg-brand" : "bg-hairline"}`}
-            >
-              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${household.lactatingMember ? "left-[22px]" : "left-0.5"}`} />
-            </button>
-          </Row>
-        </Section>
+          </Section>
+        </div>
 
-        <Section title={t("settings.diet")}>
-          <div className="flex flex-wrap gap-1.5">
-            {DIET_RESTRICTIONS.map((r) => {
-              const on = (household.restrictions ?? []).includes(r);
-              return (
-                <button
-                  key={r}
-                  aria-pressed={on}
-                  onClick={() => {
-                    const cur = household.restrictions ?? [];
-                    updateHousehold({ restrictions: on ? cur.filter((x) => x !== r) : [...cur, r] });
-                  }}
-                  className={`rounded-full border px-3 py-1.5 text-xs ${on ? "border-brand bg-brand-weak text-brand" : "border-hairline text-muted"}`}
-                >
-                  {on ? "✓ " : ""}{t(`restriction.${r}`)}
-                </button>
-              );
-            })}
-          </div>
-        </Section>
-
-        <p className="text-[11px] leading-relaxed text-muted">
+        <p className="text-[11px] leading-relaxed text-muted xl:col-span-2">
           Hộ này là một cụ thể hoá (instance) của repertoire chung (B0). Chỉnh ở đây tạo lớp B1 ghi đè khi bạn sửa món.
         </p>
       </div>
@@ -169,7 +173,7 @@ function Segmented({ options, value, onChange }: { options: [string, string][]; 
         <button
           key={val}
           onClick={() => onChange(val)}
-          className={`rounded-md px-3 py-1 text-xs ${value === val ? "bg-brand text-white" : "text-muted"}`}
+          className={`h-8 rounded-md px-3 text-xs ${value === val ? "bg-brand text-white" : "text-muted"}`}
         >
           {label}
         </button>

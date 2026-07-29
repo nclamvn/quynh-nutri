@@ -29,12 +29,14 @@ export function ProvenanceChip({
   unit = "kcal",
   field = "kcal",
   showCoverage = true,
+  compact = false,
   className = "",
 }: {
   display: MacroDisplay;
   unit?: string;
   field?: keyof MacroDisplay["point"];
   showCoverage?: boolean;
+  compact?: boolean;
   className?: string;
 }) {
   const tone = coverageTone(display.coverage);
@@ -42,20 +44,24 @@ export function ProvenanceChip({
   const lo = display.range?.low[field];
   const hi = display.range?.high[field];
 
-  let value: string;
-  if (display.mode === "number") value = `${fmt(point)}`;
-  else if (display.mode === "anchored") value = `≈${fmt(point)} (${fmtRange(lo!, hi!)})`;
-  else value = fmtRange(lo!, hi!);
+  let fullValue: string;
+  if (display.mode === "number") fullValue = `${fmt(point)}`;
+  else if (display.mode === "anchored") fullValue = `≈${fmt(point)} (${fmtRange(lo!, hi!)})`;
+  else fullValue = fmtRange(lo!, hi!);
+  const value = compact && display.mode === "anchored" ? `≈${fmt(point)}` : fullValue;
+  const coverage = showCoverage ? pct(display.coverage) : "";
+  const description = `${fullValue} ${unit}${showCoverage ? ` · ${coverage} khối lượng đã đối chiếu` : ""}`;
 
   return (
     <span
-      className={`glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[13px] ${className}`}
-      title={`${pct(display.coverage)} khối lượng đã đối chiếu`}
+      className={`glass inline-flex max-w-full shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[13px] ${className}`}
+      title={description}
+      aria-label={description}
     >
       <ProvenanceDot tone={tone} />
-      <span className={`tnum font-medium ${TEXT[tone]}`}>{value}</span>
-      <span className="text-muted">{unit}</span>
-      {showCoverage && <span className="tnum text-muted">· {pct(display.coverage)}</span>}
+      <span className={`tnum shrink-0 font-medium ${TEXT[tone]}`}>{value}</span>
+      <span className="shrink-0 text-muted">{unit}</span>
+      {showCoverage && <span className="tnum shrink-0 text-muted">· {coverage}</span>}
     </span>
   );
 }

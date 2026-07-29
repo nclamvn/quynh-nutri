@@ -115,6 +115,7 @@ export default function WeekPage() {
           <>
             <span
               data-testid="week-plan-sync-state"
+              data-control
               aria-live="polite"
               className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                 planSyncState === "synced"
@@ -217,7 +218,7 @@ export default function WeekPage() {
               </div>
 
               <div className="mb-3 space-y-1.5">
-                <ProvenanceChip display={nut.display} field="kcal" unit="kcal" />
+                <ProvenanceChip display={nut.display} field="kcal" unit="kcal" compact />
                 <AdequacyStrip adequacy={nut.adequacy} />
                 {nut.groups.missingCore.length > 0 ? (
                   <p className="text-[11px] text-amber">

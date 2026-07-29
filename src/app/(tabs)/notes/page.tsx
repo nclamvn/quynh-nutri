@@ -22,7 +22,7 @@ export default function NotesPage() {
     <PageContainer>
       <PageHeader title={t("notes.title")} subtitle={userNotes.length ? t("notes.count", { n: userNotes.length }) : undefined} />
 
-      <div data-notes-workspace className="max-w-4xl">
+      <div data-notes-workspace className="w-full">
         <div data-notes-form className="mb-6 flex gap-2">
           <input
             value={text}

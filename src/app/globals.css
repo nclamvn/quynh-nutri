@@ -281,6 +281,30 @@ body {
   transform: translateY(0);
 }
 
+/*
+  Control rhythm — one height per job. Page-header actions are normalized here
+  so visual priority changes colour/material, never the control's geometry.
+*/
+.control-chip {
+  display: inline-flex;
+  height: 2rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+.control-md,
+.page-actions > :is(a, button, [data-control]) {
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+.page-actions > form {
+  min-height: 2.5rem;
+}
+
 /* Sheet slide-up (authority §3.7: "đặt nhẹ xuống", no bounce). */
 @keyframes sheet-up {
   from { transform: translateY(12px); opacity: 0; }

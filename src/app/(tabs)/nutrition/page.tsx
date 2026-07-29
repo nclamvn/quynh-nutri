@@ -66,24 +66,28 @@ export default function NutritionPage() {
   return (
     <PageContainer>
       <PageHeader title={t("nutrition.title")} subtitle={t("nutrition.perDay")} sticky>
-        <div className="space-y-1.5">
-          <div className="scroll-x-thin flex gap-1.5 overflow-x-auto pb-2.5 pt-0.5">
+        <div
+          data-testid="nutrition-filter-toolbar"
+          className="flex min-w-0 flex-col gap-2 lg:flex-row lg:items-center lg:gap-3"
+        >
+          <div className="scroll-x-thin flex min-w-0 gap-1.5 overflow-x-auto pb-1 pt-0.5 lg:pb-0">
             {Array.from({ length: 7 }, (_, d) => (
               <button
                 key={d}
                 onClick={() => setDay(d)}
-                className={`shrink-0 rounded-full border px-3 py-1 text-xs ${day === d ? "border border-brand bg-brand-weak text-brand" : "glass text-muted"}`}
+                className={`control-chip rounded-full border px-3 text-xs ${day === d ? "border-brand bg-brand-weak text-brand" : "glass text-muted"}`}
               >
                 {t(`day.${d}`)}
               </button>
             ))}
           </div>
-          <div className="scroll-x-thin flex gap-1.5 overflow-x-auto pb-2.5 pt-0.5">
+          <span aria-hidden className="hidden h-5 w-px shrink-0 bg-hairline lg:block" />
+          <div className="scroll-x-thin flex min-w-0 gap-1.5 overflow-x-auto pb-1 pt-0.5 lg:pb-0">
             {["household", ...household.members.map((m) => m.id)].map((id) => (
               <button
                 key={id}
                 onClick={() => setMemberId(id)}
-                className={`shrink-0 rounded-full border px-3 py-1 text-xs ${memberId === id ? "border border-brand bg-brand-weak text-brand" : "glass text-muted"}`}
+                className={`control-chip rounded-full border px-3 text-xs ${memberId === id ? "border-brand bg-brand-weak text-brand" : "glass text-muted"}`}
               >
                 {memberLabel(id)}
               </button>
