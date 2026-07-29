@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useI18n } from "@/i18n/context";
 import { useTheme } from "@/ui/theme";
 import { FlowerLogo } from "./FlowerLogo";
@@ -19,7 +20,7 @@ export function MobileTopBar() {
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-hairline px-3 py-2.5 lg:hidden">
+      <div className="flex items-center justify-between border-b border-hairline bg-raised/55 px-3 py-2.5 backdrop-blur-xl lg:hidden">
         <button
           onClick={() => setMenuOpen(true)}
           aria-label="Menu"
@@ -29,10 +30,17 @@ export function MobileTopBar() {
             <path d="M4 7h16M4 12h16M4 17h16" />
           </svg>
         </button>
-        <div className="flex items-center gap-1.5 text-brand">
-          <FlowerLogo size={20} />
-          <span className="text-sm font-semibold text-ink">{t("brand.name")}</span>
-        </div>
+        <Link
+          href="/"
+          data-testid="mobile-brand-home"
+          aria-label={t("brand.home")}
+          className="group flex items-center gap-2 text-brand focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+        >
+          <FlowerLogo size={21} className="transition-transform group-hover:-rotate-6" />
+          <span className="font-serif text-[15px] font-semibold tracking-[-0.025em] text-ink">
+            {t("brand.name")}
+          </span>
+        </Link>
         <button
           onClick={toggle}
           aria-label={theme === "dark" ? t("settings.themeLight") : t("settings.themeDark")}

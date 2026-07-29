@@ -18,7 +18,9 @@ test("overview always exposes the three real-data housekeeper stages", async ({ 
 });
 
 test("desktop Sidebar and housekeeper path expose Pantry without hidden navigation", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 960 });
+  // The contextual rail intentionally starts at 2xl so it does not compress
+  // the primary canvas on a common 1440px laptop viewport.
+  await page.setViewportSize({ width: 1600, height: 960 });
   await page.goto("/overview");
 
   const pantryLinks = page.getByRole("link", { name: "Kho & Tủ lạnh", exact: true });

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import { PageContainer } from "@/ui/components/PageContainer";
+import { PageHeader } from "@/ui/components/PageHeader";
 import { SupplierSheet } from "@/ui/components/SupplierSheet";
 import { SupplierMapView } from "@/ui/components/SupplierMapView";
 import { directionsUrl, hasMapPin, supplierTone } from "@/domain/supplier";
@@ -52,21 +53,27 @@ export default function SupplierDetailPage() {
 
   return (
     <PageContainer>
-      <Link href="/suppliers" className="text-sm text-brand">← {t("supplier.detail.back")}</Link>
-
-      <div className="mt-3 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className={`text-xs ${TONE_DOT[tone]}`}>●</span>
-            <h1 className="truncate text-xl font-semibold">{s.name}</h1>
-          </div>
-          <span className="mt-1 inline-block rounded-full bg-surface px-2.5 py-0.5 text-xs text-muted">{TYPE_LABEL[s.type]}</span>
-        </div>
-        <button onClick={() => setEditing(true)} className="shrink-0 rounded-full border border-hairline px-3 py-1.5 text-xs text-muted hover:bg-surface">Sửa</button>
-      </div>
+      <Link href="/suppliers" className="mb-5 inline-flex text-sm text-brand">
+        ← {t("supplier.detail.back")}
+      </Link>
+      <PageHeader
+        title={s.name}
+        subtitle={TYPE_LABEL[s.type]}
+        actions={
+          <>
+            <span aria-hidden className={`text-xs ${TONE_DOT[tone]}`}>●</span>
+            <button
+              onClick={() => setEditing(true)}
+              className="shrink-0 rounded-full border border-hairline px-3 py-1.5 text-xs text-muted hover:bg-surface"
+            >
+              Sửa
+            </button>
+          </>
+        }
+      />
 
       {s.needsVerify && (
-        <div className="mt-3 rounded-[12px] border border-amber/30 bg-amber-weak px-3.5 py-2.5 text-xs text-amber">
+        <div className="rounded-[12px] border border-amber/30 bg-amber-weak px-3.5 py-2.5 text-xs text-amber">
           ⚠ {t("supplier.detail.verify")}
         </div>
       )}

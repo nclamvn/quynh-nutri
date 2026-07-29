@@ -12,8 +12,8 @@ import { BottomSheet } from "@/ui/components/BottomSheet";
 import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
 import { DishThumb } from "@/ui/components/DishThumb";
 import { HeartButton } from "@/ui/components/HeartButton";
-import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
+import { PageHeader } from "@/ui/components/PageHeader";
 import { SLOT_COLOR } from "@/ui/slotColor";
 import { pregnancyWarnings } from "@/domain/dish/pregnancy";
 import { isPregnant } from "@/domain/health";
@@ -104,17 +104,15 @@ export default function WeekPage() {
 
   return (
     <PageContainer>
-      {/* Hero — descriptive, never evaluative (honesty: don't imply "optimized"). */}
-      <section className="grain relative mb-5 overflow-hidden rounded-[24px] border border-hairline bg-gradient-to-br from-brand-weak/70 via-bg to-accent-weak/60 shadow-[var(--shadow-sm)]">
-        <Blossom size={190} className="pointer-events-none absolute -bottom-14 -left-12 -rotate-12 text-brand/10" />
-        <div className="relative flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-lg font-semibold -tracking-[0.02em] lg:text-[28px]">{t("nav.week")}</h1>
-            <p className="mt-1 text-sm text-muted">
-              {t("week.meta", { days: 7, quick: quickCount, busy: household.busyDays.length })}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <PageHeader
+        title={t("nav.week")}
+        subtitle={t("week.meta", {
+          days: 7,
+          quick: quickCount,
+          busy: household.busyDays.length,
+        })}
+        actions={
+          <>
             <span
               data-testid="week-plan-sync-state"
               aria-live="polite"
@@ -153,13 +151,22 @@ export default function WeekPage() {
                   : ""}
               </button>
             )}
-            <button disabled={!planEditable} onClick={reroll} className="cta-primary inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium text-white disabled:opacity-45">
+            <button
+              disabled={!planEditable}
+              onClick={reroll}
+              className="cta-primary inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium text-white disabled:opacity-45"
+            >
               ↻ {t("common.reroll")}
             </button>
-            <Link href="/shopping" className="text-sm font-medium text-brand">{t("week.export")} →</Link>
-          </div>
-        </div>
-      </section>
+            <Link
+              href="/shopping"
+              className="rounded-full border border-hairline px-4 py-2 text-sm font-medium text-brand"
+            >
+              {t("week.export")} →
+            </Link>
+          </>
+        }
+      />
 
       {planSyncState === "conflict" && planConflict && (
         <section

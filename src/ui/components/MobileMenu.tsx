@@ -19,8 +19,13 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
       <div className="space-y-4">
         {NAV_GROUPS.map(({ group, items }) => (
           <div key={group}>
-            <p className="px-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-tertiary">{t(group)}</p>
-            <ul className="grid grid-cols-2 gap-1.5">
+            <div className="mb-2 flex items-center gap-3 px-1">
+              <p className="shrink-0 text-[9px] font-semibold uppercase tracking-[0.18em] text-tertiary">
+                {t(group)}
+              </p>
+              <span aria-hidden className="h-px flex-1 bg-hairline" />
+            </div>
+            <ul className="grid grid-cols-2 gap-x-2 gap-y-1">
               {items.map((it) => {
                 const active = pathname === it.href || pathname.startsWith(it.href + "/");
                 return (
@@ -28,8 +33,11 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
                     <Link
                       href={it.href}
                       onClick={onClose}
-                      className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm ${
-                        active ? "border-brand bg-brand-weak font-medium text-brand" : "border-hairline text-muted active:bg-surface"
+                      aria-current={active ? "page" : undefined}
+                      className={`folio-nav-link relative flex min-h-11 items-center gap-2.5 px-3 py-2 text-sm ${
+                        active
+                          ? "folio-nav-active font-medium text-brand"
+                          : "text-muted active:bg-surface"
                       }`}
                     >
                       <it.icon className="h-[18px] w-[18px] shrink-0" />

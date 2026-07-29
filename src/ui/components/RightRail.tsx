@@ -24,7 +24,7 @@ export function RightRail() {
   if (!content) return null;
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 overflow-y-auto border-l border-hairline bg-surface/30 px-4 py-5 xl:block">
+    <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 overflow-y-auto border-l border-hairline bg-surface/30 px-4 py-5 2xl:block">
       {content}
     </aside>
   );

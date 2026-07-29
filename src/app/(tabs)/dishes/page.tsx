@@ -13,6 +13,7 @@ import { HeartButton } from "@/ui/components/HeartButton";
 import { DishDetailSheet } from "@/ui/components/DishDetailSheet";
 import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
+import { PageHeader } from "@/ui/components/PageHeader";
 
 const SLOTS: Slot[] = ["MAN", "RAU", "CANH", "TRANGMIENG", "COM"];
 const dishName = (d: Dish, lang: Lang) => (lang === "en" && d.enLabel ? d.enLabel : d.vnName);
@@ -47,16 +48,14 @@ export default function DishesPage() {
 
   return (
     <PageContainer size="full">
-      <header className="sticky top-0 z-10 -mx-4 mb-5 border-b border-hairline bg-bg/85 px-4 py-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
-        {/* Title + count + search on one compact row */}
-        <div className="flex items-center gap-3">
-          <div className="flex shrink-0 items-baseline gap-2">
-            <h1 className="text-lg font-semibold -tracking-[0.02em] lg:text-[28px]">{t("dishes.title")}</h1>
-            <span className="text-sm text-muted">{t("dishes.count", { n: all.length })}</span>
-          </div>
+      <PageHeader
+        title={t("dishes.title")}
+        subtitle={t("dishes.count", { n: all.length })}
+        sticky
+        actions={
           <form
             onSubmit={(e) => { e.preventDefault(); runSearch(query); }}
-            className="ml-auto flex min-w-0 flex-1 items-center gap-2 rounded-full border border-hairline bg-surface/40 px-3.5 py-2 focus-within:border-brand sm:max-w-sm"
+            className="flex w-full min-w-0 items-center gap-2 rounded-full border border-hairline bg-surface/40 px-3.5 py-2 focus-within:border-brand sm:w-80"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0 text-tertiary"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" strokeLinecap="round" /></svg>
             <input
@@ -70,9 +69,10 @@ export default function DishesPage() {
               <button type="button" onClick={() => { setQuery(""); setSearchIds(null); }} aria-label="clear" className="text-tertiary active:text-danger">✕</button>
             )}
           </form>
-        </div>
+        }
+      >
         {!searchIds ? (
-          <div className="scroll-x-thin mt-3 flex gap-1.5 overflow-x-auto pb-2.5 pt-0.5">
+          <div className="scroll-x-thin flex gap-1.5 overflow-x-auto pb-1 pt-0.5">
             <Chip active={slotFilter === "ALL"} onClick={() => setSlotFilter("ALL")}>{t("dishes.filterAll")}</Chip>
             {SLOTS.map((s) => (
               <Chip key={s} active={slotFilter === s} onClick={() => setSlotFilter(s)}>{t(`slot.${s}`)}</Chip>
@@ -80,9 +80,9 @@ export default function DishesPage() {
             <Chip active={quickOnly} onClick={() => setQuickOnly((q) => !q)}>⚡ {t("common.quick")}</Chip>
           </div>
         ) : (
-          <p className="mt-2 text-[11px] text-muted">{t("dishes.semanticHits", { n: list.length })}</p>
+          <p className="text-[11px] text-muted">{t("dishes.semanticHits", { n: list.length })}</p>
         )}
-      </header>
+      </PageHeader>
 
       {list.length === 0 ? (
         <div className="grid min-h-[40vh] place-content-center justify-items-center text-center">

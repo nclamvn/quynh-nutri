@@ -13,6 +13,7 @@ import { DishThumb } from "@/ui/components/DishThumb";
 import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
 import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
+import { PageHeader } from "@/ui/components/PageHeader";
 import { SLOT_COLOR } from "@/ui/slotColor";
 import { useCountUp } from "@/ui/hooks/useCountUp";
 import type { FoodGroup } from "@/domain/nutrition";
@@ -61,14 +62,10 @@ export default function OverviewPage() {
 
   return (
     <PageContainer>
-      <header className="mb-5">
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-          <div className="min-w-0">
-            <h1 className="text-lg font-semibold -tracking-[0.02em] lg:text-[28px]">{t("ov.title")}</h1>
-            <p className="mt-0.5 truncate text-sm text-muted">{t("greeting")} 👋 · {t("household.family", { n: household.size })}</p>
-          </div>
-          {/* Mobile: primary CTA full-width, two secondary split below (all same pill,
-             one line each). ≥sm: one horizontal row (desktop unchanged). */}
+      <PageHeader
+        title={t("ov.title")}
+        subtitle={`${t("greeting")} · ${t("household.family", { n: household.size })}`}
+        actions={
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <button
               onClick={() => window.dispatchEvent(new Event("open-assistant"))}
@@ -85,8 +82,8 @@ export default function OverviewPage() {
               </button>
             </div>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <HousekeeperPathCard />
       <KitchenAgendaCard agenda={agenda} />

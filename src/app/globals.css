@@ -243,6 +243,25 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+/* Culinary-folio navigation: a quiet recipe-ledger spine, not a SaaS pill. */
+.folio-nav-link {
+  border-radius: 0 11px 11px 0;
+}
+.folio-nav-active {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--brand) 12%, transparent), transparent 88%);
+}
+.folio-nav-active::before {
+  content: "";
+  position: absolute;
+  inset-block: 8px;
+  left: -4px;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--brand);
+  box-shadow: 7px 0 18px color-mix(in srgb, var(--brand) 24%, transparent);
+}
+
 /* Primary hero CTA — liquid rose glass, single edge. */
 .cta-primary {
   background-color: color-mix(in srgb, var(--brand) 84%, transparent);

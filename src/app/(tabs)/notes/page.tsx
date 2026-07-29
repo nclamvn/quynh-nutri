@@ -22,7 +22,7 @@ export default function NotesPage() {
     <PageContainer>
       <PageHeader title={t("notes.title")} subtitle={userNotes.length ? t("notes.count", { n: userNotes.length }) : undefined} />
 
-      <div className="mx-auto mb-6 flex max-w-2xl gap-2">
+      <div className="mb-6 flex max-w-2xl gap-2">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}

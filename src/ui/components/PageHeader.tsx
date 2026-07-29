@@ -1,11 +1,6 @@
 import type { ReactNode } from "react";
 
-/**
- * One shared page header. Mobile: the familiar sticky bordered bar (so filter /
- * selector chips stay pinned while scrolling long lists). Desktop (lg+): Overview's
- * airy, borderless title block with an optional live-context subtitle. Pass `sticky`
- * only on list-heavy pages; `children` holds filter/segment rows.
- */
+/** Shared title, action and filter grammar for every signed-in route. */
 export function PageHeader({
   title,
   subtitle,
@@ -20,18 +15,24 @@ export function PageHeader({
   sticky?: boolean;
 }) {
   const stickyCls = sticky
-    ? "sticky top-0 z-10 -mx-4 border-b border-hairline bg-bg/85 px-4 py-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none "
+    ? "sticky top-0 z-10 -mx-5 border-b border-hairline bg-bg/90 px-5 py-3 backdrop-blur-xl lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none "
     : "";
   return (
-    <header className={`${stickyCls}mb-5`}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <header className={`${stickyCls}mb-6 lg:mb-8`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-lg font-semibold -tracking-[0.02em] lg:text-[28px]">{title}</h1>
-          {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
+          <h1 className="text-[26px] font-semibold leading-none -tracking-[0.035em] lg:text-[32px]">
+            {title}
+          </h1>
+          {subtitle && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>}
         </div>
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
+        {actions && (
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+            {actions}
+          </div>
+        )}
       </div>
-      {children && <div className="mt-3">{children}</div>}
+      {children && <div className="mt-4">{children}</div>}
     </header>
   );
 }
