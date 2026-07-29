@@ -14,8 +14,7 @@ function isPublic(pathname: string): boolean {
 // hand, remember to restore before commit" QA dance. The E2E harness sets this env.
 const E2E_BYPASS = process.env.E2E_BYPASS_AUTH === "1" && process.env.NODE_ENV !== "production";
 
-export default clerkMiddleware(async (auth, req) => {
-  if (E2E_BYPASS) return; // dev + explicit env only
+const authenticatedProxy = clerkMiddleware(async (auth, req) => {
   // Canonical host: send www.anngon.io → anngon.io (permanent).
   if (req.nextUrl.hostname === "www.anngon.io") {
     const url = req.nextUrl.clone();
@@ -35,6 +34,15 @@ export default clerkMiddleware(async (auth, req) => {
   signInUrl: "/sign-in",
   signUpUrl: "/sign-up",
 });
+
+// Do not run a request through Clerk at all in hermetic E2E mode. Returning
+// from inside `clerkMiddleware` is too late: the middleware may already derive
+// its frontend API from the placeholder CI key and redirect off-origin.
+export default E2E_BYPASS
+  ? function e2eProxy() {
+      return NextResponse.next();
+    }
+  : authenticatedProxy;
 
 export const config = {
   matcher: [
