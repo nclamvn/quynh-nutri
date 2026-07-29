@@ -14,7 +14,11 @@ import { Blossom } from "./Blossom";
 
 const dishName = (d: Dish | undefined, lang: Lang) => (!d ? "—" : lang === "en" && d.enLabel ? d.enLabel : d.vnName);
 
-/** Contextual right rail — one kind per page (Blueprint §5.3). Desktop only. */
+/**
+ * Contextual rail for genuinely ultra-wide screens. It overlays the otherwise
+ * unused right margin, so route-specific rail content never changes Main's
+ * width or page origin.
+ */
 export function RightRail() {
   const pathname = usePathname();
   let content: React.ReactNode = null;
@@ -24,7 +28,7 @@ export function RightRail() {
   if (!content) return null;
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 overflow-y-auto border-l border-hairline bg-surface/30 px-4 py-5 2xl:block">
+    <aside className="fixed right-0 top-0 z-10 hidden h-dvh w-72 overflow-y-auto border-l border-hairline bg-surface/80 px-4 py-5 backdrop-blur-xl min-[2304px]:block">
       {content}
     </aside>
   );

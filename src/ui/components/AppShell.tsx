@@ -9,7 +9,8 @@ import { Toaster } from "./Toaster";
 
 /**
  * Responsive app shell (Blueprint §4–5).
- *   ≥1280px: Sidebar 240 │ Main (centered column) │ contextual Right rail 292
+ *   ≥1024px: Sidebar 264 │ centered Main
+ *   ≥2304px: contextual rail overlays the spare right margin without shifting Main
  *   <1024px: single column + bottom TabBar (mobile-first preserved)
  * Global chrome (brand, household, sync, theme) lives in the sidebar so it never
  * duplicates the per-page sticky headers.

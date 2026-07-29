@@ -83,7 +83,7 @@ export function HousekeeperPathCard() {
         size={150}
         className="pointer-events-none absolute -right-10 -top-12 rotate-12 text-brand/10"
       />
-      <div className="relative border-b border-brand/15 px-5 py-4">
+      <div data-housekeeper-intro className="relative px-5 py-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand">
           {t("housekeeper.eyebrow")}
         </p>

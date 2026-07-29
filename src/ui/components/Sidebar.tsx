@@ -47,8 +47,8 @@ export function Sidebar() {
               collapsed ? "justify-center" : "flex-1 gap-3"
             }`}
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center border-y border-brand/20">
-              <FlowerLogo size={28} className="transition-transform group-hover:-rotate-6" />
+            <span data-brand-mark className="grid h-11 w-11 shrink-0 place-items-center">
+              <FlowerLogo size={35} className="transition-transform group-hover:-rotate-6" />
             </span>
             {!collapsed && (
               <span className="min-w-0">

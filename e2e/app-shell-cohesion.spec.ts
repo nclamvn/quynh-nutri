@@ -15,24 +15,26 @@ const ALIGNED_ROUTES = [
   "/settings",
 ];
 
-test("desktop routes share one page origin while narrow content stays left-aligned", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 960 });
-  const titleXs: { route: string; x: number }[] = [];
+test("desktop routes share one centered page canvas at common and ultra-wide widths", async ({ page }) => {
+  for (const viewport of [{ width: 1440, height: 960 }, { width: 2560, height: 1440 }]) {
+    await page.setViewportSize(viewport);
+    const titleXs: { route: string; x: number }[] = [];
 
-  for (const route of ALIGNED_ROUTES) {
-    await page.goto(route);
-    const title = page.locator("main h1");
-    await expect(title).toBeVisible({ timeout: 20_000 });
-    const box = await title.boundingBox();
-    titleXs.push({ route, x: box!.x });
-  }
+    for (const route of ALIGNED_ROUTES) {
+      await page.goto(route);
+      const title = page.locator("main h1");
+      await expect(title).toBeVisible({ timeout: 20_000 });
+      const box = await title.boundingBox();
+      titleXs.push({ route, x: box!.x });
+    }
 
-  const origin = titleXs[0].x;
-  for (const measurement of titleXs) {
-    expect(
-      Math.abs(measurement.x - origin),
-      `${measurement.route} starts at ${measurement.x}, expected ${origin}`,
-    ).toBeLessThanOrEqual(1);
+    const origin = titleXs[0].x;
+    for (const measurement of titleXs) {
+      expect(
+        Math.abs(measurement.x - origin),
+        `${measurement.route} starts at ${measurement.x}, expected ${origin} at ${viewport.width}px`,
+      ).toBeLessThanOrEqual(1);
+    }
   }
 
   await page.goto("/settings");
@@ -42,8 +44,38 @@ test("desktop routes share one page origin while narrow content stays left-align
     frame.boundingBox(),
     content.boundingBox(),
   ]);
-  expect(contentBox!.x).toBe(frameBox!.x + 32);
-  expect(contentBox!.width).toBeLessThan(800);
+  expect(contentBox!.width).toBeLessThanOrEqual(1440);
+  expect(Math.abs(contentBox!.x + contentBox!.width / 2 - (frameBox!.x + frameBox!.width / 2))).toBeLessThanOrEqual(1);
+  const settingsBody = await page.locator("main .max-w-\\[760px\\]").boundingBox();
+  expect(settingsBody!.x).toBe(contentBox!.x);
+  expect(settingsBody!.width).toBeLessThan(800);
+});
+
+test("feedback regressions keep one visual axis per workspace", async ({ page }) => {
+  await page.setViewportSize({ width: 2560, height: 1440 });
+
+  await page.goto("/overview");
+  await expect(page.locator("[data-housekeeper-intro]")).toHaveCSS("border-bottom-width", "0px");
+
+  const brandMark = page.locator("[data-brand-mark]");
+  await expect(brandMark).toHaveCSS("border-top-width", "0px");
+  await expect(brandMark).toHaveCSS("border-bottom-width", "0px");
+  const logoBox = await brandMark.locator("svg").boundingBox();
+  expect(logoBox!.width).toBe(35);
+  expect(logoBox!.height).toBe(35);
+
+  await page.goto("/pantry");
+  const pantryWorkspace = await page.locator("[data-pantry-workspace]").boundingBox();
+  const pantryContent = await page.locator("[data-page-content]").boundingBox();
+  expect(pantryWorkspace!.width).toBe(pantryContent!.width);
+
+  await page.goto("/notes");
+  const notesWorkspace = await page.locator("[data-notes-workspace]").boundingBox();
+  const notesForm = await page.locator("[data-notes-form]").boundingBox();
+  const notesEmpty = await page.locator("[data-notes-empty]").boundingBox();
+  const workspaceCenter = notesWorkspace!.x + notesWorkspace!.width / 2;
+  expect(Math.abs(notesForm!.x + notesForm!.width / 2 - workspaceCenter)).toBeLessThanOrEqual(1);
+  expect(Math.abs(notesEmpty!.x + notesEmpty!.width / 2 - workspaceCenter)).toBeLessThanOrEqual(1);
 });
 
 test("desktop brand returns to landing in expanded and collapsed folio", async ({ page }) => {

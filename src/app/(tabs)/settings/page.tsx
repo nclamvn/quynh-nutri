@@ -27,10 +27,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <PageContainer size="narrow">
+    <PageContainer>
       <PageHeader title={t("settings.title")} />
 
-      <div className="space-y-5">
+      <div className="max-w-[760px] space-y-5">
         <Section title={t("settings.secAppearance")}>
           <Row label={t("settings.language")}>
             <Segmented options={[["vi", "Tiếng Việt"], ["en", "English"]]} value={lang} onChange={(v) => setLang(v as "vi" | "en")} />

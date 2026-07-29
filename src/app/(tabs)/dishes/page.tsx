@@ -47,7 +47,7 @@ export default function DishesPage() {
   };
 
   return (
-    <PageContainer size="full">
+    <PageContainer>
       <PageHeader
         title={t("dishes.title")}
         subtitle={t("dishes.count", { n: all.length })}

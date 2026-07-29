@@ -18,16 +18,17 @@ test("overview always exposes the three real-data housekeeper stages", async ({ 
 });
 
 test("desktop Sidebar and housekeeper path expose Pantry without hidden navigation", async ({ page }) => {
-  // The contextual rail intentionally starts at 2xl so it does not compress
-  // the primary canvas on a common 1440px laptop viewport.
+  // The contextual rail is reserved for genuinely ultra-wide screens so it
+  // never changes the primary canvas origin.
   await page.setViewportSize({ width: 1600, height: 960 });
   await page.goto("/overview");
 
   const pantryLinks = page.getByRole("link", { name: "Kho & Tủ lạnh", exact: true });
   await expect(pantryLinks).toHaveCount(1);
   await expect(pantryLinks).toBeVisible();
-  await expect(page.getByTestId("housekeeper-path")).toBeVisible();
-  await expect(page.getByRole("link", { name: /Mở điều phối nấu/ })).toHaveAttribute("href", "/week");
+  const path = page.getByTestId("housekeeper-path");
+  await expect(path).toBeVisible();
+  await expect(path.getByRole("link", { name: /Mở thực đơn/ })).toHaveAttribute("href", "/week");
   await page.screenshot({ path: "e2e/__screens__/housekeeper-path-desktop.png", fullPage: false });
 });
 

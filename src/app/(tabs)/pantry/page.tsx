@@ -173,7 +173,14 @@ export default function PantryPage() {
         )}
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px]">
+      <div
+        data-pantry-workspace
+        className={
+          matches.length > 0
+            ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px]"
+            : "block"
+        }
+      >
         {/* Left — add form + inventory */}
         <div>
           <div className="card mb-4 flex gap-2 p-3">
