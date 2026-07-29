@@ -1,7 +1,7 @@
 # VERIFY REPORT — TIP-KE-010
 
-**Vai trò:** Chủ thầu / Kiến trúc sư trưởng  
-**Ngày nghiệm thu:** 2026-07-29  
+**Vai trò:** Chủ thầu / Kiến trúc sư trưởng
+**Ngày nghiệm thu:** 2026-07-29
 **OVERALL STATUS:** **READY**
 
 ## 1. Requirement coverage
@@ -38,8 +38,8 @@ Coverage:             100%
 | 390px không tràn | Pass | P1 |
 | Luồng kitchen execution cũ không regression | Pass | P0 |
 
-**Passed:** 10  
-**Failed:** 0  
+**Passed:** 10
+**Failed:** 0
 **Untestable:** 0
 
 ## 3. Technical health

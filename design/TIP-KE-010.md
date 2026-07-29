@@ -1,9 +1,9 @@
 # TIP-KE-010 — Làm năng lực bà quản gia nhìn thấy được
 
-**Trạng thái:** APPROVED FOR BUILDER  
-**Chủ thầu:** Codex — Kiến trúc sư trưởng  
-**Ngày lập:** 2026-07-29  
-**Phụ thuộc:** KE-007, KE-008, KE-009  
+**Trạng thái:** APPROVED FOR BUILDER
+**Chủ thầu:** Codex — Kiến trúc sư trưởng
+**Ngày lập:** 2026-07-29
+**Phụ thuộc:** KE-007, KE-008, KE-009
 **Phê duyệt:** Chủ nhà đã duyệt đề xuất trong task hiện tại
 
 ## 1. Mục tiêu
@@ -104,23 +104,23 @@ Không dùng checkmark để ngụ ý công việc đã hoàn tất.
 
 ## 6. Acceptance criteria
 
-1. **Given** tài khoản chưa có kho/đồ thừa  
-   **When** mở Overview  
+1. **Given** tài khoản chưa có kho/đồ thừa
+   **When** mở Overview
    **Then** vẫn thấy đủ ba trạm và CTA thật, không thấy dữ liệu hoàn tất giả.
-2. **Given** mobile 390px  
-   **When** mở Menu  
+2. **Given** mobile 390px
+   **When** mở Menu
    **Then** thấy “Kho & Tủ lạnh” và đi được tới `/pantry`.
-3. **Given** ngày mai không có prep guide được hỗ trợ  
-   **When** mở Week  
+3. **Given** ngày mai không có prep guide được hỗ trợ
+   **When** mở Week
    **Then** vẫn thấy “Chuẩn bị cho ngày mai”; sheet nói rõ món unsupported.
-4. **Given** một ngày có dưới hai món được rà soát  
-   **When** xem card ngày  
+4. **Given** một ngày có dưới hai món được rà soát
+   **When** xem card ngày
    **Then** thấy affordance disabled và lý do, không bị ẩn.
-5. **Given** shopping/pantry rỗng  
-   **When** mở trang  
+5. **Given** shopping/pantry rỗng
+   **When** mở trang
    **Then** empty state giải thích dữ liệu thật cần tạo và CTA tiếp theo.
-6. **Given** suite hiện hữu  
-   **When** chạy quality gates  
+6. **Given** suite hiện hữu
+   **When** chạy quality gates
    **Then** lint, unit, build và toàn bộ E2E đều xanh.
 
 ## 7. Quality gates
