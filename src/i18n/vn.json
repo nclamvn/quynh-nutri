@@ -1,7 +1,8 @@
 {
   "app.title": "Bữa cơm nhà",
   "nav.week": "Thực đơn tuần",
-  "nav.shopping": "Đi chợ & Kho",
+  "nav.shopping": "Đi chợ",
+  "nav.pantry": "Kho & Tủ lạnh",
   "nav.suppliers": "Nhà cung cấp",
   "supplier.title": "Nhà cung cấp",
   "supplier.meta": "{count} điểm mua",
@@ -59,6 +60,9 @@
   "shopping.tripDry": "Đồ khô",
   "shopping.unassigned": "Chưa gán hàng",
   "shopping.empty": "Chưa có kế hoạch tuần — tạo tuần trước đã.",
+  "shopping.emptyTitle": "Danh sách chợ sẽ đi từ thực đơn thật",
+  "shopping.emptyBody": "Khi thực đơn có nguyên liệu cần mua, danh sách sẽ hiện ở đây. Chạm tên nguyên liệu để xem cách chọn & cất; chạm ô vuông để xác nhận lượng thực mua.",
+  "shopping.emptyAction": "Mở thực đơn tuần",
   "nutrition.title": "Dinh dưỡng",
   "nutrition.perDay": "Mỗi ngày",
   "nutrition.household": "Cả hộ",
@@ -429,6 +433,9 @@
   "agenda.eyebrow": "Nhịp quản gia",
   "agenda.title": "Việc bếp hôm nay",
   "agenda.empty": "Chưa có việc bếp nào đủ dữ liệu để nhắc.",
+  "agenda.emptyBody": "Bà quản gia chỉ nhắc từ thực đơn, hàng đã mua, lô đang cất và món thừa mà gia đình đã xác nhận.",
+  "agenda.emptyWeekAction": "Xem thực đơn",
+  "agenda.emptyPantryAction": "Ghi dữ liệu kho",
   "agenda.derivedNote": "Tự cập nhật từ dữ liệu gia đình đã ghi nhận",
   "agenda.viewAll": "Xem tất cả",
   "agenda.sheetIntro": "Đây là danh sách được tính từ thực đơn, đi chợ, kho và món còn thừa. Hãy thực hiện trong luồng nguồn; agenda không tự đánh dấu bạn đã làm xong.",
@@ -470,6 +477,27 @@
   "agenda.action.openPantry": "Mở kho",
   "agenda.action.openShopping": "Mở chợ",
   "agenda.action.openWeek": "Mở thực đơn"
+  ,"housekeeper.eyebrow": "Bà quản gia ăn uống"
+  ,"housekeeper.title": "Bắt đầu từ dữ liệu thật của nhà mình"
+  ,"housekeeper.intro": "Ba trạm nối liền nhau. Ghi nhận đến đâu, bà quản gia mới có căn cứ hướng dẫn đến đó."
+  ,"housekeeper.week.title": "Lên tuần"
+  ,"housekeeper.week.empty": "Chưa có thực đơn để làm căn cứ."
+  ,"housekeeper.week.ready": "{days} ngày · {items} món trong kế hoạch"
+  ,"housekeeper.week.action": "Mở thực đơn"
+  ,"housekeeper.shopping.title": "Đi chợ"
+  ,"housekeeper.shopping.empty": "Danh sách chợ sẽ được tính từ thực đơn."
+  ,"housekeeper.shopping.ready": "{remaining} mặt hàng còn cần xác nhận"
+  ,"housekeeper.shopping.action": "Mở danh sách chợ"
+  ,"housekeeper.store.title": "Nấu & cất"
+  ,"housekeeper.store.empty": "Chưa có hàng mua hoặc món thừa được xác nhận."
+  ,"housekeeper.store.ready": "{lots} lô nguyên liệu · {leftovers} món thừa"
+  ,"housekeeper.store.action": "Mở Kho & Tủ lạnh"
+  ,"housekeeper.loading": "Đang đọc dữ liệu nhà mình…"
+  ,"ov.openCookingPlan": "Mở điều phối nấu"
+  ,"coord.needsReviewed": "Cần ít nhất 2 món có hướng dẫn đã rà soát"
+  ,"pantry.emptyTitle": "Kho chỉ ghi những gì gia đình thực sự cất"
+  ,"pantry.emptyBody": "Xác nhận hàng đã mua ở trang Đi chợ để tạo từng lô với nơi cất và hạn trên nhãn. Ứng dụng không tự đoán trong tủ đang có gì."
+  ,"pantry.emptyAction": "Sang Đi chợ"
   ,"prepAhead.open": "Chuẩn bị cho ngày mai"
   ,"prepAhead.title": "Chuẩn bị cho bữa ngày mai"
   ,"prepAhead.reviewed": "Theo hướng dẫn đã rà soát"

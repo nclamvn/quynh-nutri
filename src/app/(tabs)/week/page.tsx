@@ -137,13 +137,20 @@ export default function WeekPage() {
                 {t("weekPlanSync.retry")}
               </button>
             )}
-            {tomorrowPrep && tomorrowPrep.supported.length > 0 && (
+            {tomorrowPrep && (
               <button
                 type="button"
                 onClick={() => setPrepOpen(true)}
-                className="rounded-full border border-accent bg-accent-weak px-4 py-2.5 text-sm font-semibold text-accent"
+                className={`rounded-full border px-4 py-2.5 text-sm font-semibold ${
+                  tomorrowPrep.supported.length > 0
+                    ? "border-accent bg-accent-weak text-accent"
+                    : "border-hairline bg-surface/60 text-muted"
+                }`}
               >
-                {t("prepAhead.open")} · {tomorrowPrep.supported.length}
+                {t("prepAhead.open")}
+                {tomorrowPrep.supported.length > 0
+                  ? ` · ${tomorrowPrep.supported.length}`
+                  : ""}
               </button>
             )}
             <button disabled={!planEditable} onClick={reroll} className="cta-primary inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium text-white disabled:opacity-45">
@@ -245,16 +252,26 @@ export default function WeekPage() {
                   );
                 })}
               </ul>
-              {reviewedCount >= 2 && (
-                      <button
-                        disabled={!planEditable}
+              <div className="mt-3 border-t border-hairline pt-3">
+                <button
+                  disabled={!planEditable || reviewedCount < 2}
                   type="button"
                   onClick={() => setCoordDay(day)}
-                  className="mt-3 w-full rounded-full border border-brand bg-brand-weak px-3 py-2 text-xs font-semibold text-brand"
+                  aria-describedby={reviewedCount < 2 ? `coord-reason-${day}` : undefined}
+                  className="w-full rounded-full border border-brand bg-brand-weak px-3 py-2 text-xs font-semibold text-brand disabled:cursor-not-allowed disabled:border-hairline disabled:bg-surface/60 disabled:text-muted disabled:opacity-75"
                 >
-                  {t("coord.open")} · {reviewedCount}
+                  {t("coord.open")}
+                  {reviewedCount >= 2 ? ` · ${reviewedCount}` : ""}
                 </button>
-              )}
+                {reviewedCount < 2 && (
+                  <p
+                    id={`coord-reason-${day}`}
+                    className="mt-1.5 text-center text-[10px] leading-relaxed text-muted"
+                  >
+                    {t("coord.needsReviewed")}
+                  </p>
+                )}
+              </div>
             </section>
           );
         })}

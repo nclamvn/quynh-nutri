@@ -1,7 +1,8 @@
 {
   "app.title": "Family Meals",
   "nav.week": "Weekly menu",
-  "nav.shopping": "Market & Pantry",
+  "nav.shopping": "Market",
+  "nav.pantry": "Pantry & Fridge",
   "nav.suppliers": "Suppliers",
   "supplier.title": "Suppliers",
   "supplier.meta": "{count} places",
@@ -59,6 +60,9 @@
   "shopping.tripDry": "Dry goods",
   "shopping.unassigned": "Unassigned vendor",
   "shopping.empty": "No week plan yet — create a week first.",
+  "shopping.emptyTitle": "The shopping list starts with your real meal plan",
+  "shopping.emptyBody": "When the plan needs ingredients, they appear here. Tap an ingredient name for choosing and storage guidance; tap its square to confirm the actual purchase.",
+  "shopping.emptyAction": "Open weekly menu",
   "nutrition.title": "Nutrition",
   "nutrition.perDay": "Per day",
   "nutrition.household": "Household",
@@ -429,6 +433,9 @@
   "agenda.eyebrow": "Housekeeper rhythm",
   "agenda.title": "Kitchen tasks today",
   "agenda.empty": "There are no kitchen tasks with enough recorded evidence.",
+  "agenda.emptyBody": "The housekeeper only derives reminders from meal plans, purchases, stored lots, and leftovers confirmed by the household.",
+  "agenda.emptyWeekAction": "View meal plan",
+  "agenda.emptyPantryAction": "Record pantry data",
   "agenda.derivedNote": "Updates from household-recorded data",
   "agenda.viewAll": "View all",
   "agenda.sheetIntro": "This list is derived from the meal plan, shopping, inventory, and leftovers. Complete work in its source flow; the agenda never marks it done automatically.",
@@ -470,6 +477,27 @@
   "agenda.action.openPantry": "Open inventory",
   "agenda.action.openShopping": "Open shopping",
   "agenda.action.openWeek": "Open meal plan"
+  ,"housekeeper.eyebrow": "Food housekeeper"
+  ,"housekeeper.title": "Start with your household's real data"
+  ,"housekeeper.intro": "Three connected stages. The housekeeper only guides as far as the household has recorded evidence."
+  ,"housekeeper.week.title": "Plan the week"
+  ,"housekeeper.week.empty": "There is no meal plan to work from yet."
+  ,"housekeeper.week.ready": "{days} days · {items} dishes in the plan"
+  ,"housekeeper.week.action": "Open meal plan"
+  ,"housekeeper.shopping.title": "Shop"
+  ,"housekeeper.shopping.empty": "The shopping list will be calculated from the meal plan."
+  ,"housekeeper.shopping.ready": "{remaining} items still need confirmation"
+  ,"housekeeper.shopping.action": "Open shopping list"
+  ,"housekeeper.store.title": "Cook & store"
+  ,"housekeeper.store.empty": "No purchased food or leftovers have been confirmed."
+  ,"housekeeper.store.ready": "{lots} ingredient lots · {leftovers} leftovers"
+  ,"housekeeper.store.action": "Open Pantry & Fridge"
+  ,"housekeeper.loading": "Reading household data…"
+  ,"ov.openCookingPlan": "Open cooking coordination"
+  ,"coord.needsReviewed": "At least 2 dishes need reviewed cooking guides"
+  ,"pantry.emptyTitle": "The pantry only records what your household actually stored"
+  ,"pantry.emptyBody": "Confirm purchased items from the Market page to create individual lots with storage location and label date. The app never guesses what is in your kitchen."
+  ,"pantry.emptyAction": "Go to Market"
   ,"prepAhead.open": "Prepare for tomorrow"
   ,"prepAhead.title": "Prepare tomorrow's meals"
   ,"prepAhead.reviewed": "From reviewed guidance"

@@ -1,14 +1,15 @@
 import {
   CalendarIcon, BasketIcon, BowlIcon, ChartIcon, GearIcon,
   OverviewIcon, ReportIcon, HeartIcon, NoteIcon, HealthIcon, StoreIcon,
+  PantryIcon,
 } from "./components/icons";
 
 export type NavItem = { href: string; key: string; icon: (p: { className?: string }) => React.ReactElement };
 
 /**
  * Single source of nav — Sidebar (desktop) and MobileMenu (bottom sheet) both
- * render from this, so the two never drift. All 9 areas + settings have routes;
- * SHELL areas (reports/pantry) keep their in-page demo badge.
+ * render from this, so the two never drift. Every app area is reachable here;
+ * the four-item mobile TabBar remains the compact daily-use shortcut.
  */
 export const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
   {
@@ -18,6 +19,7 @@ export const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
       { href: "/health", key: "nav.health", icon: HealthIcon },
       { href: "/week", key: "nav.week", icon: CalendarIcon },
       { href: "/shopping", key: "nav.shopping", icon: BasketIcon },
+      { href: "/pantry", key: "nav.pantry", icon: PantryIcon },
       { href: "/suppliers", key: "nav.suppliers", icon: StoreIcon },
       { href: "/dishes", key: "nav.dishes", icon: BowlIcon },
       { href: "/nutrition", key: "nav.nutrition", icon: ChartIcon },

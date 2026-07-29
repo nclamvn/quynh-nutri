@@ -9,7 +9,7 @@ test("derived agenda → leftover source flow → agenda updates without local d
   await page.setViewportSize({ width: 390, height: 860 });
   await page.goto("/week");
 
-  await page.getByRole("button", { name: /Phối hợp nấu/ }).first().click();
+  await page.locator('button:not(:disabled)').filter({ hasText: "Phối hợp nấu" }).first().click();
   await page.getByRole("button", { name: "Tạo timeline nấu" }).click();
   const run = page.getByRole("dialog", { name: "Timeline dọn cơm" });
   while (await run.getByRole("button", { name: "Bắt đầu món" }).count()) {

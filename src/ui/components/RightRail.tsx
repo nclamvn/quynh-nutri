@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
@@ -68,9 +69,12 @@ function TodayRail() {
               </li>
             ))}
           </ul>
-          <button className="cta-primary mt-4 w-full rounded-full py-2.5 text-sm font-medium text-white">
-            {t("ov.startCooking")}
-          </button>
+          <Link
+            href="/week"
+            className="cta-primary mt-4 block w-full rounded-full py-2.5 text-center text-sm font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            {t("ov.openCookingPlan")} →
+          </Link>
         </div>
       </section>
 

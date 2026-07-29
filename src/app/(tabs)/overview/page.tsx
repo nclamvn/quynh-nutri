@@ -18,6 +18,7 @@ import { useCountUp } from "@/ui/hooks/useCountUp";
 import type { FoodGroup } from "@/domain/nutrition";
 import { useKitchenAgenda } from "@/ui/hooks/useKitchenAgenda";
 import { KitchenAgendaCard } from "@/ui/components/KitchenAgendaCard";
+import { HousekeeperPathCard } from "@/ui/components/HousekeeperPathCard";
 
 const GROUP_COLORS: [FoodGroup, string][] = [
   ["đạm", "var(--chart-protein)"],
@@ -87,6 +88,7 @@ export default function OverviewPage() {
         </div>
       </header>
 
+      <HousekeeperPathCard />
       <KitchenAgendaCard agenda={agenda} />
 
       {plan.slots.length === 0 ? (

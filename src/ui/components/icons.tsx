@@ -38,6 +38,13 @@ export const BasketIcon = (p: P) => (
     <path d="M9 8 12 3l3 5M9.5 12v4M14.5 12v4" />
   </svg>
 );
+export const PantryIcon = (p: P) => (
+  <svg {...base(p)}>
+    <rect x="4" y="2.5" width="16" height="19" rx="2.5" />
+    <path d="M4 10h16M8 6.2h.01M8 15.5h.01" />
+    <path d="M12 2.5v19" />
+  </svg>
+);
 export const BowlIcon = (p: P) => (
   <svg {...base(p)}>
     <path d="M3 11h18a9 9 0 0 1-18 0Z" />

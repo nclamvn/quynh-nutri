@@ -48,12 +48,25 @@ export default function ShoppingPage() {
       />
 
       {shopping.length === 0 ? (
-        <div className="relative grid min-h-[45vh] place-content-center justify-items-center text-center">
+        <section
+          aria-labelledby="shopping-empty-title"
+          className="card relative grid min-h-[42vh] place-content-center justify-items-center overflow-hidden p-6 text-center"
+        >
           <Blossom size={110} className="pointer-events-none absolute -top-2 text-brand/10" />
           <span className="relative mb-3 text-brand/50"><BasketIcon className="h-12 w-12" /></span>
-          <p className="relative text-sm font-medium">{t("shopping.empty")}</p>
-          <Link href="/week" className="relative mt-2 text-sm font-medium text-brand">{t("week.title")} →</Link>
-        </div>
+          <h2 id="shopping-empty-title" className="relative text-base font-semibold">
+            {t("shopping.emptyTitle")}
+          </h2>
+          <p className="relative mt-2 max-w-lg text-sm leading-relaxed text-muted">
+            {t("shopping.emptyBody")}
+          </p>
+          <Link
+            href="/week"
+            className="cta-primary relative mt-5 rounded-full px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            {t("shopping.emptyAction")} →
+          </Link>
+        </section>
       ) : (
         <div data-stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {groups.map((g, gi) => {

@@ -59,7 +59,26 @@ export function KitchenAgendaCard({ agenda }: { agenda: KitchenAgenda }) {
         </div>
 
         {agenda.tasks.length === 0 ? (
-          <p className="px-4 py-5 text-sm text-muted">{t("agenda.empty")}</p>
+          <div className="px-4 py-5">
+            <p className="text-sm font-medium">{t("agenda.empty")}</p>
+            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted">
+              {t("agenda.emptyBody")}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link
+                href="/week"
+                className="rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                {t("agenda.emptyWeekAction")} →
+              </Link>
+              <Link
+                href="/pantry"
+                className="rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                {t("agenda.emptyPantryAction")} →
+              </Link>
+            </div>
+          </div>
         ) : (
           <ol className="divide-y divide-hairline px-4">
             {agenda.tasks.slice(0, 3).map((task) => (

@@ -205,11 +205,25 @@ export default function PantryPage() {
           </div>
 
           {availableLots.length === 0 ? (
-            <div className="relative grid min-h-[35vh] place-content-center justify-items-center text-center">
+            <section
+              aria-labelledby="pantry-empty-title"
+              className="card relative grid min-h-[34vh] place-content-center justify-items-center overflow-hidden p-6 text-center"
+            >
               <Blossom size={120} className="pointer-events-none absolute -top-2 text-brand/10" />
               <span className="relative mb-3 text-tertiary"><BasketIcon className="h-12 w-12" /></span>
-              <p className="relative text-sm text-muted">{t("pantry.empty")}</p>
-            </div>
+              <h2 id="pantry-empty-title" className="relative text-base font-semibold">
+                {t("pantry.emptyTitle")}
+              </h2>
+              <p className="relative mt-2 max-w-lg text-sm leading-relaxed text-muted">
+                {t("pantry.emptyBody")}
+              </p>
+              <Link
+                href="/shopping"
+                className="cta-primary relative mt-5 rounded-full px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                {t("pantry.emptyAction")} →
+              </Link>
+            </section>
           ) : (
             <>
               <div className="mb-2 flex items-end justify-between gap-3">
