@@ -571,16 +571,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // ── Phase 2 — Suppliers (household-owned, DB-persisted) ──
   const saveSupplierFn = useCallback((input: SupplierInput) => {
     touched.current.suppliers = true;
-    // Optimistic: temp id for a new one, then swap in the DB row.
-    const tempId = input.id || `tmp_${Date.now()}_${Math.round(Math.random() * 1e6)}`;
-    const optimistic: Supplier = { ...input, id: tempId, householdId: household.id };
-    setSuppliers((prev) => {
-      const i = prev.findIndex((s) => s.id === input.id);
-      return i >= 0 ? prev.map((s, j) => (j === i ? optimistic : s)) : [...prev, optimistic];
-    });
+    // A new supplier must receive its canonical DB id before order actions are
+    // exposed. Showing a temporary supplier allowed a fast "open channel" click
+    // to create an order against an id that the database would immediately
+    // replace, leaving the order orphaned.
+    if (input.id) {
+      const optimistic: Supplier = { ...input, householdId: household.id };
+      setSuppliers((prev) => prev.map((supplier) => (
+        supplier.id === input.id ? optimistic : supplier
+      )));
+    }
     import("@/app/actions")
       .then(({ persistSupplier }) => persistSupplier(input))
-      .then((saved) => setSuppliers((prev) => prev.map((s) => (s.id === tempId || s.id === saved.id ? saved : s))))
+      .then((saved) => setSuppliers((prev) => {
+        const existingIndex = prev.findIndex((supplier) => supplier.id === saved.id);
+        return existingIndex >= 0
+          ? prev.map((supplier, index) => (index === existingIndex ? saved : supplier))
+          : [...prev, saved];
+      }))
       .catch(() => toast(SAVE_FAIL_MSG, "error"));
   }, [household.id]);
 
