@@ -19,14 +19,18 @@ export function Memory() {
     <section ref={ref} className={`memory${inView ? " in-view" : ""}`} id="memory">
       <Blossom variant="line" size={280} className="memory-bloom" />
       <div className="memory-head">
-        <div className="memory-head-side">
-          <div className="section-label"><span className="round-no">03</span>Càng dùng càng giống nhà mình</div>
-          <figure className="memory-photo">
-            <Image src="/landing/marquee/goi-cuon.jpg" alt="" fill sizes="(max-width: 680px) calc(100vw - 40px), 136px" />
-          </figure>
-        </div>
+        <div className="section-label"><span className="round-no">03</span>Càng dùng càng giống nhà mình</div>
         <h2 className="display">Không chỉ nhớ món. <em>Nhớ cả cách gia đình mình sống.</em></h2>
       </div>
+      <figure className="memory-photo">
+        <div className="memory-photo-media">
+          <Image src="/landing/marquee/goi-cuon.jpg" alt="" fill sizes="(max-width: 680px) calc(100vw - 40px), 50vw" />
+        </div>
+        <figcaption>
+          <small>Trí nhớ của nhà mình</small>
+          Một lần đổi món hôm nay trở thành gợi ý tốt hơn cho tuần sau.
+        </figcaption>
+      </figure>
       <div className="memory-rows">
         {ROWS.map((r, i) => (
           <article key={r.n} className="memory-row" style={{ "--i": i } as React.CSSProperties}>

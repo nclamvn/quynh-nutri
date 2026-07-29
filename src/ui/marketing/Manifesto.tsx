@@ -10,16 +10,21 @@ export function Manifesto() {
   const { ref, inView } = useInView<HTMLElement>();
   return (
     <section ref={ref} className={`manifesto${inView ? " in-view" : ""}`} id="philosophy">
-      <div className="manifesto-side">
+      <Blossom variant="line" size={260} className="manifesto-bloom" />
+      <div className="manifesto-head">
         <div className="section-label"><span className="round-no">02</span>Quan điểm sản phẩm</div>
-        <figure className="manifesto-photo">
-          <Image src="/landing/marquee/pho-bo.jpg" alt="" fill sizes="(max-width: 680px) calc(100vw - 40px), 240px" />
-        </figure>
-        <Blossom variant="line" size={240} className="manifesto-bloom" />
+        <div className="manifesto-main">
+          <p className="manifesto-lead">Không phải thêm một app đếm calo</p>
+          <h2 className="display">Một tuần có thể <em>sống được.</em></h2>
+        </div>
       </div>
-      <div className="manifesto-main">
-        <p className="manifesto-lead">Không phải thêm một app đếm calo</p>
-        <h2 className="display">Một tuần có thể <em>sống được.</em></h2>
+      <div className="manifesto-story">
+        <figure className="manifesto-photo">
+          <div className="manifesto-photo-media">
+            <Image src="/landing/marquee/pho-bo.jpg" alt="" fill sizes="(max-width: 680px) calc(100vw - 40px), 58vw" />
+          </div>
+          <figcaption>Món quen không cần lặp lại theo một cách cứng nhắc.</figcaption>
+        </figure>
         <div className="manifesto-foot">
           <p>Có hôm chỉ đủ hai mươi phút để nấu. Có ngày trong tủ đã sẵn món từ tối trước. Có cuối tuần cả nhà muốn ngồi ăn thong thả hơn. Bữa cơm nhà bắt đầu từ những điều rất thật ấy – để sắp một tuần đủ ngon, đủ cân đối mà người nấu không phải xoay xở lại từ đầu mỗi chiều.</p>
           <span className="seal">

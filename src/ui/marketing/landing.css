@@ -8,7 +8,7 @@
 @keyframes lp-ping { 70% { box-shadow: 0 0 0 10px transparent; } }
 @keyframes lp-rail { 0%, 100% { transform: scaleX(0.35); opacity: 0.35; } 50% { transform: scaleX(1); opacity: 1; } }
 @keyframes lp-spin { to { transform: rotate(360deg); } }
-@keyframes lp-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes lp-rise { from { opacity: 1; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 /* coverage-gauge keyframes — MUST live at top level (never nested inside .lp,
    which is invalid CSS and can make strict parsers drop the whole .lp block). */
 @keyframes g-fill { from { stroke-dashoffset: 100; } }
@@ -127,23 +127,26 @@
   .ticker-group span { display: flex; align-items: center; gap: 2.5rem; }
   .ticker b { color: var(--acid); font-size: 0.55rem; }
 
-  /* manifesto */
-  .manifesto { position: relative; display: grid; grid-template-columns: minmax(15rem, 0.95fr) 2fr; gap: 5vw; padding: clamp(6rem, 11vw, 11rem) var(--lp-gutter); overflow: hidden; }
+  /* manifesto — one wide editorial spread: thesis, then image + reading note. */
+  .manifesto { position: relative; padding: clamp(6rem, 11vw, 11rem) var(--lp-gutter); overflow: hidden; }
   .section-label { align-self: start; color: rgba(23, 18, 20, 0.58); }
-  /* Enriched 02: an editorial framed dish print + a botanical line-art behind. */
-  .manifesto-side { position: relative; display: flex; flex-direction: column; gap: 2.4rem; }
+  .manifesto-head { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(14rem, 0.8fr) minmax(0, 2.2fr); gap: 5vw; align-items: start; }
   .manifesto-main { position: relative; }
-  .manifesto-photo { position: relative; z-index: 1; margin: 0; width: 15rem; max-width: 88%; aspect-ratio: 4/5; overflow: hidden; border-radius: 7px; transform: rotate(-2.6deg); border: 7px solid #fff; box-shadow: 0 28px 56px rgba(23, 18, 20, 0.2); }
-  .manifesto-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .manifesto-bloom { position: absolute; z-index: 0; bottom: -3.5rem; left: -3.5rem; color: color-mix(in srgb, var(--wine) 12%, transparent); }
+  .manifesto-story { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(17rem, 0.62fr); gap: clamp(2.5rem, 5vw, 5.5rem); align-items: end; margin-top: clamp(3rem, 6vw, 5.5rem); }
+  .manifesto-photo { margin: 0; min-width: 0; }
+  .manifesto-photo-media { position: relative; width: 100%; aspect-ratio: 16/10; overflow: hidden; border-radius: 18px; box-shadow: 0 32px 80px rgba(23, 18, 20, 0.17); }
+  .manifesto-photo img { object-fit: cover; }
+  .manifesto-photo figcaption { margin-top: 0.9rem; color: var(--muted); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  .manifesto-bloom { position: absolute; z-index: 0; top: 42%; right: -4.5rem; color: color-mix(in srgb, var(--wine) 10%, transparent); pointer-events: none; }
   .manifesto.in-view .manifesto-photo { animation: lp-rise 0.75s var(--ease-emphasized) both; }
   .manifesto.in-view .manifesto-lead { animation: lp-rise 0.6s var(--ease-emphasized) both; }
   .manifesto.in-view .display { animation: lp-rise 0.7s 0.08s var(--ease-emphasized) both; }
   .manifesto-lead { margin: 0 0 1.2rem; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
   .display { margin: 0; max-width: 1100px; font-size: clamp(3.4rem, 7.4vw, 8.2rem); line-height: 1.04; letter-spacing: -0.072em; font-weight: 790; }
   .display em { display: block; font-family: var(--serif); font-weight: 400; font-style: italic; color: var(--rose); }
-  .manifesto-foot { display: grid; grid-template-columns: minmax(18rem, 33rem) auto; align-items: center; gap: 4rem; margin: 3rem 0 0 24%; }
-  .manifesto-foot p { font-size: 1.03rem; line-height: 1.68; color: var(--muted); }
+  .manifesto-foot { display: flex; flex-direction: column; align-items: flex-start; gap: 2.4rem; }
+  .manifesto-foot p { margin: 0; max-width: 34rem; font-size: 1.03rem; line-height: 1.72; color: var(--muted); }
+  .manifesto-foot .seal { align-self: flex-end; }
   .seal { position: relative; display: grid; place-items: center; width: 8rem; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; }
   /* dashed inner ring is static (never rotates → can't overlap anything) */
   .seal::after { content: ""; position: absolute; inset: 0.55rem; border: 1px dashed rgba(23, 18, 20, 0.25); border-radius: 50%; }
@@ -191,23 +194,23 @@
   .stage-copy p { font-size: 0.97rem; line-height: 1.65; color: var(--muted); }
   .stage-copy a { display: inline-block; margin-top: 0.6rem; font-size: 0.72rem; font-weight: 800; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 0.25rem; }
 
-  /* memory */
+  /* memory — dark editorial folio: thesis, panoramic memory, then the ledger. */
   .memory { position: relative; overflow: hidden; padding: clamp(6rem, 10vw, 10rem) var(--lp-gutter); background:
     radial-gradient(900px 520px at 100% 0%, rgba(70, 155, 117, 0.1), transparent 58%),
     radial-gradient(800px 480px at 0% 100%, rgba(243, 93, 125, 0.1), transparent 55%),
     var(--ink); color: var(--ivory); }
-  /* Enriched 03: botanical line-art in a corner + a small framed dish accent + a
-     staggered row reveal. Full-width rows kept — no cards. */
   .memory-bloom { position: absolute; z-index: 0; top: 1.5rem; right: -3rem; color: rgba(255, 250, 244, 0.06); pointer-events: none; }
   .memory-head { position: relative; z-index: 1; display: grid; grid-template-columns: 0.8fr 2.2fr; gap: 5vw; align-items: start; }
-  .memory-head-side { display: flex; flex-direction: column; gap: 2rem; }
-  .memory-photo { position: relative; margin: 0; width: 8.5rem; max-width: 60%; aspect-ratio: 1; overflow: hidden; border-radius: 7px; transform: rotate(3deg); border: 5px solid rgba(255, 250, 244, 0.92); box-shadow: 0 22px 48px rgba(0, 0, 0, 0.45); }
-  .memory-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .memory-photo { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.55fr); margin: clamp(3rem, 6vw, 5.5rem) 0 0; overflow: hidden; border: 1px solid rgba(255, 250, 244, 0.18); border-radius: 18px; background: rgba(255, 250, 244, 0.035); }
+  .memory-photo-media { position: relative; min-height: clamp(22rem, 36vw, 35rem); overflow: hidden; }
+  .memory-photo img { object-fit: cover; }
+  .memory-photo figcaption { display: flex; flex-direction: column; justify-content: flex-end; gap: 0.85rem; padding: clamp(1.6rem, 3vw, 3rem); border-left: 1px solid rgba(255, 250, 244, 0.14); font: italic 400 clamp(1.45rem, 2.2vw, 2.15rem)/1.28 var(--serif); color: rgba(255, 250, 244, 0.9); }
+  .memory-photo figcaption small { font: 750 0.55rem/1.4 var(--font-sans); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 250, 244, 0.48); }
   .memory.in-view .memory-photo { animation: lp-rise 0.7s var(--ease-emphasized) both; }
   .memory.in-view .display { animation: lp-rise 0.7s var(--ease-emphasized) both; }
   .memory .section-label { color: rgba(255, 250, 244, 0.53); }
   .memory .display em { color: var(--rose); }
-  .memory-rows { position: relative; z-index: 1; margin-top: 5.5rem; border-top: 1px solid rgba(255, 255, 255, 0.2); }
+  .memory-rows { position: relative; z-index: 1; margin-top: clamp(3.5rem, 6vw, 5.5rem); border-top: 1px solid rgba(255, 255, 255, 0.2); }
   .memory.in-view .memory-row { animation: lp-rise 0.6s var(--ease-emphasized) both; animation-delay: calc(0.15s + var(--i, 0) * 0.12s); }
   .memory-row { display: grid; grid-template-columns: 0.35fr 1fr 1.6fr auto; align-items: center; gap: 2rem; padding: 2.1rem 0.4rem; border-bottom: 1px solid rgba(255, 255, 255, 0.2); transition: 0.2s; }
   .memory-row:hover { padding-inline: 1.2rem; background: var(--rose); }
@@ -310,6 +313,7 @@
   footer p { margin: 0; }
   footer small { display: block; margin-top: 0.2rem; opacity: 0.52; }
   footer a { text-decoration: none; }
+  footer a:hover { color: var(--ivory); }
 
   @media (max-width: 960px) {
     .nav { grid-template-columns: 1fr auto; }
@@ -319,11 +323,11 @@
     .hero h1 { font-size: clamp(4rem, 11vw, 6.6rem); }
     .hero-intro { grid-template-columns: 1fr; margin-left: 12%; }
     .rail { display: none; }
-    .manifesto { grid-template-columns: 1fr; }
-    .manifesto-foot { margin-left: 10%; }
-    .stage-inner { grid-template-columns: 1fr; gap: 2.5rem; }
-    .photo { aspect-ratio: 4/3; }
-    .app { width: min(78%, 340px); }
+    .stage-inner { display: flex; flex-direction: column; align-items: stretch; gap: 2.5rem; }
+    .stage-copy { order: 1; }
+    .stage-media { order: 2; display: grid; gap: 1.25rem; }
+    .photo { order: 1; aspect-ratio: 4/3; transform: none; overflow: hidden; border-radius: 18px; }
+    .app { position: relative; inset: auto; order: 2; width: 100%; transform: none; }
     .stage-copy { max-width: none; }
     .memory-head, .truth-grid { grid-template-columns: 1fr; }
   }
@@ -345,17 +349,42 @@
     .proof { display: none; }
     .media-caption { left: var(--lp-gutter); right: auto; bottom: 1.2rem; }
     .display { font-size: clamp(3.2rem, 16vw, 5rem); }
-    .manifesto-foot { grid-template-columns: 1fr; margin-left: 0; gap: 2rem; }
-    .photo { aspect-ratio: 4/5; }
-    .app { right: 2%; bottom: 4%; width: min(84%, 300px); padding: 0.7rem; border-radius: 1.35rem; }
+    .manifesto { padding-block: 5.5rem; }
+    .manifesto-head { grid-template-columns: 1fr; gap: 2.5rem; }
+    .manifesto-story { grid-template-columns: 1fr; gap: 2rem; margin-top: 3rem; }
+    .manifesto-photo-media { aspect-ratio: 4/3; border-radius: 16px; }
+    .manifesto-foot { gap: 1.75rem; }
+    .manifesto-foot .seal { align-self: flex-start; width: 7rem; }
+    .manifesto-bloom { top: auto; right: -5rem; bottom: 1rem; }
+
+    /* Mobile is a reading edition: thesis → complete meal photo → complete app.
+       The interface is never positioned over photography. */
+    .stage { padding-block: 4.75rem; }
+    .stage-inner { display: flex; flex-direction: column; align-items: stretch; gap: 2.25rem; }
+    .stage-copy { order: 1; }
+    .stage-media { order: 2; display: grid; gap: 1rem; }
+    .photo { position: relative; order: 1; aspect-ratio: 4/3; transform: none; overflow: hidden; border-radius: 16px; box-shadow: 0 22px 55px rgba(23, 18, 20, 0.17); }
+    .app { position: relative; inset: auto; order: 2; width: 100%; padding: 0.75rem; border-radius: 16px; transform: none; }
     .days span { width: 1.9rem; }
     .app-foot { align-items: flex-start; flex-direction: column; }
     .app-foot .foot-cta { width: 100%; text-align: center; }
     .stage-copy h2 { font-size: clamp(2.4rem, 9vw, 3.2rem); }
-    .memory-rows { margin-top: 3rem; }
+
+    .memory { padding-block: 5.5rem; }
+    .memory-head { gap: 2.5rem; }
+    .memory-photo { grid-template-columns: 1fr; margin-top: 3rem; border-radius: 16px; }
+    .memory-photo-media { min-height: 0; aspect-ratio: 4/3; }
+    .memory-photo figcaption { padding: 1.5rem; border-top: 1px solid rgba(255, 250, 244, 0.14); border-left: 0; }
+    .memory-rows { margin-top: 3.25rem; }
     .memory-row { grid-template-columns: auto 1fr auto; gap: 1rem; }
     .memory-row p { grid-column: 2/4; }
+
     .truth-top span:last-child { display: none; }
+    .truth { padding-block: 5.5rem 3.5rem; }
+    .truth-grid { gap: 2.5rem; padding: 3rem 0; }
+    .truth-grid > div:first-child > p:last-child { margin-top: 1.25rem; line-height: 1.65; color: var(--muted); }
+    .confidence { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 1.25rem; }
+    .confidence .gauge { width: 92px; }
     /* mobile: the three tiers read as ONE scale — compact horizontal rows (ring
        left, text right), close together, so all three fit in one glance instead
        of floating far apart down the page. */
@@ -366,18 +395,22 @@
     .trust article > div { min-width: 0; }
     .g-mid b { font-size: 1.05rem; }
     .ribbon { flex-wrap: wrap; }
-    .quote blockquote { font-size: clamp(2.7rem, 13vw, 4.7rem); }
-    .quote-meta { align-items: center; flex-direction: column; gap: 0.8rem; }
-    .final { min-height: 100svh; }
-    .final-q { font-size: clamp(3.6rem, 22vw, 6.6rem); }
+    .quote { padding-block: 7rem; text-align: left; }
+    .quote:before { left: 0.02em; transform: none; }
+    .quote blockquote { margin: 0; font-size: clamp(2.7rem, 13vw, 4.7rem); }
+    .quote-meta { align-items: flex-start; flex-direction: column; gap: 0.65rem; margin-top: 3rem; padding-top: 1.1rem; border-top: 1px solid rgba(255, 255, 255, 0.35); }
+
+    .final { min-height: auto; display: flex; flex-direction: column; align-items: stretch; padding: 0 var(--lp-gutter) 5rem; }
+    .final-dish { position: relative; inset: auto; order: 1; width: calc(100% + 2.5rem); aspect-ratio: 4/3; margin: 0 0 3.5rem -1.25rem; border: 0; border-radius: 0 0 24px 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42); }
+    .final-inner { order: 2; }
+    .final-eyebrow { max-width: none; }
+    .final-q { font-size: clamp(3.6rem, 18vw, 5.5rem); }
     .final-actions { width: 100%; flex-direction: column; align-items: flex-start; }
     .final-actions .btn { width: 100%; text-align: center; }
-    /* mobile: section dish photos shown FULL width, centered, untilted */
-    .manifesto-photo, .memory-photo { width: 100%; max-width: none; aspect-ratio: 4/3; transform: none; margin-inline: auto; }
-    .manifesto-side, .memory-head-side { align-items: center; text-align: center; }
-    .final-dish { top: clamp(2.5rem, 8vh, 6rem); left: 50%; right: auto; width: min(72vw, 310px); margin-left: calc(min(72vw, 310px) / -2); }
-    footer { grid-template-columns: 1fr; align-items: start; }
-    footer > p { order: 3; }
-    footer > div:last-child { justify-self: start; }
+
+    footer { grid-template-columns: 1fr; align-items: start; gap: 1.5rem; padding-block: 2.25rem; }
+    footer > p { order: 3; max-width: 32rem; line-height: 1.55; }
+    footer > div:first-child { align-items: flex-start; }
+    footer > div:last-child { width: 100%; justify-self: start; flex-wrap: wrap; gap: 0.8rem 1.4rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
   }
 }

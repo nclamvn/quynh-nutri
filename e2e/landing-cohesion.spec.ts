@@ -90,3 +90,72 @@ test("landing has no horizontal overflow at supported breakpoints", async ({ pag
     expect(overflow, `horizontal overflow at ${viewport.width}px`).toBe(0);
   }
 });
+
+test("mobile landing unfolds every post-hero story without hidden or overlapping content", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const visibleContent = [
+    ".manifesto h2",
+    ".manifesto-photo",
+    ".memory h2",
+    ".memory-photo",
+    ".memory-row",
+    ".truth h2",
+    ".trust article",
+    ".final-dish",
+    ".final-inner",
+  ];
+  for (const selector of visibleContent) {
+    const locator = page.locator(selector);
+    await expect(locator.first(), `${selector} must be visible immediately`).toBeVisible();
+    const opacities = await locator.evaluateAll((nodes) =>
+      nodes.map((node) => getComputedStyle(node).opacity),
+    );
+    expect(opacities, `${selector} must never be faded to zero`).not.toContain("0");
+  }
+
+  const boxes = async (selectors: string[]) =>
+    Promise.all(selectors.map((selector) => page.locator(selector).first().boundingBox()));
+  const follows = (first: Awaited<ReturnType<typeof boxes>>[number], second: Awaited<ReturnType<typeof boxes>>[number], label: string) => {
+    expect(first, `${label}: first element renders`).not.toBeNull();
+    expect(second, `${label}: second element renders`).not.toBeNull();
+    expect(second!.y, label).toBeGreaterThanOrEqual(first!.y + first!.height - 1);
+  };
+
+  const [manifestoHeading, manifestoPhoto, manifestoBody] = await boxes([
+    ".manifesto h2",
+    ".manifesto-photo",
+    ".manifesto-foot",
+  ]);
+  follows(manifestoHeading, manifestoPhoto, "Manifesto heading precedes photo");
+  follows(manifestoPhoto, manifestoBody, "Manifesto photo precedes body");
+
+  const [stageCopy, stagePhoto, stageApp, stageInner] = await boxes([".stage-copy", ".photo", ".app", ".stage-inner"]);
+  follows(stageCopy, stagePhoto, "Product thesis precedes photo");
+  follows(stagePhoto, stageApp, "Product photo precedes app folio");
+  expect(Math.abs(stageApp!.x - stageInner!.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageApp!.width - stageInner!.width)).toBeLessThanOrEqual(1);
+
+  const [memoryHeading, memoryPhoto, memoryRows] = await boxes([
+    ".memory h2",
+    ".memory-photo",
+    ".memory-rows",
+  ]);
+  follows(memoryHeading, memoryPhoto, "Memory thesis precedes photo");
+  follows(memoryPhoto, memoryRows, "Memory photo precedes rows");
+
+  const [finalPhoto, finalInner, finalSection, footer] = await boxes([
+    ".final-dish",
+    ".final-inner",
+    ".final",
+    "footer",
+  ]);
+  follows(finalPhoto, finalInner, "Final meal photo precedes CTA");
+  follows(finalSection, footer, "Footer starts after final CTA");
+
+  const appPosition = await page.locator(".app").evaluate((node) => getComputedStyle(node).position);
+  expect(["static", "relative"]).toContain(appPosition);
+  const footerLinks = page.locator("footer > div:last-child");
+  expect((await footerLinks.boundingBox())!.width).toBeLessThanOrEqual(350);
+});
