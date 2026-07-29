@@ -5,6 +5,7 @@ import { Manifesto } from "@/ui/marketing/Manifesto";
 import { Memory } from "@/ui/marketing/Memory";
 import { FinalCTA } from "@/ui/marketing/FinalCTA";
 import { DataTruth } from "@/ui/marketing/DataTruth";
+import { FlowerLogo } from "@/ui/components/FlowerLogo";
 import "@/ui/marketing/landing.css";
 
 // Public editorial landing (blueprint §5 order LOCKED), ported from the owner's
@@ -19,17 +20,12 @@ export const metadata: Metadata = {
 const hero = LANDING_MEDIA.hero;
 const stage = LANDING_MEDIA.stage;
 
-// Self-hosted Vietnamese-dish squares for the hero marquee (credits in
-// public/landing/marquee/CREDITS.md). Decorative – visualises "49 món nền".
-const MARQUEE = [
-  "pho-bo", "banh-mi", "goi-cuon", "cha-gio", "bun-bo-hue", "bun", "bun-chay",
-].map((f) => `/landing/marquee/${f}.jpg`);
-// Far layer reuses the same verified dishes, rotated so it never twins the near
-// row. 8 copies each → half the track is wider than any viewport, so the
-// translateX(-50%) loop is seamless. Different speeds per layer = parallax depth.
-const MARQUEE_FAR = [...MARQUEE.slice(3), ...MARQUEE.slice(0, 3)];
-const marqueeImgs = (arr: string[]) =>
-  Array.from({ length: 8 }).flatMap(() => arr);
+const VALUE_STRIP = [
+  "Xoay món theo ngày bận",
+  "Định lượng có nguồn",
+  "Gộp danh sách đi chợ",
+  "Nói thật độ chắc",
+];
 
 export default function LandingPage() {
   return (
@@ -39,59 +35,58 @@ export default function LandingPage() {
       {/* NAV */}
       <nav className="nav">
         <Link className="brand" href="/">
-          <span className="brand-mark">A</span>
-          <span>Ăn Ngon<small>Bữa cơm nhà</small></span>
+          <span className="brand-mark" data-landing-brand-mark>
+            <FlowerLogo size={35} />
+          </span>
+          <span>Bữa cơm nhà<small>Ăn Ngon · Q&apos;s Kitchen</small></span>
         </Link>
         <div className="nav-links">
           <a href="#philosophy">Cách dùng</a>
-          <a href="#data">Dữ liệu dinh dưỡng</a>
-          <Link href="/overview">Mở ứng dụng</Link>
+          <a href="#data">Dữ liệu</a>
+          <Link href="/sign-in">Đăng nhập</Link>
         </div>
-        <Link className="nav-cta" href="/sign-up">Lên thực đơn tuần này <span>↗</span></Link>
+        <Link className="nav-cta" href="/sign-up">Bắt đầu một tuần <span>↗</span></Link>
       </nav>
 
       {/* HERO */}
       <header className="hero" id="top">
         <div className="hero-bg" style={{ backgroundImage: `url('${hero.src}')` }} />
-        {/* "Bàn tiệc trôi qua" — two parallax layers (far drifts slow + small +
-           soft; near drifts faster, varied sizes, staggered) so it reads as a
-           table being laid, not a conveyor belt. Transform-only motion (GPU). */}
-        <div className="hero-marquee" aria-hidden>
-          <div className="mq-layer mq-far">
-            {marqueeImgs(MARQUEE_FAR).map((src, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={src} alt="" loading="lazy" />
-            ))}
+        <div className="hero-folio" aria-label="Minh họa một tuần được sắp theo nhịp gia đình">
+          <div className="hero-folio-mark"><FlowerLogo size={24} /></div>
+          <div>
+            <small>Tuần mẫu · Nhà mình</small>
+            <strong>2 ngày bận đã được ưu tiên món nhanh</strong>
           </div>
-          <div className="mq-layer mq-near">
-            {marqueeImgs(MARQUEE).map((src, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={src} alt="" loading="lazy" />
-            ))}
-          </div>
+          <span>Đã gộp chợ</span>
         </div>
-        <div className="proof"><b>92</b><span>% đã đối chiếu<small>dữ liệu có căn cứ</small></span></div>
+        <div className="proof"><b>92</b><span>% đã đối chiếu<small>minh họa dữ liệu</small></span></div>
         <a className="hero-credit" href={hero.sourceUrl} target="_blank" rel="noopener">Ảnh: {hero.author} / Unsplash ↗</a>
         <div className="media-caption"><i className="dot" />Kế hoạch đang thích nghi theo tuần này</div>
         <div className="rail"><span>Cuộn xuống xem một tuần được sắp</span><i /></div>
         <div className="hero-copy">
           <p className="eyebrow">Thực đơn tuần cho gia đình Việt</p>
-          <h1><span className="soft">Mỗi chiều, bớt một lần</span><span className="strong">phải nghĩ:</span><span className="accent">tối nay ăn gì?</span></h1>
+          <h1><span className="soft">Mỗi bữa cơm</span><span className="strong">đều có một</span><span className="accent">lý do.</span></h1>
           <div className="hero-intro">
-            <p>Bữa cơm nhà sắp thực đơn theo khẩu vị, số người và quỹ thời gian của gia đình. Từ món ăn, định lượng đến danh sách đi chợ, mọi thứ được nối lại gọn gàng cho cả tuần.</p>
+            <p>Một hệ thống lập bữa cho gia đình Việt, biết xoay món, cân lượng, gộp chợ và nói thật độ chắc của từng con số.</p>
             <div className="actions">
-              <Link className="btn" href="/sign-up">Lên thực đơn tuần này <span>→</span></Link>
-              <Link className="text-link" href="#product">Xem một tuần mẫu ↓</Link>
+              <Link className="btn" href="/sign-up">Lập tuần đầu tiên <span>→</span></Link>
+              <Link className="text-link" href="/overview">Mở ứng dụng</Link>
             </div>
           </div>
           <div className="orbital"><span>7 ngày được sắp sẵn</span><span>Khẩu phần theo số người</span><span>Danh sách chợ tự gộp</span></div>
         </div>
       </header>
 
-      {/* VALUE STRIP — four plain values, static + readable (no running caps) */}
-      <div className="ticker"><div className="ticker-track ticker-static">
-        <span>Xếp món theo ngày bận</span><b>·</b><span>Tự cân khẩu phần</span><b>·</b><span>Gộp danh sách đi chợ</span><b>·</b><span>Nói rõ mức dữ liệu</span>
-      </div></div>
+      {/* VALUE STRIP — the landing's single, restrained marquee. */}
+      <div className="ticker" aria-label={VALUE_STRIP.join(" · ")}>
+        <div className="ticker-track">
+          {[0, 1].map((copy) => (
+            <div className="ticker-group" key={copy} aria-hidden={copy === 1}>
+              {VALUE_STRIP.map((value) => <span key={value}>{value}<b>✦</b></span>)}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* MANIFESTO — enriched (client island for reveal) */}
       <Manifesto />
@@ -105,9 +100,9 @@ export default function LandingPage() {
               <div className="photo-note"><small>Thứ tư / 18:30</small>Canh khổ qua · thịt kho · rau luộc</div>
             </div>
             <div className="app">
-              <div className="app-top"><span>Tuần của nhà mình</span><b>21 – 27.07</b><i>•••</i></div>
+              <div className="app-top"><span><FlowerLogo size={18} /> Tuần của nhà mình</span><b>21 – 27.07</b><i>•••</i></div>
               <div className="days"><span>T2</span><span>T3</span><span className="on">T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
-              <div className="meal-head"><div><small>Bữa tối · 4 người</small><h3>Đủ món, vừa thời gian.</h3></div><span className="pill">Đã đối chiếu 92%</span></div>
+              <div className="meal-head"><div><small>Bữa tối · 4 người</small><h3>Đủ món, vừa thời gian.</h3></div><span className="pill">● Đã đối chiếu 92%</span></div>
               <div className="meal-list">
                 <div className="meal-row"><span className="index">01</span><div><h4>Canh khổ qua nhồi thịt</h4><p>650 g · đã tính phần hao hụt</p></div><b>≈ 28′</b></div>
                 <div className="meal-row"><span className="index">02</span><div><h4>Thịt kho trứng</h4><p>720 g · món đã chuẩn bị từ trước</p></div><b>có sẵn</b></div>
@@ -133,7 +128,7 @@ export default function LandingPage() {
 
       {/* QUOTE — brand statement */}
       <section className="quote">
-        <blockquote>Bữa cơm nhà không cần hoàn hảo. Chỉ cần đủ hợp với nhịp sống để cả nhà vẫn muốn ngồi lại cùng nhau.</blockquote>
+        <blockquote>Ăn ngon không bắt đầu từ ý chí. Nó bắt đầu từ một kế hoạch đủ thực tế để cả nhà cùng theo.</blockquote>
         <div className="quote-meta"><span>Tinh thần Ăn Ngon</span><span>Cho gia đình Việt</span></div>
       </section>
 
@@ -142,7 +137,7 @@ export default function LandingPage() {
 
       {/* FOOTER */}
       <footer>
-        <div><span className="footer-mark">A</span><p>Ăn Ngon<small>Bữa cơm nhà được xây quanh nhịp sống của gia đình Việt.</small></p></div>
+        <div><span className="footer-mark"><FlowerLogo size={30} /></span><p>Bữa cơm nhà<small>Được xây quanh nhịp sống của gia đình Việt.</small></p></div>
         <p>Một sản phẩm của Q&apos;s Kitchen · © 2026 · ảnh qua Unsplash ({hero.author}, {stage.author})</p>
         <div><a href="#philosophy">Cách dùng</a><a href="#data">Dữ liệu dinh dưỡng</a><Link href="/sign-in">Đăng nhập</Link></div>
       </footer>

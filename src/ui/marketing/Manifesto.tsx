@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Blossom } from "@/ui/components/Blossom";
 import { useInView } from "./useInView";
 
@@ -12,14 +13,13 @@ export function Manifesto() {
       <div className="manifesto-side">
         <div className="section-label"><span className="round-no">02</span>Quan điểm sản phẩm</div>
         <figure className="manifesto-photo">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/landing/marquee/pho-bo.jpg" alt="" loading="lazy" />
+          <Image src="/landing/marquee/pho-bo.jpg" alt="" fill sizes="(max-width: 680px) calc(100vw - 40px), 240px" />
         </figure>
         <Blossom variant="line" size={240} className="manifesto-bloom" />
       </div>
       <div className="manifesto-main">
-        <p className="manifesto-lead">Không bắt cuộc sống chạy theo thực đơn</p>
-        <h2 className="display">Một tuần vừa với <em>nhịp sống nhà mình.</em></h2>
+        <p className="manifesto-lead">Không phải thêm một app đếm calo</p>
+        <h2 className="display">Một tuần có thể <em>sống được.</em></h2>
         <div className="manifesto-foot">
           <p>Có hôm chỉ đủ hai mươi phút để nấu. Có ngày trong tủ đã sẵn món từ tối trước. Có cuối tuần cả nhà muốn ngồi ăn thong thả hơn. Bữa cơm nhà bắt đầu từ những điều rất thật ấy – để sắp một tuần đủ ngon, đủ cân đối mà người nấu không phải xoay xở lại từ đầu mỗi chiều.</p>
           <span className="seal">

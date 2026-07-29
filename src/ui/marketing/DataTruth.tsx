@@ -58,7 +58,7 @@ export function DataTruth() {
       <div className="truth-grid">
         <div>
           <p className="manifesto-lead">Biết đến đâu, nói rõ đến đó</p>
-          <h2 className="display">Con số nào cũng nói rõ <em>mình chắc đến đâu.</em></h2>
+          <h2 className="display">Con số nào cũng phải biết <em>mình chắc đến đâu.</em></h2>
           <p>Một con số dinh dưỡng chỉ thực sự hữu ích khi bạn biết nó được tính từ đâu và còn bao nhiêu phần chưa chắc chắn.</p>
         </div>
         <div className="confidence">

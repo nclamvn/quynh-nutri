@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Blossom } from "@/ui/components/Blossom";
 import { useInView } from "./useInView";
 
@@ -21,8 +22,7 @@ export function Memory() {
         <div className="memory-head-side">
           <div className="section-label"><span className="round-no">03</span>Càng dùng càng giống nhà mình</div>
           <figure className="memory-photo">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/landing/marquee/goi-cuon.jpg" alt="" loading="lazy" />
+            <Image src="/landing/marquee/goi-cuon.jpg" alt="" fill sizes="(max-width: 680px) calc(100vw - 40px), 136px" />
           </figure>
         </div>
         <h2 className="display">Không chỉ nhớ món. <em>Nhớ cả cách gia đình mình sống.</em></h2>

@@ -8,14 +8,7 @@
 @keyframes lp-ping { 70% { box-shadow: 0 0 0 10px transparent; } }
 @keyframes lp-rail { 0%, 100% { transform: scaleX(0.35); opacity: 0.35; } 50% { transform: scaleX(1); opacity: 1; } }
 @keyframes lp-spin { to { transform: rotate(360deg); } }
-/* Step 1 data-truth: sequential reveal + the one-time "confidence grows" demo
-   (gray → honey → green). Frozen to the final (green) state under reduced-motion. */
 @keyframes lp-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-@keyframes lp-confidence {
-  0%   { color: #8f878c; border-color: rgba(143, 135, 140, 0.38); box-shadow: none; }
-  42%  { color: #e6b75e; border-color: rgba(230, 183, 94, 0.42); box-shadow: 0 0 11px rgba(230, 183, 94, 0.13); }
-  100% { color: #73c79d; border-color: rgba(115, 199, 157, 0.46); box-shadow: 0 0 15px rgba(115, 199, 157, 0.16); }
-}
 /* coverage-gauge keyframes — MUST live at top level (never nested inside .lp,
    which is invalid CSS and can make strict parsers drop the whole .lp block). */
 @keyframes g-fill { from { stroke-dashoffset: 100; } }
@@ -35,6 +28,7 @@
   --line: rgba(23, 18, 20, 0.18);
   --muted: rgba(23, 18, 20, 0.62);
   --serif: var(--font-serif);
+  --lp-gutter: max(2rem, calc((100vw - 1440px) / 2));
   /* Data-truth tier colours — the app's "one colour one meaning" palette, kept as
      scoped landing vars so no raw hex scatters. Green/honey/gray, never red. */
   --tier-ok: #469b75;
@@ -50,6 +44,11 @@
   letter-spacing: -0.014em;
 
   a { color: inherit; }
+  a:focus-visible {
+    outline: 2px solid var(--rose);
+    outline-offset: 5px;
+    border-radius: 6px;
+  }
 
   /* A3 — no orphan: balance every display heading so no line ends with 1 word. */
   :is(.display, .hero h1, .quote blockquote, .stage-copy h2) { text-wrap: balance; }
@@ -61,28 +60,28 @@
   }
 
   /* nav */
-  .nav { position: absolute; inset: 0 0 auto; z-index: 20; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2rem; padding: 1.35rem 2.2rem; color: var(--ivory); }
+  .nav { position: absolute; inset: 0 0 auto; z-index: 20; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2rem; padding: 1.15rem var(--lp-gutter); color: var(--ivory); }
   .brand { display: inline-flex; align-items: center; gap: 0.78rem; width: max-content; text-decoration: none; font-size: 0.88rem; font-weight: 750; }
-  .brand-mark, .footer-mark { display: grid; place-items: center; width: 2.15rem; aspect-ratio: 1; border: 1px solid currentColor; border-radius: 50%; font: italic 1.05rem var(--serif); }
+  .brand-mark, .footer-mark { display: grid; place-items: center; width: 2.75rem; aspect-ratio: 1; color: var(--rose); }
   .brand small { display: block; margin-top: 0.14rem; font-size: 0.5rem; font-weight: 600; letter-spacing: 0.15em; opacity: 0.6; text-transform: uppercase; }
-  .nav-links { display: flex; gap: 2rem; font-size: 0.67rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; }
+  .nav-links { display: flex; gap: 2rem; font-size: 0.72rem; font-weight: 650; letter-spacing: 0.02em; }
   .nav-links a { text-decoration: none; opacity: 0.7; transition: 0.2s; }
   .nav-links a:hover { opacity: 1; }
-  .nav-cta { justify-self: end; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; min-width: 11.8rem; padding: 0.9rem 1rem 0.9rem 1.2rem; border: 1px solid rgba(255, 250, 244, 0.48); border-radius: 999px; text-decoration: none; font-size: 0.74rem; font-weight: 750; backdrop-filter: blur(12px); transition: 0.2s; }
+  .nav-cta { justify-self: end; display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 1.5rem; min-width: 11.8rem; padding: 0.7rem 1rem 0.7rem 1.2rem; border: 1px solid rgba(255, 250, 244, 0.48); border-radius: 999px; text-decoration: none; font-size: 0.74rem; font-weight: 750; background: rgba(23, 18, 20, 0.18); backdrop-filter: blur(16px) saturate(140%); transition: 0.2s; }
   .nav-cta:hover { background: var(--ivory); color: var(--ink); transform: translateY(-2px); }
 
   /* hero */
-  .hero { position: relative; min-height: 100svh; display: grid; align-items: end; background: #171214; color: var(--ivory); }
+  .hero { position: relative; min-height: max(820px, 100svh); display: grid; align-items: end; background: #171214; color: var(--ivory); }
   .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: 48% 50%; background-repeat: no-repeat; filter: saturate(0.72) contrast(1.07) brightness(0.69); transform: scale(1.015); animation: lp-breathe 17s ease-in-out infinite alternate; }
   .hero:after { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(13, 9, 11, 0.78), rgba(13, 9, 11, 0.48) 43%, rgba(13, 9, 11, 0.08) 74%), linear-gradient(0deg, rgba(13, 9, 11, 0.82), transparent 48%); }
-  .hero-copy { position: relative; z-index: 3; width: min(94vw, 1500px); margin: auto; padding: 12.9rem 0 5rem; }
+  .hero-copy { position: relative; z-index: 3; width: 100%; margin: auto; padding: clamp(10rem, 20vh, 12rem) var(--lp-gutter) 4.25rem; }
   .eyebrow, .section-label { display: flex; align-items: center; gap: 1rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
   .eyebrow { margin: 0 0 1.5rem; opacity: 0.74; }
   .round-no { display: grid; place-items: center; width: 2.15rem; aspect-ratio: 1; border: 1px solid currentColor; border-radius: 50%; font-variant-numeric: tabular-nums; }
   /* line-height loosened well past the mock's 0.78 → Vietnamese stacks TWO marks
      per glyph (ố=o+◌̂+◌́, ộ=o+◌̂+◌̣) that overrun neighbouring lines at tight
      leading. 1.04 clears them while keeping the poster feel. */
-  .hero h1 { max-width: 1150px; margin: 0; font-size: clamp(4.6rem, 9.8vw, 10rem); line-height: 1.06; letter-spacing: -0.086em; font-weight: 820; }
+  .hero h1 { max-width: 1060px; margin: 0; font-size: clamp(4.5rem, 8vw, 8.5rem); line-height: 1.02; letter-spacing: -0.072em; font-weight: 820; }
   .hero h1 span { display: block; }
   /* Explicit inter-line gaps: uppercase Vietnamese caps stack marks (Ề = Ê + ◌̀)
      that overshoot cap-height and poke into the line above at any tight leading —
@@ -92,69 +91,44 @@
      sans; sits in the same serif family as the soft + accent lines. */
   .strong { display: block; margin-top: 0.08em; font-family: var(--serif); font-weight: 500; text-transform: uppercase; letter-spacing: -0.008em; }
   .accent { display: block; margin-top: 0.06em; font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--rose); letter-spacing: -0.066em; }
-  .hero-intro { display: grid; grid-template-columns: minmax(18rem, 32rem) auto; align-items: end; gap: 3rem; margin: 2.4rem 0 0 38%; }
+  .hero-intro { display: grid; grid-template-columns: minmax(18rem, 32rem) auto; align-items: end; gap: 2.5rem; margin: 1.75rem 0 0 35%; }
   .hero-intro p { margin: 0; font-size: clamp(1rem, 1.3vw, 1.25rem); line-height: 1.55; opacity: 0.86; }
   .actions { display: flex; align-items: center; gap: 1.35rem; }
-  .btn { display: inline-flex; align-items: center; justify-content: space-between; gap: 2.5rem; padding: 1.08rem 1.2rem 1.08rem 1.4rem; border-radius: 999px; background: var(--rose); color: #fff; text-decoration: none; font-size: 0.78rem; font-weight: 780; box-shadow: 0 18px 50px rgba(243, 93, 125, 0.26); transition: 0.2s; }
+  .btn { display: inline-flex; min-height: 48px; align-items: center; justify-content: space-between; gap: 2.5rem; padding: 0.86rem 1.2rem 0.86rem 1.4rem; border-radius: 999px; background: var(--rose); color: #fff; text-decoration: none; font-size: 0.78rem; font-weight: 780; box-shadow: 0 18px 50px rgba(243, 93, 125, 0.26); transition: 0.2s; }
   .btn:hover { background: #ff6c8a; transform: translateY(-3px); }
   .text-link { font-size: 0.78rem; font-weight: 750; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.48); padding-bottom: 0.25rem; }
-  .proof, .media-meta, .media-caption, .rail { position: absolute; z-index: 4; }
+  .proof, .media-caption, .rail { position: absolute; z-index: 4; }
   /* Stat strip — now an in-flow horizontal caption under the hero CTAs (was a
      cramped floating corner block that fought the eyebrow). */
   .orbital { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 1.15rem; margin-top: 2.4rem; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.62; }
   .orbital span { display: flex; align-items: center; }
   .orbital span:not(:first-child)::before { content: "·"; margin-right: 1.15rem; opacity: 0.5; }
-  .proof { right: 7vw; top: 24%; display: flex; align-items: center; gap: 0.7rem; padding: 0.76rem 1rem; border: 1px solid rgba(255, 255, 255, 0.38); border-radius: 999px; background: rgba(18, 12, 15, 0.3); backdrop-filter: blur(14px); transform: rotate(5deg); }
+  .proof { right: var(--lp-gutter); top: 25%; display: flex; align-items: center; gap: 0.7rem; padding: 0.76rem 1rem; border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 999px; background: rgba(18, 12, 15, 0.4); backdrop-filter: blur(16px) saturate(130%); }
   .proof b { font: italic 2rem var(--serif); }
   .proof span { font-size: 0.56rem; font-weight: 800; letter-spacing: 0.11em; text-transform: uppercase; }
   .proof small { display: block; margin-top: 0.13rem; font-size: 0.48rem; font-weight: 600; opacity: 0.56; }
-  .media-meta { top: 6.2rem; right: 2.2rem; display: flex; gap: 2rem; font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
-  .media-caption { right: 2.2rem; bottom: 1.6rem; display: flex; align-items: center; gap: 0.6rem; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .media-caption { right: var(--lp-gutter); bottom: 1.6rem; display: flex; align-items: center; gap: 0.6rem; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; }
   .hero-credit { position: absolute; z-index: 4; left: 50%; bottom: 1.45rem; transform: translateX(-50%); color: rgba(255, 250, 244, 0.58); font-size: 0.5rem; font-weight: 650; letter-spacing: 0.11em; text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
   .hero-credit:hover { color: var(--ivory); }
   .dot { width: 0.46rem; height: 0.46rem; border-radius: 50%; background: var(--acid); box-shadow: 0 0 0 0 rgba(199, 255, 98, 0.5); animation: lp-ping 2s infinite; }
-  .rail { left: 2.2rem; bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; font-size: 0.53rem; letter-spacing: 0.16em; }
+  .rail { left: var(--lp-gutter); bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; font-size: 0.53rem; letter-spacing: 0.16em; }
   .rail i { width: 3rem; height: 1px; background: currentColor; animation: lp-rail 2.4s ease-in-out infinite; transform-origin: left; }
 
-  /* B1 — "bàn tiệc trôi qua". Two parallax layers of self-hosted Vietnamese dishes
-     fill the empty top band of the hero. Absolute (out of flow → never pushes the
-     hook), edge-faded. ONLY transform is animated (translateX per layer) — GPU,
-     no layout thrash — so it stays smooth on mobile. Reduced-motion freezes both
-     tracks to translateX(0): the first images already form an arranged banquet,
-     not a flat strip. */
-  .hero-marquee { position: absolute; z-index: 3; top: 5rem; left: 0; right: 0; height: 6.8rem; overflow: hidden; pointer-events: none;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-            mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
-  .mq-layer { position: absolute; left: 0; top: 0; display: flex; align-items: center; height: 100%; width: max-content; will-change: transform; backface-visibility: hidden; }
-  .mq-near { z-index: 2; gap: 1.1rem; padding: 0 0.35rem; animation: lp-ticker 46s linear infinite; }
-  .mq-far  { z-index: 1; gap: 2.1rem; padding: 0 0.35rem; animation: lp-ticker 82s linear infinite; opacity: 0.5; filter: blur(1px); }
-  .hero-marquee img { border-radius: 13px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.18); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28); display: block; flex: none; }
-  /* near — varied sizes + vertical stagger = a table being laid, not a grid. Big
-     "main dishes" sit anchored; smaller "sides" offset up/down. Sized so nothing
-     clips the 6.8rem band. */
-  .mq-near img { width: 92px; height: 92px; opacity: 0.96; }
-  .mq-near img:nth-child(7n+1) { width: 100px; height: 100px; transform: translateY(0); }
-  .mq-near img:nth-child(7n+2) { width: 70px;  height: 70px;  transform: translateY(18px); }
-  .mq-near img:nth-child(7n+3) { width: 92px;  height: 92px;  transform: translateY(-6px); }
-  .mq-near img:nth-child(7n+4) { width: 76px;  height: 76px;  transform: translateY(14px); }
-  .mq-near img:nth-child(7n+5) { width: 98px;  height: 98px;  transform: translateY(2px); }
-  .mq-near img:nth-child(7n+6) { width: 68px;  height: 68px;  transform: translateY(-20px); }
-  .mq-near img:nth-child(7n+7) { width: 84px;  height: 84px;  transform: translateY(10px); }
-  /* far — smaller, softer, pushed up so it peeks behind the near row → depth */
-  .mq-far img { width: 52px; height: 52px; transform: translateY(-16px); }
-  .mq-far img:nth-child(2n) { width: 60px; height: 60px; transform: translateY(-6px); }
-  .mq-far img:nth-child(3n) { width: 46px; height: 46px; transform: translateY(-24px); }
+  .hero-folio { position: absolute; z-index: 4; top: 5.8rem; left: var(--lp-gutter); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.8rem; width: min(31rem, calc(100vw - 4rem)); padding: 0.72rem 0.82rem; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; background: rgba(28, 23, 28, 0.52); box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22); backdrop-filter: blur(18px) saturate(140%); }
+  .hero-folio-mark { display: grid; width: 2.25rem; aspect-ratio: 1; place-items: center; color: var(--rose); }
+  .hero-folio small { display: block; margin-bottom: 0.18rem; color: rgba(255, 250, 244, 0.5); font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .hero-folio strong { display: block; font-size: 0.72rem; font-weight: 620; }
+  .hero-folio > span { padding: 0.48rem 0.65rem; border-radius: 999px; background: rgba(70, 155, 117, 0.18); color: #9be0bd; font-size: 0.6rem; font-weight: 750; white-space: nowrap; }
 
   /* ticker */
   .ticker { overflow: hidden; background: var(--rose); color: white; border-block: 1px solid rgba(23, 18, 20, 0.25); }
-  .ticker-track { display: flex; width: max-content; align-items: center; gap: 1.6rem; padding: 0.73rem 0; font-size: 0.67rem; font-weight: 850; letter-spacing: 0.14em; white-space: nowrap; animation: lp-ticker 30s linear infinite; }
-  .ticker b { color: var(--acid); }
-  /* static value strip — four plain values, no running caps */
-  .ticker-static { width: 100%; animation: none; justify-content: center; flex-wrap: wrap; gap: 0.5rem 1.5rem; text-transform: none; letter-spacing: 0.02em; font-weight: 750; }
-  .ticker-static b { color: rgba(255, 255, 255, 0.5); }
+  .ticker-track { display: flex; width: max-content; align-items: center; padding: 0.78rem 0; font-size: 0.65rem; font-weight: 780; letter-spacing: 0.1em; white-space: nowrap; text-transform: uppercase; animation: lp-ticker 32s linear infinite; }
+  .ticker-group { display: flex; min-width: 100vw; align-items: center; justify-content: space-around; gap: 2.5rem; padding-inline: 1.25rem; }
+  .ticker-group span { display: flex; align-items: center; gap: 2.5rem; }
+  .ticker b { color: var(--acid); font-size: 0.55rem; }
 
   /* manifesto */
-  .manifesto { position: relative; display: grid; grid-template-columns: minmax(15rem, 0.95fr) 2fr; gap: 5vw; padding: clamp(6rem, 11vw, 11rem) 4vw; overflow: hidden; }
+  .manifesto { position: relative; display: grid; grid-template-columns: minmax(15rem, 0.95fr) 2fr; gap: 5vw; padding: clamp(6rem, 11vw, 11rem) var(--lp-gutter); overflow: hidden; }
   .section-label { align-self: start; color: rgba(23, 18, 20, 0.58); }
   /* Enriched 02: an editorial framed dish print + a botanical line-art behind. */
   .manifesto-side { position: relative; display: flex; flex-direction: column; gap: 2.4rem; }
@@ -181,26 +155,27 @@
 
   /* stage — contained grid: [media (photo + app lodged inside)] [copy].
      No section-wide absolutes, so nothing can collide across the section. */
-  .stage { position: relative; padding: clamp(4rem, 8vw, 7rem) 4vw; background: #d8cfc6; overflow: hidden; }
+  .stage { position: relative; padding: clamp(4rem, 8vw, 7rem) var(--lp-gutter); background: #e5deda; overflow: hidden; }
   .stage:after { content: "WEEK / 01"; position: absolute; z-index: 0; left: -0.03em; bottom: -0.3em; color: rgba(255, 255, 255, 0.2); font-size: clamp(4.2rem, 12vw, 13rem); font-weight: 900; letter-spacing: -0.1em; line-height: 1; white-space: nowrap; pointer-events: none; }
-  .stage-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: center; gap: clamp(2rem, 4vw, 4.5rem); max-width: 1280px; margin: auto; }
+  .stage-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: center; gap: clamp(2rem, 4vw, 4.5rem); max-width: 1440px; margin: auto; }
   .stage-media { position: relative; width: 100%; }
   .photo { position: relative; width: 100%; aspect-ratio: 5/6; background-size: cover; background-position: 50% 46%; background-repeat: no-repeat; transform: rotate(-2deg); box-shadow: 0 30px 80px rgba(23, 18, 20, 0.2); }
   .photo-note { position: absolute; left: 1.5rem; bottom: 1.5rem; color: #fff; font-size: 0.88rem; font-weight: 700; }
   .photo-note small { display: block; margin-bottom: 0.25rem; font-size: 0.51rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
   .photo-credit { position: absolute; right: 1rem; top: 1rem; z-index: 2; padding: 0.45rem 0.6rem; background: rgba(18, 12, 15, 0.48); color: white; border: 1px solid rgba(255, 255, 255, 0.28); font-size: 0.47rem; font-weight: 650; letter-spacing: 0.1em; text-decoration: none; text-transform: uppercase; backdrop-filter: blur(10px); transition: 0.2s; }
   .photo-credit:hover { background: rgba(18, 12, 15, 0.76); }
-  .app { position: absolute; z-index: 3; right: 3%; bottom: 5%; width: min(72%, 340px); padding: 0.9rem; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 1.5rem; background: rgba(255, 250, 244, 0.95); box-shadow: 0 45px 120px rgba(61, 41, 48, 0.25); backdrop-filter: blur(28px) saturate(125%); transform: rotate(1.4deg); }
+  .app { position: absolute; z-index: 3; right: 3%; bottom: 5%; width: min(74%, 360px); padding: 0.9rem; border: 1px solid rgba(226, 218, 222, 0.9); border-radius: 18px; background: rgba(255, 253, 252, 0.96); box-shadow: 0 32px 90px rgba(61, 41, 48, 0.24); backdrop-filter: blur(24px) saturate(125%); }
   .app-top, .days, .meal-head, .meal-row, .app-foot { display: flex; align-items: center; }
   .app-top { justify-content: space-between; padding: 0.65rem 0.5rem 1.15rem; font-size: 0.66rem; }
+  .app-top span { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--rose); font-weight: 750; }
   .app-top b { font-size: 0.55rem; letter-spacing: 0.13em; }
   .days { justify-content: space-between; padding: 0.62rem; border: 1px solid rgba(23, 18, 20, 0.1); border-radius: 999px; background: rgba(255, 255, 255, 0.62); }
   .days span { display: grid; place-items: center; width: 2.2rem; aspect-ratio: 1; border-radius: 50%; font-size: 0.62rem; font-weight: 800; }
-  .days .on { background: var(--ink); color: white; }
+  .days .on { background: var(--rose); color: white; box-shadow: 0 6px 18px rgba(239, 87, 117, 0.22); }
   .meal-head { justify-content: space-between; gap: 1rem; padding: 1.2rem 0.5rem 1rem; }
   .meal-head small { font-size: 0.54rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(23, 18, 20, 0.5); }
   .meal-head h3 { margin: 0.35rem 0 0; font: italic 400 clamp(1.5rem, 2.4vw, 2.2rem)/1.1 var(--serif); letter-spacing: -0.04em; }
-  .pill { padding: 0.62rem 0.82rem; border-radius: 999px; background: var(--acid); color: #1e402a; font-size: 0.57rem; font-weight: 850; white-space: nowrap; }
+  .pill { padding: 0.62rem 0.82rem; border-radius: 999px; background: rgba(70, 155, 117, 0.12); color: var(--tier-ok); font-size: 0.57rem; font-weight: 850; white-space: nowrap; }
   .meal-list { border-top: 1px solid var(--line); }
   .meal-row { gap: 0.85rem; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--line); }
   .meal-row .index { font: italic 1.45rem var(--serif); color: var(--rose); }
@@ -217,13 +192,16 @@
   .stage-copy a { display: inline-block; margin-top: 0.6rem; font-size: 0.72rem; font-weight: 800; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 0.25rem; }
 
   /* memory */
-  .memory { position: relative; overflow: hidden; padding: clamp(6rem, 10vw, 10rem) 4vw; background: var(--ink); color: var(--ivory); }
+  .memory { position: relative; overflow: hidden; padding: clamp(6rem, 10vw, 10rem) var(--lp-gutter); background:
+    radial-gradient(900px 520px at 100% 0%, rgba(70, 155, 117, 0.1), transparent 58%),
+    radial-gradient(800px 480px at 0% 100%, rgba(243, 93, 125, 0.1), transparent 55%),
+    var(--ink); color: var(--ivory); }
   /* Enriched 03: botanical line-art in a corner + a small framed dish accent + a
      staggered row reveal. Full-width rows kept — no cards. */
   .memory-bloom { position: absolute; z-index: 0; top: 1.5rem; right: -3rem; color: rgba(255, 250, 244, 0.06); pointer-events: none; }
   .memory-head { position: relative; z-index: 1; display: grid; grid-template-columns: 0.8fr 2.2fr; gap: 5vw; align-items: start; }
   .memory-head-side { display: flex; flex-direction: column; gap: 2rem; }
-  .memory-photo { margin: 0; width: 8.5rem; max-width: 60%; aspect-ratio: 1; overflow: hidden; border-radius: 7px; transform: rotate(3deg); border: 5px solid rgba(255, 250, 244, 0.92); box-shadow: 0 22px 48px rgba(0, 0, 0, 0.45); }
+  .memory-photo { position: relative; margin: 0; width: 8.5rem; max-width: 60%; aspect-ratio: 1; overflow: hidden; border-radius: 7px; transform: rotate(3deg); border: 5px solid rgba(255, 250, 244, 0.92); box-shadow: 0 22px 48px rgba(0, 0, 0, 0.45); }
   .memory-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .memory.in-view .memory-photo { animation: lp-rise 0.7s var(--ease-emphasized) both; }
   .memory.in-view .display { animation: lp-rise 0.7s var(--ease-emphasized) both; }
@@ -238,25 +216,24 @@
   .memory-row p { margin: 0; max-width: 39rem; line-height: 1.55; color: rgba(255, 250, 244, 0.64); }
   .memory-row:hover p { color: white; }
 
-  /* truth — CINEMATIC (Step 1). A deep-charcoal room between the cream sections:
-     you scroll from light INTO the dark, where the numbers glow like lamps.
-     "Certainty = brightness" — ≥85% glows green, 60–85% glows honey, <60% does NOT
-     glow (unsure earns no light). Semantic colours stay inviolable: green/honey/gray,
-     NEVER red; rose is brand only. Glow is restrained (a lamp, not a game sign). */
-  --data-ok: #73c79d;   /* dark-bg tints of the app semantics */
-  --data-mid: #e6b75e;
-  --data-low: #8f878c;
-  .truth { padding: clamp(6rem, 10vw, 10rem) 4vw clamp(3rem, 6vw, 5rem); background: var(--ink); color: var(--ivory); }
-  .truth-top { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.14); font-size: 0.55rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 250, 244, 0.45); }
+  /* Data truth returns to a light reading room. The three data states are the
+     exact app semantics: botanical green, honey and unknown gray. */
+  --data-ok: #469b75;
+  --data-mid: #c58a21;
+  --data-low: #989195;
+  .truth { padding: clamp(6rem, 10vw, 10rem) var(--lp-gutter) clamp(3rem, 6vw, 5rem); background:
+    radial-gradient(760px 420px at 92% 4%, rgba(70, 155, 117, 0.07), transparent 62%),
+    var(--ivory); color: var(--ink); }
+  .truth-top { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); font-size: 0.55rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
   .truth-grid { display: grid; grid-template-columns: 1.6fr 0.8fr; align-items: end; gap: 6vw; padding: 5rem 0 4.5rem; }
   .truth-grid .display { font-size: clamp(3.4rem, 6.6vw, 7rem); }
-  .truth-grid .display em { color: var(--landing-display-rose); }
-  .truth-grid > p { margin: 0; line-height: 1.72; color: rgba(255, 250, 244, 0.62); }
+  .truth-grid .display em { color: var(--wine); }
+  .truth-grid > p { margin: 0; line-height: 1.72; color: var(--muted); }
   .confidence { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
-  .confidence small { max-width: 22rem; font-size: 0.62rem; line-height: 1.5; color: rgba(255, 250, 244, 0.5); }
+  .confidence small { max-width: 22rem; font-size: 0.62rem; line-height: 1.5; color: var(--muted); }
 
-  .trust { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(255, 255, 255, 0.14); }
-  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 1.15rem; padding: 2.4rem 1.4rem; border-right: 1px solid rgba(255, 255, 255, 0.1); opacity: 1; }
+  .trust { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
+  .trust article { min-height: 15rem; display: flex; flex-direction: column; gap: 1.15rem; padding: 2.4rem 1.4rem; border-right: 1px solid var(--line); opacity: 1; }
   .trust article:last-child { border-right: 0; }
   .truth.in-view .trust article { animation: lp-rise 0.65s var(--ease-emphasized) both; animation-delay: calc(var(--i, 0) * 110ms); }
 
@@ -267,32 +244,32 @@
      ADDS the draw-in entrance. */
   .gauge { position: relative; width: clamp(104px, 11vw, 128px); aspect-ratio: 1; flex: none; }
   .gauge svg { width: 100%; height: 100%; overflow: visible; }
-  .g-track { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 4.5; }
+  .g-track { fill: none; stroke: rgba(23, 18, 20, 0.1); stroke-width: 4.5; }
   .g-arc { fill: none; stroke: currentColor; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--cov) * 100); transform: rotate(-90deg); transform-origin: 50% 50%; }
   .truth.in-view .g-arc { animation: g-fill 1.15s var(--ease-emphasized) both; animation-delay: calc(0.25s + var(--i, 0) * 0.16s); }
   .g-mid { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; line-height: 1; }
-  .g-mid b { font-size: clamp(1.1rem, 1.9vw, 1.45rem); font-weight: 820; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ivory); }
-  .g-mid i { margin-top: 0.24rem; font-style: normal; font-size: 0.5rem; font-weight: 850; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 250, 244, 0.4); }
+  .g-mid b { font-size: clamp(1.1rem, 1.9vw, 1.45rem); font-weight: 820; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ink); }
+  .g-mid i { margin-top: 0.24rem; font-style: normal; font-size: 0.5rem; font-weight: 850; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
   .g-cov { margin-top: 0.34rem; font-size: 0.72rem; font-weight: 800; font-variant-numeric: tabular-nums; color: currentColor; }
   .tier-ok  { color: var(--data-ok); }
   .tier-mid { color: var(--data-mid); }
   .tier-low { color: var(--data-low); }
-  .tier-ok  .g-arc { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--data-ok) 42%, transparent)); }
-  .tier-mid .g-arc { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--data-mid) 26%, transparent)); }
+  .tier-ok  .g-arc { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--data-ok) 24%, transparent)); }
+  .tier-mid .g-arc { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--data-mid) 18%, transparent)); }
   .tier-low .g-arc { filter: none; }
   .tier-low .g-cov { opacity: 0.82; }
   /* demo ring — brightens gray→honey→green as it fills */
   .truth.in-view .gauge-demo .g-arc { animation: g-demo 2.4s var(--ease-standard) both; }
-  .trust small { font-size: 0.6rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
-  .trust h3 { margin: 0.3rem 0 0.4rem; font: italic 400 clamp(1.7rem, 2.6vw, 2.5rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ivory); }
-  .trust p { margin: 0; font-size: 0.84rem; line-height: 1.5; font-weight: 500; color: rgba(255, 250, 244, 0.6); }
-  .tier-demo { margin: 1.6rem 0 0; font-size: 0.72rem; color: rgba(255, 250, 244, 0.42); }
-  .ribbon { display: flex; align-items: center; gap: 1rem; padding-top: 2.4rem; font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 250, 244, 0.5); }
-  .ribbon i { flex: 1; height: 1px; background: rgba(255, 255, 255, 0.14); }
-  .ribbon strong { color: var(--landing-display-rose); }
+  .trust small { font-size: 0.6rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); }
+  .trust h3 { margin: 0.3rem 0 0.4rem; font: italic 400 clamp(1.7rem, 2.6vw, 2.5rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ink); }
+  .trust p { margin: 0; font-size: 0.84rem; line-height: 1.5; font-weight: 500; color: var(--muted); }
+  .tier-demo { margin: 1.6rem 0 0; font-size: 0.72rem; color: var(--muted); }
+  .ribbon { display: flex; align-items: center; gap: 1rem; padding-top: 2.4rem; font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .ribbon i { flex: 1; height: 1px; background: var(--line); }
+  .ribbon strong { color: var(--tier-ok); }
 
   /* quote */
-  .quote { position: relative; padding: clamp(7rem, 13vw, 14rem) 8vw; background: var(--rose); color: white; text-align: center; overflow: hidden; }
+  .quote { position: relative; padding: clamp(7rem, 13vw, 14rem) var(--lp-gutter); background: var(--rose); color: white; text-align: center; overflow: hidden; }
   .quote:before { content: "“"; position: absolute; top: -0.27em; left: 50%; transform: translateX(-50%); font: clamp(16rem, 35vw, 38rem)/1 var(--serif); color: rgba(255, 255, 255, 0.11); }
   .quote blockquote { position: relative; z-index: 1; max-width: 1100px; margin: auto; font: italic 400 clamp(3rem, 6.3vw, 6.8rem)/1.18 var(--serif); letter-spacing: -0.062em; }
   .quote-meta { position: relative; z-index: 1; display: flex; justify-content: space-between; margin-top: 4rem; font-size: 0.54rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
@@ -301,7 +278,10 @@
   /* STEP 2 — tương phản khổ. ~full-viewport, block anchored low-left so ~70% of
      the screen is deliberately empty (the breath). Nothing added beyond eyebrow
      + question + one CTA — the emptiness IS the design. */
-  .final { position: relative; overflow: hidden; min-height: 100svh; display: grid; align-content: end; justify-items: start; padding: clamp(6rem, 16vh, 12rem) clamp(1.4rem, 5vw, 5rem) clamp(3.5rem, 9vh, 7rem); background: var(--ink); color: var(--ivory); text-align: left; }
+  .final { position: relative; overflow: hidden; min-height: 100svh; display: grid; align-content: end; justify-items: start; padding: clamp(6rem, 16vh, 12rem) var(--lp-gutter) clamp(3.5rem, 9vh, 7rem); background:
+    radial-gradient(900px 560px at 82% 18%, rgba(70, 155, 117, 0.11), transparent 62%),
+    radial-gradient(760px 480px at 8% 100%, rgba(243, 93, 125, 0.1), transparent 58%),
+    var(--ink); color: var(--ivory); text-align: left; }
   /* a single clean plated dish floating in the top-right void — the appetite the
      question asks about, made real. Circular crop reads as the plate itself. */
   .final-dish { position: absolute; z-index: 0; top: calc(min(58vw, 880px) * -0.18); right: calc(min(58vw, 880px) * -0.3); margin: 0; width: min(58vw, 880px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 1px solid rgba(255, 250, 244, 0.1); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55); pointer-events: none; }
@@ -324,7 +304,7 @@
   .final.in-view .final-actions { animation: lp-rise 0.8s 0.56s var(--ease-emphasized) both; }
 
   /* footer */
-  footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 2rem; padding: 2rem 4vw; background: var(--ink); color: rgba(255, 250, 244, 0.66); border-top: 1px solid rgba(255, 255, 255, 0.12); font-size: 0.58rem; }
+  footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 2rem; padding: 2rem var(--lp-gutter); background: var(--ink); color: rgba(255, 250, 244, 0.66); border-top: 1px solid rgba(255, 255, 255, 0.12); font-size: 0.58rem; }
   footer > div { display: flex; align-items: center; gap: 0.8rem; }
   footer > div:last-child { justify-self: end; gap: 1.2rem; }
   footer p { margin: 0; }
@@ -332,15 +312,13 @@
   footer a { text-decoration: none; }
 
   @media (max-width: 960px) {
-    .nav { grid-template-columns: 1fr auto; padding: 1.05rem 1.2rem; }
+    .nav { grid-template-columns: 1fr auto; }
     .nav-links { display: none; }
     .nav-cta { min-width: auto; }
-    .hero-copy { width: auto; padding: 12.4rem 1.2rem 5rem; }
-    .hero h1 { font-size: clamp(4rem, 14vw, 7.2rem); }
-    .hero-intro { grid-template-columns: 1fr; margin-left: 16%; }
+    .hero-copy { width: auto; padding-block: 10.5rem 4.5rem; }
+    .hero h1 { font-size: clamp(4rem, 11vw, 6.6rem); }
+    .hero-intro { grid-template-columns: 1fr; margin-left: 12%; }
     .rail { display: none; }
-    .proof { right: 1.2rem; }
-    .media-meta, .media-caption { right: 1.2rem; }
     .manifesto { grid-template-columns: 1fr; }
     .manifesto-foot { margin-left: 10%; }
     .stage-inner { grid-template-columns: 1fr; gap: 2.5rem; }
@@ -350,33 +328,30 @@
     .memory-head, .truth-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 680px) {
-    .brand small, .nav-cta span, .media-meta, .hero-credit { display: none; }
-    .nav-cta { padding: 0.75rem 0.9rem; font-size: 0.66rem; }
-    .hero { min-height: 920px; }
+    --lp-gutter: 1.25rem;
+    .brand small, .nav-cta span, .hero-credit { display: none; }
+    .nav-cta { min-height: 40px; padding: 0.65rem 0.85rem; font-size: 0.66rem; }
+    .hero { min-height: 880px; }
     .hero:after { background: linear-gradient(0deg, rgba(13, 9, 11, 0.9), rgba(13, 9, 11, 0.12) 78%); }
     .hero-bg { background-position: 58% center; }
-    .hero-copy { padding-top: 12rem; }
-    /* mobile perf (P0): no blur raster on the moving far layer — depth stays via
-       size + opacity. Only transform animates. */
-    .mq-far { filter: none; opacity: 0.42; }
-    .hero h1 { font-size: clamp(3.8rem, 19vw, 6rem); line-height: 1.05; }
+    .hero-copy { padding-top: 9.4rem; }
+    .hero-folio { top: 4.7rem; width: calc(100vw - 2.5rem); }
+    .hero-folio > span { display: none; }
+    .hero h1 { font-size: clamp(3.5rem, 16vw, 5rem); line-height: 1.05; }
     .soft { font-size: 0.48em; }
     .hero-intro { margin: 2rem 0 0; gap: 1.6rem; }
     .actions { align-items: flex-start; flex-direction: column; }
     .btn { width: 100%; }
-    .proof { top: 40%; transform: scale(0.8) rotate(5deg); transform-origin: right; }
-    .media-caption { left: 1.2rem; right: auto; bottom: 1.2rem; }
-    .manifesto { padding-inline: 1.2rem; }
+    .proof { display: none; }
+    .media-caption { left: var(--lp-gutter); right: auto; bottom: 1.2rem; }
     .display { font-size: clamp(3.2rem, 16vw, 5rem); }
     .manifesto-foot { grid-template-columns: 1fr; margin-left: 0; gap: 2rem; }
-    .stage { padding-inline: 1.2rem; }
     .photo { aspect-ratio: 4/5; }
     .app { right: 2%; bottom: 4%; width: min(84%, 300px); padding: 0.7rem; border-radius: 1.35rem; }
     .days span { width: 1.9rem; }
     .app-foot { align-items: flex-start; flex-direction: column; }
     .app-foot .foot-cta { width: 100%; text-align: center; }
     .stage-copy h2 { font-size: clamp(2.4rem, 9vw, 3.2rem); }
-    .memory, .truth { padding-inline: 1.2rem; }
     .memory-rows { margin-top: 3rem; }
     .memory-row { grid-template-columns: auto 1fr auto; gap: 1rem; }
     .memory-row p { grid-column: 2/4; }
@@ -391,10 +366,9 @@
     .trust article > div { min-width: 0; }
     .g-mid b { font-size: 1.05rem; }
     .ribbon { flex-wrap: wrap; }
-    .quote { padding-inline: 1.2rem; }
     .quote blockquote { font-size: clamp(2.7rem, 13vw, 4.7rem); }
     .quote-meta { align-items: center; flex-direction: column; gap: 0.8rem; }
-    .final { min-height: 100svh; padding-inline: 1.4rem; }
+    .final { min-height: 100svh; }
     .final-q { font-size: clamp(3.6rem, 22vw, 6.6rem); }
     .final-actions { width: 100%; flex-direction: column; align-items: flex-start; }
     .final-actions .btn { width: 100%; text-align: center; }
@@ -402,7 +376,7 @@
     .manifesto-photo, .memory-photo { width: 100%; max-width: none; aspect-ratio: 4/3; transform: none; margin-inline: auto; }
     .manifesto-side, .memory-head-side { align-items: center; text-align: center; }
     .final-dish { top: clamp(2.5rem, 8vh, 6rem); left: 50%; right: auto; width: min(72vw, 310px); margin-left: calc(min(72vw, 310px) / -2); }
-    footer { grid-template-columns: 1fr; align-items: start; padding-inline: 1.2rem; }
+    footer { grid-template-columns: 1fr; align-items: start; }
     footer > p { order: 3; }
     footer > div:last-child { justify-self: start; }
   }
