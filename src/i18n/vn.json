@@ -60,6 +60,7 @@
   "shopping.tripDry": "Đồ khô",
   "shopping.unassigned": "Chưa gán hàng",
   "shopping.empty": "Chưa có kế hoạch tuần — tạo tuần trước đã.",
+  "shopping.loading": "Đang đọc thực đơn và dữ liệu mua hàng đã lưu…",
   "shopping.emptyTitle": "Danh sách chợ sẽ đi từ thực đơn thật",
   "shopping.emptyBody": "Khi thực đơn có nguyên liệu cần mua, danh sách sẽ hiện ở đây. Chạm tên nguyên liệu để xem cách chọn & cất; chạm ô vuông để xác nhận lượng thực mua.",
   "shopping.emptyAction": "Mở thực đơn tuần",

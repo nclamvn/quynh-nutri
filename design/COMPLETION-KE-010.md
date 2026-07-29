@@ -88,6 +88,16 @@ E2E mới:
 5. Core smoke bổ sung `/pantry`.
 6. Kitchen agenda flow cũ vẫn hoàn tất bằng nút coordinate đang enabled.
 
+Stability verification bổ sung sau vòng CI đầu:
+
+- GitHub CI của commit release đầu phát hiện 1/46 lỗi không ổn định ở thao tác
+  “Cách chọn & cất”: control Shopping có thể xuất hiện trước khi Store và
+  canonical plan hydrate xong.
+- Shopping nay giữ skeleton trung thực trong lúc hydrate/đồng bộ plan và chỉ
+  mở control tương tác khi dữ liệu đã sẵn sàng.
+- Test honesty đích được lặp 20 lần: 20/20 pass.
+- Toàn bộ E2E sau sửa: 46/46 pass.
+
 ## 5. Visual evidence
 
 - `e2e/__screens__/housekeeper-path-390.png`
@@ -120,7 +130,9 @@ Hai ảnh được sinh từ E2E hermetic:
 
 ## 8. Issues discovered
 
-Không còn P0/P1 trong phạm vi KE-010.
+Một hydration race ở Shopping được GitHub CI phát hiện, tái hiện cục bộ 3/20,
+sửa tại product boundary và xác nhận lại 20/20. Không còn P0/P1 đã biết trong
+phạm vi KE-010.
 
 Deferred ngoài phạm vi:
 
@@ -132,6 +144,6 @@ Deferred ngoài phạm vi:
 ## 9. Bàn giao cho Chủ thầu
 
 TIP-KE-010 đủ điều kiện nghiệm thu `DONE`: 10/10 yêu cầu, toàn bộ quality gates
-xanh, visual review mobile/desktop đạt và không có thay đổi database. Chưa
-commit, push hoặc deploy trong Completion này; release cần hành động riêng sau
-nghiệm thu.
+cục bộ xanh sau vòng sửa ổn định, visual review mobile/desktop đạt và không có
+thay đổi database. Release chỉ được bàn giao sau khi commit cuối vượt GitHub CI
+và Vercel production.

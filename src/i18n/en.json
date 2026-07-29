@@ -60,6 +60,7 @@
   "shopping.tripDry": "Dry goods",
   "shopping.unassigned": "Unassigned vendor",
   "shopping.empty": "No week plan yet — create a week first.",
+  "shopping.loading": "Loading the saved meal plan and purchase data…",
   "shopping.emptyTitle": "The shopping list starts with your real meal plan",
   "shopping.emptyBody": "When the plan needs ingredients, they appear here. Tap an ingredient name for choosing and storage guidance; tap its square to confirm the actual purchase.",
   "shopping.emptyAction": "Open weekly menu",

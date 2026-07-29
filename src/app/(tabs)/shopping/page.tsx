@@ -17,7 +17,14 @@ import { PageHeader } from "@/ui/components/PageHeader";
 import { SupplierOrders } from "@/ui/components/SupplierOrders";
 
 export default function ShoppingPage() {
-  const { shopping, plan, receiveShoppingItem, commodity } = useStore();
+  const {
+    hydrated,
+    planSyncState,
+    shopping,
+    plan,
+    receiveShoppingItem,
+    commodity,
+  } = useStore();
   const { t, lang } = useI18n();
   const groups = groupByTrip(shopping);
   const [guideCommodity, setGuideCommodity] = useState<Commodity | undefined>();
@@ -34,6 +41,27 @@ export default function ShoppingPage() {
 
   const freshCount = groups.filter((g) => g.kind === "fresh").length;
   const vendors = new Set(shopping.map((i) => i.vendor)).size;
+
+  if (!hydrated || planSyncState === "loading") {
+    return (
+      <PageContainer>
+        <PageHeader title={t("shopping.title")} />
+        <section
+          aria-live="polite"
+          data-testid="shopping-loading"
+          className="card p-6"
+        >
+          <div className="h-5 w-44 animate-pulse rounded bg-hairline" />
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 3 }, (_, index) => (
+              <div key={index} className="h-36 animate-pulse rounded-[18px] bg-surface" />
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-muted">{t("shopping.loading")}</p>
+        </section>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer>

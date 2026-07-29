@@ -34,11 +34,12 @@ Coverage:             100%
 | Coordinate dưới 2 guide disabled và có lý do | Pass | P1 |
 | Agenda rỗng không tự tạo task | Pass | P0 |
 | Shopping/Pantry empty-state có CTA thật | Pass | P1 |
+| Shopping không mở control trước khi hydrate xong | Pass — 20/20 repeat | P0 |
 | Right rail không còn CTA chết | Pass | P1 |
 | 390px không tràn | Pass | P1 |
 | Luồng kitchen execution cũ không regression | Pass | P0 |
 
-**Passed:** 10
+**Passed:** 11
 **Failed:** 0
 **Untestable:** 0
 
@@ -50,6 +51,7 @@ Type errors:       0
 Lint errors:       0
 Unit/repository:   256/256 pass
 E2E:               46/46 pass
+Shopping repeat:   20/20 pass
 git diff check:    pass
 i18n JSON:         pass
 Schema changes:    0
@@ -82,7 +84,9 @@ Schema changes:    0
 
 ## 6. Critical issues
 
-Không có.
+Không còn issue mở. Vòng CI release đầu đã phát hiện một hydration race ở
+Shopping (45/46); lỗi được tái hiện, sửa bằng loading gate ở product UI, rồi
+xác nhận lại bằng targeted repeat 20/20 và full E2E 46/46.
 
 ## 7. Deferred ngoài TIP
 
