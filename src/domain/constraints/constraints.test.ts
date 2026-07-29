@@ -16,7 +16,7 @@ const src: CommoditySource = (id) =>
   id in COMS ? ({ id, group: "x", allergens: COMS[id] } as unknown as Commodity) : undefined;
 
 const dish = (id: string, commodityIds: string[]): Dish => ({
-  id, vnName: id, proteinType: "rau", method: "luoc", slot: "dinner",
+  id, vnName: id, proteinType: "rau", method: "luoc", slot: "MAN",
   quick: true, baseServings: 4, origin: "B0",
   lines: commodityIds.map((c) => ({ commodityId: c, qtyBase: 100, unit: "g" })),
 });

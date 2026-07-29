@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/i18n/context";
 import { useStore } from "@/ui/store";
 import { UserButton } from "@clerk/nextjs";
 import { FlowerLogo } from "./FlowerLogo";
 import { NAV_GROUPS as GROUPS } from "@/ui/nav";
+import { useLocalStorageValue } from "@/ui/hooks/useLocalStorageValue";
+import { useRuntime } from "@/ui/providers";
 
 const COLLAPSE_KEY = "qk-sidebar-collapsed";
 
@@ -24,19 +25,11 @@ function ChevronsIcon({ dir }: { dir: "left" | "right" }) {
 export function Sidebar() {
   const pathname = usePathname();
   const { t } = useI18n();
+  const { e2e } = useRuntime();
   const { household, hydrated } = useStore();
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    try { setCollapsed(localStorage.getItem(COLLAPSE_KEY) === "1"); } catch {}
-  }, []);
-  const toggleCollapsed = () => {
-    setCollapsed((c) => {
-      const next = !c;
-      try { localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0"); } catch {}
-      return next;
-    });
-  };
+  const [collapsedValue, setCollapsedValue] = useLocalStorageValue(COLLAPSE_KEY, "0");
+  const collapsed = collapsedValue === "1";
+  const toggleCollapsed = () => setCollapsedValue(collapsed ? "0" : "1");
 
   return (
     <aside className={`sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-surface/40 lg:flex ${collapsed ? "w-16" : "w-60"}`}>
@@ -96,7 +89,7 @@ export function Sidebar() {
       <div className={`border-t border-hairline ${collapsed ? "p-2" : "p-3"}`}>
         {collapsed ? (
           <div className="mb-1 flex justify-center py-1.5">
-            <UserButton appearance={{ elements: { avatarBox: "h-7 w-7" } }} />
+            <AccountAvatar e2e={e2e} />
           </div>
         ) : (
           <div className="mb-2 flex items-center gap-2.5 rounded-lg px-2 py-1.5">
@@ -117,10 +110,17 @@ export function Sidebar() {
                 {hydrated ? t("sync.online") : t("sync.syncing")}
               </p>
             </div>
-            <UserButton appearance={{ elements: { avatarBox: "h-7 w-7" } }} />
+            <AccountAvatar e2e={e2e} />
           </div>
         )}
       </div>
     </aside>
   );
+}
+
+function AccountAvatar({ e2e }: { e2e: boolean }) {
+  if (e2e) {
+    return <span aria-label="Tài khoản kiểm thử" className="grid h-7 w-7 place-items-center rounded-full bg-brand-weak text-[10px] font-semibold text-brand">E2E</span>;
+  }
+  return <UserButton appearance={{ elements: { avatarBox: "h-7 w-7" } }} />;
 }

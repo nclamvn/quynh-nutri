@@ -13,7 +13,7 @@ export interface PantryMatch {
  * dish with a missing staple simply ranks lower + lists what's missing.
  */
 export function cookFromPantry(pantry: PantryItem[], repertoire: Dish[]): PantryMatch[] {
-  const have = new Set(pantry.map((p) => p.commodityId));
+  const have = new Set(pantry.filter((item) => item.qty > 0).map((p) => p.commodityId));
   return repertoire
     .map((dish) => {
       let total = 0;

@@ -20,6 +20,8 @@ export function HealthProfileSheet({ member, onClose }: { member: Member | null;
   const [allergies, setAllergies] = useState<Allergen[]>([]);
 
   useEffect(() => {
+    // Controlled sheet draft must reset when the selected member changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStage(member?.healthProfile?.lifeStage ?? "none");
     setAllergies(member?.allergies ?? []);
   }, [member]);

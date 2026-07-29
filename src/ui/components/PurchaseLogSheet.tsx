@@ -40,6 +40,8 @@ export function PurchaseLogSheet({
   const [note, setNote] = useState("");
 
   useEffect(() => {
+    // A fresh purchase draft is required every time this controlled sheet opens.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) { setPrices({}); setOnTime(undefined); setNote(""); }
   }, [open]);
 

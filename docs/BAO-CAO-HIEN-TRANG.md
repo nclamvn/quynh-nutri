@@ -1,9 +1,9 @@
 # BÁO CÁO HIỆN TRẠNG — Bữa cơm nhà / Quỳnh Nutri
 
-**Ngày:** 2026-07-27  
-**Sản phẩm:** Bữa cơm nhà (hệ thống lập bữa cho gia đình Việt)  
-**Bản quyền/định hướng:** Chủ nhà (Product Owner)  
-**Môi trường live:** https://anngon.io (Vercel production, SSL, www→apex 308)  
+**Ngày:** 2026-07-27
+**Sản phẩm:** Bữa cơm nhà (hệ thống lập bữa cho gia đình Việt)
+**Bản quyền/định hướng:** Chủ nhà (Product Owner)
+**Môi trường live:** https://anngon.io (Vercel production, SSL, www→apex 308)
 **Trạng thái tổng thể:** Đang phát triển — nền tảng + 3 vertical đã lên production, landing công khai đã ra mắt.
 
 ---
@@ -34,7 +34,7 @@ Tài liệu nền trong repo: `design/` (blueprint + tokens + vision/blueprint/T
 
 **Stack:** Next.js 16 (App Router, Turbopack) · React 19 · Tailwind v4 · TypeScript · Prisma 7.9 + `@prisma/adapter-pg` + Neon Postgres · Clerk auth (@clerk/nextjs v7) · Anthropic SDK + Vercel AI Gateway · Leaflet + OpenStreetMap (bản đồ) · Deploy Vercel.
 
-**Chất lượng:** build xanh · **102 unit test** (16 test file) · QA pixel bằng Playwright ở 390/768/1024/1280/1440 + reduced-motion cho các bề mặt mới.
+**Chất lượng cập nhật 2026-07-29:** lint xanh · 256 unit test/40 file · build 22 route · 41 E2E; E2E dùng repo bộ nhớ và Prisma tripwire, không chạm Neon. QA pixel có các spot-check 390/768/1024/1280/1440 + reduced-motion.
 
 **Khu vực đã có (route):**
 - **Công khai:** `/` (landing editorial), `/sign-in`, `/sign-up`, `/spike/share` (trang thử Web Share).
@@ -83,9 +83,9 @@ Tài liệu nền trong repo: `design/` (blueprint + tokens + vision/blueprint/T
 
 ## 6. Lưu ý bàn giao
 
-- **Kỷ luật QA auth:** app bị Clerk chặn; khi QA bằng Playwright phải tạm bypass `src/proxy.ts` rồi **khôi phục** (kiểm `redirectToSignIn` + `/` public) **trước khi commit**. Trang công khai (`/`) QA không cần bypass.
+- **Kỷ luật QA auth:** Playwright bật `E2E_BYPASS_AUTH=1` chỉ ở development. Chế độ này tự chuyển repository sang bộ nhớ và `getDb()` sẽ throw nếu có đường code nào cố chạm Prisma.
 - **Bí mật:** không commit `.env*`/`.vercel`; `sk_live` do Chủ nhà nhập ở dashboard hoặc `vercel env` (Thợ không thấy giá trị).
-- **Dữ liệu seed** hiện là TypeScript trong `src/data/seed/*` (chạy được không cần DB); Postgres là hợp đồng qua repo layer.
+- **Dữ liệu nền** là TypeScript trong `src/data/seed/*`; trạng thái household runtime đã persist qua Clerk-scoped repository vào Neon.
 - **Prisma push consent:** `PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION`.
 
 ---
@@ -98,4 +98,4 @@ Tài liệu nền trong repo: `design/` (blueprint + tokens + vision/blueprint/T
 4. **Thay media hero** bằng ảnh/video bối cảnh Việt Nam đúng art-direction.
 5. **Tiện ích bản đồ:** geocode địa chỉ → tự đặt pin.
 
-> Toàn bộ mã nguồn, hợp đồng thiết kế (`design/`) và phương pháp refinery (`refinery/`) nằm trong repo và đã đồng bộ với production tại HEAD `809aaf3`.
+> Toàn bộ mã nguồn, hợp đồng thiết kế (`design/`) và phương pháp refinery (`refinery/`) nằm trong repo. Luôn kiểm tra `git rev-parse HEAD` và deployment Vercel thay vì dựa vào SHA được ghi cứng trong báo cáo này.

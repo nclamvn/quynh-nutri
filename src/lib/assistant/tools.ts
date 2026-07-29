@@ -14,6 +14,9 @@ import { semanticSearch } from "@/lib/search";
 import { normalizeVn } from "@/lib/claude";
 import { dayDishes, dayNutrition } from "@/ui/derive";
 import type { Household, Allergen, DietRestriction, Slot } from "@/domain/types";
+import { currentWeekStartIso } from "@/lib/week";
+import { getKitchenAgendaSnapshot } from "@/lib/assistant/kitchen-agenda";
+import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
 
 // Tools wrap the DETERMINISTIC engines — the LLM orchestrates + explains, the
 // engines compute the numbers (with provenance). This is the honesty moat: no
@@ -27,7 +30,7 @@ async function household(): Promise<Household> {
   return (await loadHouseholdState()).household;
 }
 function planFor(hh: Household) {
-  return generateWeek({ household: hh, repertoire: dietaryRepertoire(REPERTOIRE, hh, src), weekStart: "2026-07-27", seed: 1 }).plan;
+  return generateWeek({ household: hh, repertoire: dietaryRepertoire(REPERTOIRE, hh, src), weekStart: currentWeekStartIso(), seed: 1 }).plan;
 }
 function matchCommodity(q: string): string | undefined {
   const n = normalizeVn(q);
@@ -35,8 +38,22 @@ function matchCommodity(q: string): string | undefined {
 }
 
 export const tools = {
+  prep_ahead_guide: tool({
+    description: "Đọc hướng dẫn chuẩn bị trước đã rà soát cho một dishId trong catalog, hoặc tự đọc các món ngày mai khi không truyền dishId. Chỉ trả registry read-only; nếu unsupported=false thì không được tự viết bước thay thế.",
+    inputSchema: z.object({
+      dishId: z.string().max(80).optional(),
+    }),
+    execute: async ({ dishId }) => getPrepAheadGuideSnapshot(dishId),
+  }),
+
+  kitchen_agenda: tool({
+    description: "Đọc agenda bếp tất định hiện tại để trả lời 'tôi nên làm gì tiếp'. Đây là projection read-only theo dữ liệu hộ đã ghi nhận. Nếu mảng rỗng, phải nói chưa có việc nào đủ căn cứ và không tự nghĩ thêm.",
+    inputSchema: z.object({}),
+    execute: async () => (await getKitchenAgendaSnapshot()).tasks,
+  }),
+
   plan_week: tool({
-    description: "Tạo thực đơn tuần (7 ngày) cho hộ, tôn trọng ngày bận + dị ứng/ăn kiêng. Trả tên món mỗi ngày và ghi chú nếu phải nới luật (vd hết hạn ngạch hải sản).",
+    description: "Tạo bản xem trước thực đơn tuần (7 ngày), không lưu và không thay đổi thực đơn canonical. Tôn trọng ngày bận + dị ứng/ăn kiêng; trả tên món và ghi chú.",
     inputSchema: z.object({
       vegetarian: z.boolean().optional().describe("ăn chay"),
       avoidAllergens: z.array(z.enum(["shellfish", "fish", "egg", "soy", "dairy", "gluten", "peanut"])).optional().describe("dị nguyên cần tránh"),
@@ -49,7 +66,7 @@ export const tools = {
         ? base.members.map((m, i) => (i === 0 ? { ...m, allergies: [...(m.allergies ?? []), ...(avoidAllergens as Allergen[])] } : m))
         : base.members;
       const hh: Household = { ...base, restrictions, members };
-      const res = generateWeek({ household: hh, repertoire: dietaryRepertoire(REPERTOIRE, hh, src), weekStart: "2026-07-27", seed: 1 });
+      const res = generateWeek({ household: hh, repertoire: dietaryRepertoire(REPERTOIRE, hh, src), weekStart: currentWeekStartIso(), seed: 1 });
       return {
         days: Array.from({ length: 7 }, (_, d) => ({
           day: DAYS[d],

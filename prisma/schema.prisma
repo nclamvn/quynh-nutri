@@ -68,23 +68,45 @@ enum Activity {
   heavy
 }
 
+enum StorageLocation {
+  pantry
+  fridge
+  freezer
+}
+
+enum InventoryMovementKind {
+  consumed
+  discarded
+}
+
+enum LeftoverStorageLocation {
+  fridge
+  freezer
+}
+
+enum LeftoverMovementKind {
+  consumed
+  discarded
+  corrected
+}
+
 // ─── A: Commodity (macro/100g, provenance) ───────────────────────────────
 model CommodityIngredient {
-  id             String          @id
-  canonicalVn    String // khóa ngữ nghĩa (canonical)
-  labelEn        String? // chỉ hiển thị; thiếu → fallback VN
-  group          String // 14 nhóm theo Bảng 2016
-  kcal           Float
-  proteinG       Float
-  carbG          Float
-  fatG           Float
-  fiberG         Float
+  id              String          @id
+  canonicalVn     String // khóa ngữ nghĩa (canonical)
+  labelEn         String? // chỉ hiển thị; thiếu → fallback VN
+  group           String // 14 nhóm theo Bảng 2016
+  kcal            Float
+  proteinG        Float
+  carbG           Float
+  fatG            Float
+  fiberG          Float
   provenanceLevel ProvenanceLevel
-  confidence     Confidence
-  sourceRefs     Json // [{ source, value }]
-  seasonMonths   Int[]
-  storageNote    String?
-  substitutes    String[] // commodity ids cùng slot/vai trò
+  confidence      Confidence
+  sourceRefs      Json // [{ source, value }]
+  seasonMonths    Int[]
+  storageNote     String?
+  substitutes     String[] // commodity ids cùng slot/vai trò
 
   repertoireLines RepertoireLine[]
   householdLines  HouseholdLine[]
@@ -109,13 +131,13 @@ model RepertoireDish {
 }
 
 model RepertoireLine {
-  id           String              @id @default(cuid())
-  dishId       String
-  dish         RepertoireDish      @relation(fields: [dishId], references: [id], onDelete: Cascade)
-  commodityId  String
-  commodity    CommodityIngredient @relation(fields: [commodityId], references: [id])
-  qtyBase      Float // cho baseServings
-  unit         String
+  id          String              @id @default(cuid())
+  dishId      String
+  dish        RepertoireDish      @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  commodityId String
+  commodity   CommodityIngredient @relation(fields: [commodityId], references: [id])
+  qtyBase     Float // cho baseServings
+  unit        String
 }
 
 // ─── B1: Household dish (override B0) ─────────────────────────────────────
@@ -152,94 +174,223 @@ model HouseholdLine {
 
 // ─── Household ───────────────────────────────────────────────────────────
 model Household {
-  id             String          @id @default(cuid())
-  userId         String?         @unique // Clerk user → their household (multi-tenant)
-  name           String
-  size           Int
-  marketMode     String          @default("mixed")
-  cookTimeCapMin Int             @default(45)
-  busyDays       String[] // ["Mon","Wed"]
-  lactatingMember Boolean        @default(false)
-  restrictions   String[] // diet: vegetarian, no_pork, …
+  id                      String                   @id @default(cuid())
+  userId                  String?                  @unique // Clerk user → their household (multi-tenant)
+  name                    String
+  size                    Int
+  marketMode              String                   @default("mixed")
+  cookTimeCapMin          Int                      @default(45)
+  busyDays                String[] // ["Mon","Wed"]
+  lactatingMember         Boolean                  @default(false)
+  restrictions            String[] // diet: vegetarian, no_pork, …
   // Mutable per-household user state (Phase A persistence). Collections kept on
   // the household row to avoid many tiny tables; promote to relations if needed.
-  favorites      String[] // dish ids
-  notes          Json      @default("[]") // [{id, text}]
-  pantry         Json      @default("[]") // [{commodityId, qty, unit, expiry?}]
-  members        Member[]
-  dishes         HouseholdDish[]
-  weekPlans      WeekPlan[]
-  suppliers      Supplier[]
-  orders         Order[]
-  purchases      PurchaseRecord[]
+  favorites               String[] // dish ids
+  notes                   Json                     @default("[]") // [{id, text}]
+  pantry                  Json                     @default("[]") // [{commodityId, qty, unit, expiry?}]
+  members                 Member[]
+  dishes                  HouseholdDish[]
+  weekPlans               WeekPlan[]
+  suppliers               Supplier[]
+  orders                  Order[]
+  purchases               PurchaseRecord[]
+  inventoryLots           InventoryLot[]
+  inventoryMovements      InventoryMovement[]
+  leftoverLots            LeftoverLot[]
+  leftoverMovements       LeftoverMovement[]
+  shoppingFulfillments    ShoppingFulfillment[]
+  shoppingReceiveRequests ShoppingReceiveRequest[]
 }
 
 // ── Lane 2 — Purchase log (real-price catch-bucket; pricePaid = B1 ground truth) ──
 model PurchaseRecord {
-  id          String    @id @default(cuid())
-  householdId String
-  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  date        DateTime   @default(now())
-  orderRef    String?
-  supplierId  String?
-  lines       Json       @default("[]") // [{ commodityId, qty, unit, pricePaid? }]
-  onTime      String?    // on_time | late | no_show — subjective household observation
-  note        String?
+  id                  String               @id @default(cuid())
+  householdId         String
+  household           Household            @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  date                DateTime             @default(now())
+  orderRef            String?
+  supplierId          String?
+  lines               Json                 @default("[]") // [{ commodityId, qty, unit, pricePaid? }]
+  onTime              String? // on_time | late | no_show — subjective household observation
+  note                String?
+  shoppingFulfillment ShoppingFulfillment?
+}
+
+// ── Kitchen Execution — bought-line ground truth + individually traceable lots ──
+model ShoppingFulfillment {
+  id               String                   @id @default(cuid())
+  householdId      String
+  household        Household                @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  weekRef          String
+  commodityId      String
+  vendor           String
+  plannedQty       Float
+  actualQty        Float
+  unit             String
+  boughtAt         DateTime
+  pricePaid        Int?
+  purchaseRecordId String                   @unique
+  purchaseRecord   PurchaseRecord           @relation(fields: [purchaseRecordId], references: [id], onDelete: Cascade)
+  inventoryLot     InventoryLot?
+  receiveRequests  ShoppingReceiveRequest[]
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  @@unique([householdId, weekRef, commodityId, vendor])
+  @@index([householdId, weekRef])
+}
+
+model InventoryLot {
+  id                String               @id @default(cuid())
+  householdId       String
+  household         Household            @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  commodityId       String
+  qty               Float
+  unit              String
+  purchasedAt       DateTime
+  storageLocation   StorageLocation
+  bestBefore        DateTime?
+  sourceWeekRef     String?
+  sourceShoppingKey String?
+  fulfillmentId     String?              @unique
+  fulfillment       ShoppingFulfillment? @relation(fields: [fulfillmentId], references: [id], onDelete: SetNull)
+  movements         InventoryMovement[]
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@index([householdId, commodityId])
+  @@index([householdId, sourceWeekRef])
+}
+
+model InventoryMovement {
+  id             String                @id @default(cuid())
+  idempotencyKey String                @unique
+  householdId    String
+  household      Household             @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  inventoryLotId String
+  inventoryLot   InventoryLot          @relation(fields: [inventoryLotId], references: [id], onDelete: Restrict)
+  kind           InventoryMovementKind
+  qty            Float
+  unit           String
+  qtyBefore      Float
+  qtyAfter       Float
+  occurredAt     DateTime
+  note           String?
+  createdAt      DateTime              @default(now())
+
+  @@index([householdId, occurredAt])
+  @@index([inventoryLotId, occurredAt])
+}
+
+model ShoppingReceiveRequest {
+  idempotencyKey String              @id
+  householdId    String
+  household      Household           @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  fulfillmentId  String
+  fulfillment    ShoppingFulfillment @relation(fields: [fulfillmentId], references: [id], onDelete: Cascade)
+  createdAt      DateTime            @default(now())
+
+  @@index([householdId, fulfillmentId])
+}
+
+// ── Kitchen Execution — cooked-dish leftovers, never ingredient inventory ──
+model LeftoverLot {
+  id                  String                  @id @default(cuid())
+  idempotencyKey      String
+  householdId         String
+  household           Household               @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  dishRef             String
+  dishLabelSnapshot   String
+  remainingServings   Float
+  preparedAt          DateTime
+  chilledAt           DateTime
+  storageLocation     LeftoverStorageLocation
+  hotWeatherConfirmed Boolean                 @default(false)
+  policyVersion       String
+  sourceMealRunRef    String?
+  note                String?
+  createdByUserId     String
+  movements           LeftoverMovement[]
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  @@unique([householdId, idempotencyKey])
+  @@index([householdId, chilledAt])
+}
+
+model LeftoverMovement {
+  id              String               @id @default(cuid())
+  idempotencyKey  String
+  householdId     String
+  household       Household            @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  leftoverLotId   String
+  leftoverLot     LeftoverLot          @relation(fields: [leftoverLotId], references: [id], onDelete: Restrict)
+  kind            LeftoverMovementKind
+  servings        Float
+  beforeServings  Float
+  afterServings   Float
+  occurredAt      DateTime
+  note            String?
+  createdByUserId String
+  createdAt       DateTime             @default(now())
+
+  @@unique([householdId, idempotencyKey])
+  @@index([householdId, leftoverLotId, occurredAt])
 }
 
 // ── Phase 2 — Supplier & Order (household-owned; chain registry is code-seed) ──
 model Supplier {
   id              String    @id @default(cuid())
   householdId     String
-  household       Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  household       Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   name            String
-  type            String     // cho | sieu_thi | tiem | online
-  channels        Json       @default("[]") // [{ kind, value, label }]
+  type            String // cho | sieu_thi | tiem | online
+  channels        Json      @default("[]") // [{ kind, value, label }]
   hours           String?
   shipFee         String?
   shipArea        String?
-  handles         String[]   // commodity ids / groups
-  address         String?    // household shop; chains span many branches → omit
-  lat             Float?     // map pin (household shop only; user-set, never invented)
+  handles         String[] // commodity ids / groups
+  address         String? // household shop; chains span many branches → omit
+  lat             Float? // map pin (household shop only; user-set, never invented)
   lng             Float?
-  storeLocatorUrl String?    // chain branch-finder URL (honest stand-in for one address)
+  storeLocatorUrl String? // chain branch-finder URL (honest stand-in for one address)
   note            String?
-  sources         String[]   // provenance for enriched fields
-  needsVerify     Boolean    @default(false)
+  sources         String[] // provenance for enriched fields
+  needsVerify     Boolean   @default(false)
   orders          Order[]
 }
 
 model Order {
   id          String    @id @default(cuid())
   householdId String
-  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   supplierId  String
-  supplier    Supplier   @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  supplier    Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
   weekRef     String
-  lines       Json       @default("[]") // [{ commodityId, qtyGross, unit }]
-  status      String     @default("draft") // draft | sent | confirmed | delivered
+  lines       Json      @default("[]") // [{ commodityId, qtyGross, unit }]
+  status      String    @default("draft") // draft | sent | confirmed | delivered
   channelUsed String?
   sentAt      DateTime?
   note        String?
 }
 
 model Member {
-  id          String     @id @default(cuid())
-  householdId String
-  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  name        String?
-  role        MemberRole
-  sex         String?
-  ageBand     String?
-  activity    Activity   @default(moderate)
+  id            String        @id @default(cuid())
+  householdId   String
+  household     Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name          String?
+  role          MemberRole
+  sex           String?
+  ageBand       String?
+  activity      Activity      @default(moderate)
   // ── BASE layer (static) ──
-  allergies   String[] // shellfish, fish, egg, … — HARD-SAFETY tier
-  habits      String[] // everyday eating habits
-  conditions  String[] // standing conditions — MEDICAL tier (execute-not-prescribe)
-  dislikes    String[] // disliked dishes/ingredients — PREFERENCE tier
-  healthProfile Json?    // { lifeStage, mode } — T1 special diets (wellness only)
+  allergies     String[] // shellfish, fish, egg, … — HARD-SAFETY tier
+  habits        String[] // everyday eating habits
+  conditions    String[] // standing conditions — MEDICAL tier (execute-not-prescribe)
+  dislikes      String[] // disliked dishes/ingredients — PREFERENCE tier
+  healthProfile Json? // { lifeStage, mode } — T1 special diets (wellness only)
   // ── STATE layer (dynamic, self-expiring) ──
-  states      MemberState[]
+  states        MemberState[]
 }
 
 // Dynamic state that overrides the base while in effect, then SELF-EXPIRES via
@@ -248,7 +399,7 @@ model MemberState {
   id         String    @id @default(cuid())
   memberId   String
   member     Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  kind       String    // illness | mood | context
+  kind       String // illness | mood | context
   value      String
   validFrom  DateTime  @default(now())
   validUntil DateTime?
@@ -256,24 +407,31 @@ model MemberState {
 
 // ─── Planning ────────────────────────────────────────────────────────────
 model WeekPlan {
-  id          String        @id @default(cuid())
-  householdId String
-  household   Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  weekStart   DateTime
-  daySlots    DaySlot[]
+  id           String        @id @default(cuid())
+  householdId  String
+  household    Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  weekStart    DateTime
+  version      Int           @default(1)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  daySlots     DaySlot[]
   shoppingList ShoppingList?
+
+  @@unique([householdId, weekStart])
 }
 
 model DaySlot {
-  id                String         @id @default(cuid())
-  weekPlanId        String
-  weekPlan          WeekPlan       @relation(fields: [weekPlanId], references: [id], onDelete: Cascade)
-  day               Int // 0..6
-  slot              Slot
-  repertoireDishId  String? // ref B0
-  householdDishId   String? // ref B1
-  householdDish     HouseholdDish? @relation(fields: [householdDishId], references: [id])
-  locked            Boolean        @default(false)
+  id               String         @id @default(cuid())
+  weekPlanId       String
+  weekPlan         WeekPlan       @relation(fields: [weekPlanId], references: [id], onDelete: Cascade)
+  day              Int // 0..6
+  slot             Slot
+  repertoireDishId String? // ref B0
+  householdDishId  String? // ref B1
+  householdDish    HouseholdDish? @relation(fields: [householdDishId], references: [id])
+  locked           Boolean        @default(false)
+
+  @@unique([weekPlanId, day, slot])
 }
 
 model ShoppingList {

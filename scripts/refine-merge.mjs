@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { COMMODITIES, COMMODITY_BY_ID } from "../src/data/seed/commodity";
+import { COMMODITIES } from "../src/data/seed/commodity";
 import { REPERTOIRE } from "../src/data/seed/repertoire";
 
 // Phase C — human-in-loop MERGE. Reads the AI-generated candidates + a

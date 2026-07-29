@@ -3,7 +3,7 @@ import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
 import type { CommoditySource } from "./calculator";
-import { dishMacro, dishCoverage, scaleMacro } from "./calculator";
+import { dishMacro, dishCoverage } from "./calculator";
 import { displayModeFor, toDisplay, marginRatio } from "./d3-gate";
 import { householdAdequacy, memberAdequacy, groupsCheck, householdNeed } from "./adequacy";
 import { D3_CONFIG } from "./config";

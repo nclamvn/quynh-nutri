@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Dish } from "@/domain/types";
 import { dishPhoto, dishSvg } from "@/ui/dish-image";
 
@@ -25,8 +25,6 @@ export function DishThumb({
 }) {
   const radius = shape === "circle" ? "rounded-full" : "rounded-[14px]";
   const photo = dish ? dishPhoto(dish) : "";
-  const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [photo]); // reset fallback when the dish changes
 
   if (!dish) {
     return <span className={`inline-block shrink-0 bg-surface ${radius} ${className}`} style={{ width: size, height: size }} aria-hidden />;
@@ -36,13 +34,20 @@ export function DishThumb({
       className={`relative inline-block shrink-0 overflow-hidden bg-surface ring-1 ring-hairline/70 ${radius} ${className}`}
       style={{ width: size, height: size }}
     >
-      <img
-        src={failed ? dishSvg(dish) : photo}
-        alt=""
-        loading="lazy"
-        onError={() => setFailed(true)}
-        className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.06] dark:brightness-[0.92]"
-      />
+      <DishImage key={photo} dish={dish} photo={photo} />
     </span>
+  );
+}
+
+function DishImage({ dish, photo }: { dish: ThumbDish; photo: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <img
+      src={failed ? dishSvg(dish) : photo}
+      alt=""
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.06] dark:brightness-[0.92]"
+    />
   );
 }

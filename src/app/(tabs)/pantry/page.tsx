@@ -5,14 +5,27 @@ import Link from "next/link";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import type { Lang } from "@/i18n/context";
+import type { InventoryLot, LeftoverLot } from "@/domain/types";
 import { COMMODITIES } from "@/data/seed/commodity";
 import { REPERTOIRE } from "@/data/seed/repertoire";
 import { cookFromPantry } from "@/domain/pantry";
+import {
+  expirySignal,
+  frozenLotsNeededForDay,
+  planDayForDate,
+  sortLotsFefo,
+} from "@/domain/kitchen-execution/inventory";
 import { DishThumb } from "@/ui/components/DishThumb";
 import { Blossom } from "@/ui/components/Blossom";
 import { BasketIcon } from "@/ui/components/icons";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
+import { InventoryLotSheet } from "@/ui/components/InventoryLotSheet";
+import { LeftoverLotSheet } from "@/ui/components/LeftoverLotSheet";
+import {
+  evaluateLeftoverGuidance,
+  sortLeftoversForReview,
+} from "@/domain/kitchen-execution/leftover-safety";
 import { pct } from "@/ui/format";
 
 const cName = (id: string, lang: Lang) => {
@@ -21,27 +34,144 @@ const cName = (id: string, lang: Lang) => {
 };
 
 export default function PantryPage() {
-  const { pantry, addPantry, removePantry, dish } = useStore();
+  const {
+    pantry,
+    inventoryMovements,
+    leftoverLots,
+    leftoverMovements,
+    addPantry,
+    removePantry,
+    recordInventoryMovement,
+    recordLeftoverMovement,
+    plan,
+    dish,
+  } = useStore();
   const { t, lang } = useI18n();
   const [sel, setSel] = useState("");
   const [qty, setQty] = useState(200);
+  const [selectedLot, setSelectedLot] = useState<InventoryLot | null>(null);
+  const [selectedLeftover, setSelectedLeftover] = useState<LeftoverLot | null>(null);
+  const [guidanceAt] = useState(() => new Date());
 
+  const availableLots = useMemo(() => sortLotsFefo(pantry), [pantry]);
   const matches = useMemo(
-    () => (pantry.length ? cookFromPantry(pantry, REPERTOIRE).filter((m) => m.coverage >= 0.6).slice(0, 6) : []),
-    [pantry],
+    () => (availableLots.length ? cookFromPantry(availableLots, REPERTOIRE).filter((m) => m.coverage >= 0.6).slice(0, 6) : []),
+    [availableLots],
   );
+  const thawLots = useMemo(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const day = planDayForDate(plan.weekStart, tomorrow);
+    return day === undefined ? [] : frozenLotsNeededForDay(availableLots, plan, day, dish);
+  }, [availableLots, plan, dish]);
+  const thawNames = [...new Set(thawLots.map((lot) => cName(lot.commodityId, lang)))].join(", ");
+  const activeLeftovers = useMemo(
+    () => sortLeftoversForReview(leftoverLots, guidanceAt),
+    [guidanceAt, leftoverLots],
+  );
+
+  const signalClass = (signal: ReturnType<typeof expirySignal>) => {
+    if (signal === "overdue" || signal === "today") return "bg-danger/10 text-danger";
+    if (signal === "soon") return "bg-amber/15 text-amber-700";
+    return "bg-surface text-muted";
+  };
 
   return (
     <PageContainer>
       <PageHeader
         title={t("pantry.title")}
-        subtitle={pantry.length ? t("pantry.count", { n: pantry.length }) : undefined}
+        subtitle={availableLots.length ? t("pantry.count", { n: availableLots.length }) : undefined}
         actions={
           <Link href="/shopping" className="rounded-full border border-hairline px-3 py-1.5 text-sm text-muted active:bg-surface">
             {t("shopping.title")} →
           </Link>
         }
       />
+
+      {thawLots.length > 0 && (
+        <section className="mb-4 rounded-[18px] border border-sky-200 bg-sky-50/75 p-4 text-sky-950">
+          <h2 className="text-sm font-semibold">{t("inventory.thawTitle")}</h2>
+          <p className="mt-1 text-xs leading-relaxed">
+            {t("inventory.thawBody", { items: thawNames })}
+          </p>
+        </section>
+      )}
+
+      <section id="leftovers" className="mb-6 scroll-mt-6" aria-labelledby="leftovers-title">
+        <div className="mb-2 flex items-end justify-between gap-3">
+          <div>
+            <h2 id="leftovers-title" className="text-sm font-semibold">{t("leftover.listTitle")}</h2>
+            <p className="mt-0.5 text-[11px] text-muted">{t("leftover.listHint")}</p>
+          </div>
+          {activeLeftovers.length > 0 && (
+            <span className="tnum rounded-full bg-brand-weak px-2.5 py-1 text-xs font-semibold text-brand">
+              {activeLeftovers.length}
+            </span>
+          )}
+        </div>
+        {activeLeftovers.length === 0 ? (
+          <div className="rounded-[16px] border border-dashed border-hairline px-4 py-5 text-center text-xs text-muted">
+            {t("leftover.empty")}
+          </div>
+        ) : (
+          <ul className="grid gap-2 sm:grid-cols-2" data-testid="leftover-lots">
+            {activeLeftovers.map((lot) => {
+              const guidance = evaluateLeftoverGuidance({
+                chilledAt: lot.chilledAt,
+                storageLocation: lot.storageLocation,
+                now: guidanceAt,
+              });
+              const attention = guidance.signal === "past-guidance-window"
+                ? "bg-danger/10 text-danger"
+                : guidance.signal === "review-guidance"
+                  ? "bg-amber/15 text-amber-700"
+                  : "bg-surface text-muted";
+              return (
+                <li key={lot.id}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedLeftover(lot)}
+                    aria-label={`${t("leftover.open")}: ${lot.dishLabelSnapshot}`}
+                    className="card flex w-full items-center gap-3 p-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">{lot.dishLabelSnapshot}</span>
+                      <span className="mt-1 flex flex-wrap gap-1">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] ${attention}`}>
+                          {t(`leftover.signal.${guidance.signal}`)}
+                        </span>
+                        <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] text-muted">
+                          {t(`leftover.storage.${lot.storageLocation}`)}
+                        </span>
+                      </span>
+                    </span>
+                    <span className="tnum shrink-0 text-xs text-muted">
+                      {lot.remainingServings} {t("leftover.servingUnit")}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {leftoverMovements.length > 0 && (
+          <details className="mt-2 text-xs">
+            <summary className="cursor-pointer text-muted">{t("leftover.recent")}</summary>
+            <ul className="mt-2 space-y-1.5" data-testid="leftover-activity">
+              {leftoverMovements.slice(0, 5).map((movement) => (
+                <li key={movement.id} className="flex gap-2 rounded-[12px] bg-surface/45 px-3 py-2">
+                  <span className="min-w-0 flex-1 truncate">
+                    {movement.dishLabelSnapshot} · {t(`leftover.kind.${movement.kind}`)}
+                  </span>
+                  <span className="tnum text-muted">
+                    {movement.beforeServings} → {movement.afterServings}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px]">
         {/* Left — add form + inventory */}
@@ -74,25 +204,94 @@ export default function PantryPage() {
             </button>
           </div>
 
-          {pantry.length === 0 ? (
+          {availableLots.length === 0 ? (
             <div className="relative grid min-h-[35vh] place-content-center justify-items-center text-center">
               <Blossom size={120} className="pointer-events-none absolute -top-2 text-brand/10" />
               <span className="relative mb-3 text-tertiary"><BasketIcon className="h-12 w-12" /></span>
               <p className="relative text-sm text-muted">{t("pantry.empty")}</p>
             </div>
           ) : (
-            <ul data-stagger className="space-y-2">
-              {pantry.map((p, i) => (
-                <li key={p.commodityId} style={{ "--i": Math.min(i, 12) } as React.CSSProperties} className="card flex items-center gap-3 p-3">
-                  <span className="flex-1 text-sm">{cName(p.commodityId, lang)}</span>
-                  <span className="tnum text-xs text-muted">{p.qty} {p.unit}</span>
-                  <button onClick={() => removePantry(p.commodityId)} aria-label={t("notes.delete")} className="rounded p-1 text-tertiary active:text-danger">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            <>
+              <div className="mb-2 flex items-end justify-between gap-3">
+                <h2 className="text-sm font-semibold">{t("inventory.priority")}</h2>
+                <p className="text-[10px] text-muted">{t("inventory.labelDisclaimer")}</p>
+              </div>
+              <ul data-stagger data-testid="pantry-lots" className="space-y-2">
+              {availableLots.map((p, i) => {
+                const signal = expirySignal(p);
+                const relationLot =
+                  !p.legacy && p.id && p.purchasedAt && p.storageLocation
+                    ? p as InventoryLot
+                    : undefined;
+                return (
+                <li
+                  key={p.id ?? `${p.commodityId}-${i}`}
+                  data-lot-id={p.id}
+                  style={{ "--i": Math.min(i, 12) } as React.CSSProperties}
+                  className="card flex items-center gap-2 p-2"
+                >
+                  <button
+                    type="button"
+                    disabled={!relationLot}
+                    onClick={() => relationLot && setSelectedLot(relationLot)}
+                    aria-label={`${t("inventory.open")}: ${cName(p.commodityId, lang)}`}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-[14px] p-1 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-default"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">{cName(p.commodityId, lang)}</span>
+                      <span className="mt-1 flex flex-wrap gap-1">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] ${signalClass(signal)}`}>
+                          {t(`inventory.signal.${signal}`)}
+                        </span>
+                        {p.legacy && (
+                          <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] text-muted">
+                            {t("inventory.legacy")}
+                          </span>
+                        )}
+                      </span>
+                    </span>
+                    <span className="tnum shrink-0 text-xs text-muted">{p.qty} {p.unit}</span>
+                    {p.storageLocation && (
+                      <span className="shrink-0 rounded-full bg-surface px-2 py-1 text-[10px] text-muted">
+                        {t(`receive.storage.${p.storageLocation}`)}
+                      </span>
+                    )}
                   </button>
+                  {p.legacy && (
+                    <button
+                      onClick={() => p.id && removePantry(p.id)}
+                      disabled={!p.id}
+                      aria-label={t("notes.delete")}
+                      className="rounded p-1 text-tertiary active:text-danger disabled:opacity-30"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                  )}
                 </li>
-              ))}
-            </ul>
+                );
+              })}
+              </ul>
+            </>
           )}
+
+          <section className="mt-6">
+            <h2 className="mb-2 text-sm font-semibold">{t("inventory.recent")}</h2>
+            {inventoryMovements.length === 0 ? (
+              <p className="text-xs text-muted">{t("inventory.emptyRecent")}</p>
+            ) : (
+              <ul className="space-y-2" data-testid="inventory-activity">
+                {inventoryMovements.slice(0, 8).map((movement) => (
+                  <li key={movement.id} className="flex items-center gap-3 rounded-[14px] bg-surface/45 px-3 py-2 text-xs">
+                    <span className="min-w-0 flex-1 truncate">
+                      {cName(movement.commodityId, lang)} · {t(`inventory.kind.${movement.kind}`)}
+                    </span>
+                    <span className="tnum text-muted">−{movement.qty} {movement.unit}</span>
+                    <span className="tnum font-medium">{movement.qtyAfter} {movement.unit}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
 
         {/* Right — cook from pantry */}
@@ -120,6 +319,22 @@ export default function PantryPage() {
           </aside>
         )}
       </div>
+
+      {selectedLot && (
+        <InventoryLotSheet
+          lot={selectedLot}
+          name={cName(selectedLot.commodityId, lang)}
+          onClose={() => setSelectedLot(null)}
+          onRecord={recordInventoryMovement}
+        />
+      )}
+      {selectedLeftover && (
+        <LeftoverLotSheet
+          lot={selectedLeftover}
+          onClose={() => setSelectedLeftover(null)}
+          onRecord={recordLeftoverMovement}
+        />
+      )}
     </PageContainer>
   );
 }

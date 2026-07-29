@@ -45,6 +45,25 @@ describe("cookFromPantry", () => {
     expect(top.dish.lines.every((l) => l.commodityId === "rau_muong")).toBe(true);
   });
 
+  it("does not count a depleted lot as available", () => {
+    const depleted = [{ commodityId: "rice", qty: 0, unit: "g" }];
+    const dish = {
+      id: "rice-dish",
+      vnName: "Cơm",
+      proteinType: "rau" as const,
+      method: "luoc" as const,
+      slot: "COM" as const,
+      quick: true,
+      baseServings: 4,
+      origin: "B0" as const,
+      lines: [{ commodityId: "rice", qtyBase: 100, unit: "g" }],
+    };
+    expect(cookFromPantry(depleted, [dish])[0]).toMatchObject({
+      coverage: 0,
+      missing: ["rice"],
+    });
+  });
+
   it("lists missing ingredients for partially-stocked dishes", () => {
     const pantry: PantryItem[] = [{ commodityId: "thit_ga", qty: 700, unit: "g" }];
     const matches = cookFromPantry(pantry, REPERTOIRE);

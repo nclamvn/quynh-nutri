@@ -17,9 +17,11 @@ export function useCountUp(target: number, durationMs = 750): number {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce || !Number.isFinite(target) || target === 0) {
-      setValue(target);
-      fromRef.current = target;
-      return;
+      const raf = requestAnimationFrame(() => {
+        setValue(target);
+        fromRef.current = target;
+      });
+      return () => cancelAnimationFrame(raf);
     }
     const from = fromRef.current;
     const start = performance.now();

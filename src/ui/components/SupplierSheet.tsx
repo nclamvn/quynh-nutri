@@ -90,6 +90,8 @@ export function SupplierSheet({ supplier, seed, onClose }: {
   useEffect(() => {
     const s = supplier ?? seed;
     if (!open) return;
+    // Controlled sheet draft must reset for the selected supplier/registry seed.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(s?.name ?? "");
     setType(s?.type ?? "cho");
     setChannels(s?.channels?.length ? s.channels.map((c) => ({ ...c })) : [{ kind: "zalo_chat", value: "" }]);

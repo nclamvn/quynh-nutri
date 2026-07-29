@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useLocalStorageValue } from "@/ui/hooks/useLocalStorageValue";
 
 type Theme = "light" | "dark";
 interface ThemeValue {
@@ -12,21 +13,26 @@ interface ThemeValue {
 const ThemeContext = createContext<ThemeValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [storedTheme, setStoredTheme] = useLocalStorageValue("theme");
+  const systemDark = useSyncExternalStore(
+    (notify) => {
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      media.addEventListener("change", notify);
+      return () => media.removeEventListener("change", notify);
+    },
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+    () => false,
+  );
+  const theme: Theme = storedTheme === "dark" || (!storedTheme && systemDark) ? "dark" : "light";
 
   useEffect(() => {
-    // Mirror whatever the pre-paint script already applied.
-    setThemeState(document.documentElement.classList.contains("dark") ? "dark" : "light");
-  }, []);
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   const apply = useCallback((t: Theme) => {
-    setThemeState(t);
-    const root = document.documentElement;
-    root.classList.toggle("dark", t === "dark");
-    try {
-      localStorage.setItem("theme", t);
-    } catch {}
-  }, []);
+    document.documentElement.classList.toggle("dark", t === "dark");
+    setStoredTheme(t);
+  }, [setStoredTheme]);
 
   const toggle = useCallback(() => apply(theme === "dark" ? "light" : "dark"), [theme, apply]);
 

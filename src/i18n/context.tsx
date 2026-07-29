@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useCallback } from "react";
 import vn from "./vn.json";
 import en from "./en.json";
+import { useLocalStorageValue } from "@/ui/hooks/useLocalStorageValue";
 
 export type Lang = "vi" | "en";
 type Dict = Record<string, string>;
@@ -17,19 +18,12 @@ interface I18nValue {
 const I18nContext = createContext<I18nValue | null>(null);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("vi");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("lang") as Lang | null;
-    if (saved === "vi" || saved === "en") setLangState(saved);
-  }, []);
+  const [storedLang, setStoredLang] = useLocalStorageValue("lang", "vi");
+  const lang: Lang = storedLang === "en" ? "en" : "vi";
 
   const setLang = useCallback((l: Lang) => {
-    setLangState(l);
-    try {
-      localStorage.setItem("lang", l);
-    } catch {}
-  }, []);
+    setStoredLang(l);
+  }, [setStoredLang]);
 
   const t = useCallback(
     (key: string, vars?: Record<string, string | number>) => {

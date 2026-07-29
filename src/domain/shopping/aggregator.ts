@@ -1,4 +1,4 @@
-import type { Dish, Household, WeekPlan, PantryItem } from "@/domain/types";
+import type { Dish, Household, WeekPlan, PantryItem, ShoppingFulfillment } from "@/domain/types";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
 
 export type TripKind = "fresh" | "dry";
@@ -11,6 +11,7 @@ export interface ShoppingItem {
   trip: number; // 1..N fresh, then the dry trip
   kind: TripKind;
   checked: boolean;
+  fulfillment?: ShoppingFulfillment;
 }
 
 const DRY_GROUPS = new Set(["gia vị", "ngũ cốc"]);
@@ -59,12 +60,18 @@ export function aggregateShopping(
   household: Household,
   previous: ShoppingItem[] = [],
   pantry: PantryItem[] = [],
+  fulfillments: ShoppingFulfillment[] = [],
 ): ShoppingItem[] {
   const freshTrips = freshTripCount(household);
   const acc = new Map<string, Acc>();
   // Pantry stock to subtract (by commodity, gross grams — same basis as buy qty).
   const stock = new Map<string, number>();
-  for (const p of pantry) stock.set(p.commodityId, (stock.get(p.commodityId) ?? 0) + p.qty);
+  for (const p of pantry) {
+    // Lots received for this week's shopping are represented by fulfilled lines.
+    // Excluding them here keeps the bought line visible in the week's progress.
+    if (p.sourceWeekRef === plan.weekStart) continue;
+    stock.set(p.commodityId, (stock.get(p.commodityId) ?? 0) + p.qty);
+  }
 
   for (const slot of plan.slots) {
     const dish = dishes(slot.dishId);
@@ -110,6 +117,18 @@ export function aggregateShopping(
       kind: a.kind,
       checked: checkedKeys.has(`${a.commodityId}|${a.vendor}`),
     });
+  }
+
+  const fulfillmentByKey = new Map(
+    fulfillments
+      .filter((fulfillment) => fulfillment.weekRef === plan.weekStart)
+      .map((fulfillment) => [`${fulfillment.commodityId}|${fulfillment.vendor}`, fulfillment]),
+  );
+  for (const item of items) {
+    const fulfillment = fulfillmentByKey.get(`${item.commodityId}|${item.vendor}`);
+    if (!fulfillment) continue;
+    item.checked = true;
+    item.fulfillment = fulfillment;
   }
 
   // Stable sort: by trip, then vendor, then commodity id.

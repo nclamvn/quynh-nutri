@@ -1,4 +1,7 @@
 import { generateText } from "ai";
+import { apiUserId } from "@/lib/auth";
+import { parseJson, rateLimit, RequestError } from "@/lib/request-security";
+import { z } from "zod";
 
 // Warm framing ONLY. By design the client runs the crisis gate + picks the dishes
 // deterministically BEFORE calling this — so the raw feeling text never reaches the
@@ -25,17 +28,25 @@ const SYSTEM = [
   "Chỉ thể hiện sự quan tâm và rằng đây là món gọn/quen để đỡ gánh nặng nấu — không phải thuốc.",
 ].join(" ");
 
+const bodySchema = z.object({
+  mood: z.enum(["stress", "tired", "sleepless", "low", "normal"]),
+  dishes: z.array(z.object({ name: z.string().trim().min(1).max(120) }).passthrough()).max(6),
+}).strict();
+
 export async function POST(req: Request) {
   try {
-    const { mood, dishes } = await req.json();
+    const userId = await apiUserId();
+    if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    if (!rateLimit(`mood:${userId}`, 30, 60_000)) {
+      return Response.json({ error: "Thử lại sau một phút." }, { status: 429 });
+    }
+    const { mood, dishes } = await parseJson(req, bodySchema);
     // E2E/CI: deterministic warmth, no LLM/key/network.
     if (process.env.E2E_MOCK_AI === "1") {
       return Response.json({ warmth: "Hôm nay chọn mấy món gọn nhẹ, đỡ phải nghĩ nhiều nhé." });
     }
     const label = MOOD_LABEL[mood as string] ?? "hôm nay";
-    const list = Array.isArray(dishes)
-      ? dishes.map((d: { name?: string }) => `- ${d?.name ?? ""}`).filter((s) => s.length > 2).join("\n")
-      : "";
+    const list = dishes.map((d) => `- ${d.name}`).join("\n");
     if (!list) return Response.json({ warmth: null });
     const { text } = await generateText({
       model: "anthropic/claude-sonnet-4.6",
@@ -44,7 +55,10 @@ export async function POST(req: Request) {
     });
     const warmth = (text ?? "").trim();
     return Response.json({ warmth: warmth.length > 0 ? warmth : null });
-  } catch {
+  } catch (error) {
+    if (error instanceof RequestError) {
+      return Response.json({ error: error.message, warmth: null }, { status: error.status });
+    }
     return Response.json({ warmth: null }); // client falls back to the rule-based note
   }
 }

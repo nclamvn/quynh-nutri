@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import { costReport, formatVnd } from "@/domain/cost";
@@ -8,6 +8,7 @@ import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
 import { useCountUp } from "@/ui/hooks/useCountUp";
+import { useLocalStorageValue } from "@/ui/hooks/useLocalStorageValue";
 
 const BUDGET_KEY = "qk-budget-weekly";
 const GROUP_LABEL: Record<string, { vn: string; en: string }> = {
@@ -25,14 +26,10 @@ const GROUP_COLOR: Record<string, string> = {
 
 export default function ReportsPage() {
   const { t, lang } = useI18n();
-  const { shopping, commodity } = useStore();
-  const [budget, setBudget] = useState<number | null>(null);
+  const { shopping, commodity, household } = useStore();
+  const [storedBudget, setStoredBudget] = useLocalStorageValue(`${BUDGET_KEY}:${household.id}`);
+  const budget = storedBudget ? Number(storedBudget) : null;
   const [draft, setDraft] = useState("");
-
-  useEffect(() => {
-    const v = localStorage.getItem(BUDGET_KEY);
-    if (v) setBudget(Number(v));
-  }, []);
 
   const report = useMemo(
     () => costReport(shopping, commodity, budget ?? undefined),
@@ -41,9 +38,9 @@ export default function ReportsPage() {
 
   const saveBudget = () => {
     const n = Math.round(Number(draft.replace(/\D/g, "")));
-    if (n > 0) { localStorage.setItem(BUDGET_KEY, String(n)); setBudget(n); setDraft(""); }
+    if (n > 0) { setStoredBudget(String(n)); setDraft(""); }
   };
-  const clearBudget = () => { localStorage.removeItem(BUDGET_KEY); setBudget(null); };
+  const clearBudget = () => setStoredBudget(null);
 
   const glabel = (g: string) => GROUP_LABEL[g]?.[lang === "en" ? "en" : "vn"] ?? g;
   const maxGroup = report.byGroup[0]?.vnd ?? 1;

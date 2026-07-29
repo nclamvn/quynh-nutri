@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useStore } from "@/ui/store";
 import { MoodSheet } from "@/ui/components/MoodSheet";
 import { useI18n } from "@/i18n/context";
@@ -16,6 +16,8 @@ import { PageContainer } from "@/ui/components/PageContainer";
 import { SLOT_COLOR } from "@/ui/slotColor";
 import { useCountUp } from "@/ui/hooks/useCountUp";
 import type { FoodGroup } from "@/domain/nutrition";
+import { useKitchenAgenda } from "@/ui/hooks/useKitchenAgenda";
+import { KitchenAgendaCard } from "@/ui/components/KitchenAgendaCard";
 
 const GROUP_COLORS: [FoodGroup, string][] = [
   ["đạm", "var(--chart-protein)"],
@@ -40,6 +42,7 @@ export default function OverviewPage() {
   const { plan, household, dish, commodity, shopping, reroll, optionsFor } = useStore();
   const { t, lang } = useI18n();
   const [moodOpen, setMoodOpen] = useState(false);
+  const agenda = useKitchenAgenda();
 
   const today = dayDishes(plan, TODAY, dish);
   const nut = dayNutrition(today, household, commodity);
@@ -48,10 +51,9 @@ export default function OverviewPage() {
   const vendors = new Set(shopping.map((i) => i.vendor)).size;
   const groupSegments = GROUP_COLORS.map(([g, color]) => ({ color, on: nut.groups.present.has(g) }));
 
-  const suggestion = useMemo(() => {
-    const todayIds = new Set(today.map((d) => d.id));
-    return optionsFor("MAN").find((d) => d.quick && !todayIds.has(d.id)) ?? optionsFor("MAN")[0];
-  }, [optionsFor, today]);
+  const todayIds = new Set(today.map((d) => d.id));
+  const manOptions = optionsFor("MAN");
+  const suggestion = manOptions.find((d) => d.quick && !todayIds.has(d.id)) ?? manOptions[0];
 
   const slotDish = (day: number, slot: Slot) => dish(plan.slots.find((s) => s.day === day && s.slot === slot)?.dishId ?? "");
   const needCount = Math.round(useCountUp(shopping.length)); // count-up flourish
@@ -84,6 +86,8 @@ export default function OverviewPage() {
           </div>
         </div>
       </header>
+
+      <KitchenAgendaCard agenda={agenda} />
 
       {plan.slots.length === 0 ? (
         <div className="card grid min-h-[40vh] place-content-center p-10 text-center">
@@ -226,4 +230,3 @@ export default function OverviewPage() {
     </PageContainer>
   );
 }
-

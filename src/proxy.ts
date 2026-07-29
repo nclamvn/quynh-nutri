@@ -1,8 +1,13 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 // Everything requires sign-in except the auth pages + static assets.
-const isPublic = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/spike(.*)"]);
+function isPublic(pathname: string): boolean {
+  return pathname === "/" ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/spike/");
+}
 
 // E2E-only auth bypass — committed but env-gated and HARD-guarded off in production,
 // so it can never weaken the live app. Replaces the old fragile "edit proxy.ts by
@@ -17,7 +22,7 @@ export default clerkMiddleware(async (auth, req) => {
     url.hostname = "anngon.io";
     return NextResponse.redirect(url, 308);
   }
-  if (isPublic(req)) return;
+  if (isPublic(req.nextUrl.pathname)) return;
   // Redirect signed-out users to the sign-in page instead of auth.protect(),
   // which on a Clerk *development* instance rewrites to /404 ("dev-browser-missing")
   // on a deployed domain. A redirect lets the sign-in page bootstrap the dev browser.

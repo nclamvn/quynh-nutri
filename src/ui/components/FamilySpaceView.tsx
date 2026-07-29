@@ -37,7 +37,7 @@ const displayName = (m: Member) => m.name?.trim() || (m.role === "child" ? "Bé"
 export function FamilySpaceView() {
   const { household, addMemberState, removeMemberState } = useStore();
   // Recompute "active" against now on each render — expired states just drop out.
-  const now = useMemo(() => new Date().toISOString(), [household.members]);
+  const now = new Date().toISOString();
   const space = useMemo(() => familySpace(household.members, now), [household.members, now]);
   const conflicts = useMemo(() => detectConflicts(household.members), [household.members]);
   const [openFor, setOpenFor] = useState<string | null>(null);

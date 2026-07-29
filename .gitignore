@@ -51,3 +51,4 @@ refinery/approved-dishes.ts
 /playwright-report/
 /e2e/__screens__/
 /e2e/.auth/
+.neon

@@ -5,10 +5,12 @@ import { BottomSheet } from "./BottomSheet";
 import { FlowerLogo } from "./FlowerLogo";
 import { RichText } from "./RichText";
 import { Skeleton } from "./Skeleton";
+import { useStore } from "@/ui/store";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const SUGGESTIONS = [
+  "Tôi nên làm gì tiếp trong bếp?",
   "Lên thực đơn tuần cho nhà mình",
   "Bữa Thứ 2 đủ chất chưa?",
   "Nấu gì với đồ đang có?",
@@ -23,6 +25,7 @@ const STORE_KEY = "qk-chat";
  * Numbers come from server-side tools, never the model.
  */
 export function AssistantSheet() {
+  const { household } = useStore();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -30,24 +33,24 @@ export function AssistantSheet() {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onOpen = () => setOpen(true);
+    const onOpen = () => {
+      try {
+        const saved = localStorage.getItem(`${STORE_KEY}:${household.id}`);
+        setMessages(saved ? JSON.parse(saved) : []);
+      } catch {
+        setMessages([]);
+      }
+      setOpen(true);
+    };
     window.addEventListener("open-assistant", onOpen);
     return () => window.removeEventListener("open-assistant", onOpen);
-  }, []);
-
-  // Restore prior conversation on mount.
-  useEffect(() => {
-    try {
-      const s = localStorage.getItem(STORE_KEY);
-      if (s) setMessages(JSON.parse(s));
-    } catch {}
-  }, []);
+  }, [household.id]);
   // Persist when an exchange finishes (not on every stream chunk).
   useEffect(() => {
     if (!busy && messages.length) {
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(messages)); } catch {}
+      try { localStorage.setItem(`${STORE_KEY}:${household.id}`, JSON.stringify(messages)); } catch {}
     }
-  }, [busy, messages]);
+  }, [busy, messages, household.id]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
@@ -93,7 +96,7 @@ export function AssistantSheet() {
 
   const clear = () => {
     setMessages([]);
-    try { localStorage.removeItem(STORE_KEY); } catch {}
+    try { localStorage.removeItem(`${STORE_KEY}:${household.id}`); } catch {}
   };
 
   const lastStreaming = busy && messages[messages.length - 1]?.role === "assistant";

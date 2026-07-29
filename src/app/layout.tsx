@@ -3,6 +3,7 @@ import { Inter, Lora } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Providers } from "@/ui/providers";
+import { isE2EMode } from "@/lib/auth";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -39,15 +40,19 @@ export const viewport: Viewport = {
 const themeInit = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const e2e = isE2EMode();
+  const content = <Providers e2e={e2e}>{children}</Providers>;
   return (
     <html lang="vi" className={`${inter.variable} ${lora.variable} h-full`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-full flex flex-col bg-bg text-ink">
-        <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-          <Providers>{children}</Providers>
-        </ClerkProvider>
+        {e2e ? content : (
+          <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+            {content}
+          </ClerkProvider>
+        )}
       </body>
     </html>
   );

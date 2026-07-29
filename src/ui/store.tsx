@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, WeekPlan, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord, ShoppingFulfillment, ReceiveShoppingItemInput, ReceiveShoppingItemResult, InventoryMovement, RecordInventoryMovementInput, RecordInventoryMovementResult, LeftoverLot, LeftoverMovement, CreateLeftoverLotInput, RecordLeftoverMovementInput, RecordLeftoverMovementResult } from "@/domain/types";
 import { splitOrders, type OrderSplit } from "@/domain/order";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -10,8 +10,13 @@ import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
 import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
 import { dishSafety, safetyReason } from "@/domain/constraints";
-import { getHouseholdState, persistState } from "@/app/actions";
+import { getHouseholdState, getCanonicalWeekPlan, persistCanonicalWeekPlan, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction } from "@/app/actions";
 import { toast } from "@/ui/toast";
+import { currentWeekStartIso } from "@/lib/week";
+import type {
+  PersistedWeekPlan,
+  WeekPlanSyncState,
+} from "@/domain/planning/persisted-week-plan";
 
 const SYNC_FAIL_MSG = "Không tải được dữ liệu — đang dùng bản mặc định.";
 const SAVE_FAIL_MSG = "Chưa lưu được thay đổi. Kiểm tra kết nối.";
@@ -30,13 +35,18 @@ const B1_KEY = "qk-b1-dishes";
 interface StoreValue {
   hydrated: boolean;
   household: Household;
-  plan: WeekPlan;
+  plan: PersistedWeekPlan;
+  planSyncState: WeekPlanSyncState;
+  planConflict: PersistedWeekPlan | null;
+  retryPlanSync: () => void;
+  acceptCanonicalPlan: () => void;
   notes: string[];
   shopping: ShoppingItem[];
   reroll: () => void;
   changeSlot: (day: number, slot: Slot, dishId: string) => void;
   toggleLock: (day: number, slot: Slot) => void;
   toggleShopping: (commodityId: string, vendor: string) => void;
+  receiveShoppingItem: (input: ReceiveShoppingItemInput) => Promise<ReceiveShoppingItemResult>;
   optionsFor: (slot: Slot) => Dish[];
   dish: (id: string) => Dish | undefined;
   commodity: typeof commodities;
@@ -61,8 +71,14 @@ interface StoreValue {
   deleteNote: (id: number) => void;
   // PA-Pantry
   pantry: PantryItem[];
+  inventoryMovements: InventoryMovement[];
   addPantry: (commodityId: string, qty: number, unit: string) => void;
-  removePantry: (commodityId: string) => void;
+  removePantry: (lotId: string) => void;
+  recordInventoryMovement: (input: RecordInventoryMovementInput) => Promise<RecordInventoryMovementResult>;
+  leftoverLots: LeftoverLot[];
+  leftoverMovements: LeftoverMovement[];
+  createLeftoverLot: (input: CreateLeftoverLotInput) => Promise<LeftoverLot>;
+  recordLeftoverMovement: (input: RecordLeftoverMovementInput) => Promise<RecordLeftoverMovementResult>;
   // Phase 2 — Supplier & Order (household-owned)
   suppliers: Supplier[];
   saveSupplier: (input: SupplierInput) => void;
@@ -88,20 +104,38 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [household, setHousehold] = useState<Household>(DEFAULT_HOUSEHOLD);
   // Per-piece "touched" flags so late-arriving DB hydration never clobbers an
   // optimistic edit the user made before it resolved.
-  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, suppliers: false, orders: false, purchases: false });
+  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, inventoryMovements: false, leftoverLots: false, leftoverMovements: false, suppliers: false, orders: false, purchases: false, fulfillments: false, b1: false });
   const [hydrated, setHydrated] = useState(false);
-  const [seed, setSeed] = useState(1);
-  const [manualPlan, setManualPlan] = useState<WeekPlan | null>(null);
-  const [notes, setNotes] = useState<string[]>([]);
+  const [plan, setPlan] = useState<PersistedWeekPlan>(() => ({
+    id: "",
+    householdId: "",
+    weekStart: currentWeekStartIso(),
+    version: 1,
+    updatedAt: "",
+    slots: [],
+  }));
+  const [planSyncState, setPlanSyncState] = useState<WeekPlanSyncState>("loading");
+  const [planConflict, setPlanConflict] = useState<PersistedWeekPlan | null>(null);
+  const [planNotes, setPlanNotes] = useState<string[]>([]);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [b1, setB1] = useState<Dish[]>([]); // household forks + imports (B1 ⊳ B0)
   const [userNotes, setUserNotes] = useState<{ id: number; text: string }[]>([]);
   const noteId = useRef(1);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
+  const [inventoryMovements, setInventoryMovements] = useState<InventoryMovement[]>([]);
+  const [leftoverLots, setLeftoverLots] = useState<LeftoverLot[]>([]);
+  const [leftoverMovements, setLeftoverMovements] = useState<LeftoverMovement[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
+  const [fulfillments, setFulfillments] = useState<ShoppingFulfillment[]>([]);
+  const b1Scope = useRef<string | null>(null);
+  const planRef = useRef(plan);
+  const planVersionRef = useRef(1);
+  const pendingPlanRef = useRef<PersistedWeekPlan | null>(null);
+  const savingPlanRef = useRef(false);
+  const rerollSeed = useRef(1);
 
   // Resolve a dish id through the override: B1 fork wins over B0 (Blueprint §2).
   const resolve = useCallback((id: string) => resolveDish(id, REPERTOIRE, b1) ?? REPERTOIRE_BY_ID[id], [b1]);
@@ -118,40 +152,69 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           noteId.current = s.notes.reduce((m, n) => Math.max(m, n.id), 0) + 1;
         }
         if (!tp.pantry) setPantry(s.pantry);
+        if (!tp.inventoryMovements) setInventoryMovements(s.inventoryMovements);
+        if (!tp.leftoverLots) setLeftoverLots(s.leftoverLots);
+        if (!tp.leftoverMovements) setLeftoverMovements(s.leftoverMovements);
         if (!tp.suppliers) setSuppliers(s.suppliers);
         if (!tp.orders) setOrders(s.orders);
         if (!tp.purchases) setPurchases(s.purchases);
+        if (!tp.fulfillments) setFulfillments(s.fulfillments);
+        const key = `${B1_KEY}:${s.household.id}`;
+        if (!tp.b1) {
+          try {
+            const raw = localStorage.getItem(key);
+            const local = raw ? JSON.parse(raw) as Dish[] : [];
+            setB1((previous) => [
+              ...local.filter((dish) => !previous.some((item) => item.id === dish.id)),
+              ...previous,
+            ]);
+          } catch {
+            setB1([]);
+          }
+        }
+        b1Scope.current = key;
       })
       .catch(() => toast(SYNC_FAIL_MSG, "error")) // surface, don't swallow
       .finally(() => setHydrated(true));
   }, []);
 
-  // B1 dishes (forks + imports) persist on-device. DB-persist is a later migration.
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(B1_KEY);
-      if (raw) setB1(JSON.parse(raw) as Dish[]);
-    } catch {}
+  const loadCanonicalPlan = useCallback(() => {
+    setPlanSyncState("loading");
+    getCanonicalWeekPlan()
+      .then((envelope) => {
+        planRef.current = envelope.plan;
+        planVersionRef.current = envelope.plan.version;
+        pendingPlanRef.current = null;
+        setPlan(envelope.plan);
+        setPlanConflict(null);
+        setB1((previous) => [
+          ...previous.filter((dish) =>
+            !envelope.householdDishes.some((serverDish) => serverDish.id === dish.id)
+          ),
+          ...envelope.householdDishes,
+        ]);
+        setPlanSyncState("synced");
+      })
+      .catch(() => {
+        setPlanSyncState("unsynced");
+        toast("Không tải được thực đơn đã lưu. Hãy thử lại.", "error");
+      });
   }, []);
+
   useEffect(() => {
-    try { localStorage.setItem(B1_KEY, JSON.stringify(b1)); } catch {}
-  }, [b1]);
+    queueMicrotask(loadCanonicalPlan);
+  }, [loadCanonicalPlan]);
+
+  // B1 dishes persist on-device, isolated by household. The old unscoped key is
+  // intentionally not migrated because it may contain another account's data.
+  useEffect(() => {
+    const key = `${B1_KEY}:${household.id}`;
+    if (!hydrated || b1Scope.current !== key) return;
+    try { localStorage.setItem(key, JSON.stringify(b1)); } catch {}
+  }, [b1, hydrated, household.id]);
 
   // Dishes the household is actually allowed to eat (allergies + diet restrictions).
   const allowedRepertoire = useMemo(() => dietaryRepertoire(repertoire, household, commodities), [household]);
-
-  // Generate a plan from the seed unless the user hand-edited slots.
-  const generated = useMemo(() => {
-    const locked = manualPlan?.slots.filter((s) => s.locked);
-    const res = generateWeek({ household, repertoire: allowedRepertoire, weekStart: "2026-07-27", seed, locked });
-    return res;
-  }, [household, seed, manualPlan, allowedRepertoire]);
-
-  const plan = manualPlan ?? generated.plan;
-
-  useEffect(() => {
-    setNotes(generated.notes);
-  }, [generated]);
 
   // Derive shopping from the plan, carrying checked ticks over.
   const shopping = useMemo(() => {
@@ -161,28 +224,103 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const [commodityId, vendor] = key.split("|");
         return { commodityId, vendor, checked: true } as ShoppingItem;
       });
-    return aggregateShopping(plan, resolve, commodities, household, prev, pantry);
-  }, [plan, household, checked, resolve, pantry]);
+    return aggregateShopping(plan, resolve, commodities, household, prev, pantry, fulfillments);
+  }, [plan, household, checked, resolve, pantry, fulfillments]);
 
-  const reroll = useCallback(() => {
-    // Keep locked slots, drop manual edits, advance the seed.
-    setManualPlan((prev) => {
-      const locked = (prev ?? generated.plan).slots.filter((s) => s.locked);
-      if (locked.length === 0) return null;
-      return { ...(prev ?? generated.plan), slots: locked };
-    });
-    setSeed((s) => s + 1);
-  }, [generated.plan]);
+  const flushPlan = useCallback(async () => {
+    if (savingPlanRef.current) return;
+    savingPlanRef.current = true;
+    try {
+      while (pendingPlanRef.current) {
+        const draft = pendingPlanRef.current;
+        pendingPlanRef.current = null;
+        setPlanSyncState("saving");
+        try {
+          const result = await persistCanonicalWeekPlan({
+            weekStart: draft.weekStart,
+            expectedVersion: planVersionRef.current,
+            slots: draft.slots,
+            householdDishes: b1.filter((dish) =>
+              draft.slots.some((slot) => slot.dishId === dish.id)
+            ),
+          });
+          if (!result.ok) {
+            setPlanConflict(result.canonical);
+            setPlanSyncState("conflict");
+            pendingPlanRef.current = draft;
+            break;
+          }
+          planVersionRef.current = result.plan.version;
+          if (!pendingPlanRef.current) {
+            planRef.current = result.plan;
+            setPlan(result.plan);
+            setPlanSyncState("synced");
+          }
+        } catch {
+          pendingPlanRef.current = draft;
+          setPlanSyncState("unsynced");
+          toast("Thực đơn chưa được đồng bộ. Bản đang xem vẫn được giữ lại.", "error");
+          break;
+        }
+      }
+    } finally {
+      savingPlanRef.current = false;
+    }
+  }, [b1]);
+
+  const commitPlan = useCallback((next: PersistedWeekPlan) => {
+    planRef.current = next;
+    pendingPlanRef.current = next;
+    setPlan(next);
+    setPlanConflict(null);
+    setPlanSyncState("saving");
+    void flushPlan();
+  }, [flushPlan]);
 
   const editPlan = useCallback(
     (mut: (slots: PlannedSlot[]) => PlannedSlot[]) => {
-      setManualPlan((prev) => {
-        const base = prev ?? plan;
-        return { ...base, slots: mut(base.slots.map((s) => ({ ...s }))) };
+      const base = planRef.current;
+      commitPlan({
+        ...base,
+        slots: mut(base.slots.map((slot) => ({ ...slot }))),
       });
     },
-    [plan],
+    [commitPlan],
   );
+
+  const reroll = useCallback(() => {
+    const current = planRef.current;
+    if (!current.id) return;
+    rerollSeed.current += 1;
+    const locked = current.slots.filter((slot) => slot.locked);
+    const result = generateWeek({
+      household,
+      repertoire: allowedRepertoire,
+      weekStart: current.weekStart,
+      seed: rerollSeed.current,
+      locked,
+    });
+    setPlanNotes(result.notes);
+    commitPlan({ ...current, slots: result.plan.slots });
+  }, [allowedRepertoire, commitPlan, household]);
+
+  const retryPlanSync = useCallback(() => {
+    if (planSyncState === "loading") return;
+    if (planSyncState === "conflict") return;
+    pendingPlanRef.current = planRef.current.id ? planRef.current : null;
+    if (pendingPlanRef.current) void flushPlan();
+    else loadCanonicalPlan();
+  }, [flushPlan, loadCanonicalPlan, planSyncState]);
+
+  const acceptCanonicalPlan = useCallback(() => {
+    if (!planConflict) return;
+    pendingPlanRef.current = null;
+    planRef.current = planConflict;
+    planVersionRef.current = planConflict.version;
+    setPlan(planConflict);
+    setPlanConflict(null);
+    setPlanSyncState("synced");
+  }, [planConflict]);
 
   const changeSlot = useCallback(
     (day: number, slot: Slot, dishId: string) => {
@@ -217,6 +355,82 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const toggleShopping = useCallback((commodityId: string, vendor: string) => {
     const key = `${commodityId}|${vendor}`;
     setChecked((c) => ({ ...c, [key]: !c[key] }));
+  }, []);
+
+  const receiveShoppingItem = useCallback(async (input: ReceiveShoppingItemInput) => {
+    const result = await receiveShoppingItemAction(input);
+    touched.current.fulfillments = true;
+    touched.current.purchases = true;
+    setFulfillments((prev) => {
+      const index = prev.findIndex((item) => item.id === result.fulfillment.id);
+      return index >= 0
+        ? prev.map((item, itemIndex) => (itemIndex === index ? result.fulfillment : item))
+        : [...prev, result.fulfillment];
+    });
+    setPurchases((prev) => {
+      const index = prev.findIndex((item) => item.id === result.purchase.id);
+      return index >= 0
+        ? prev.map((item, itemIndex) => (itemIndex === index ? result.purchase : item))
+        : [result.purchase, ...prev];
+    });
+    if (result.lot) {
+      touched.current.pantry = true;
+      setPantry((prev) => {
+        const index = prev.findIndex((item) => item.id === result.lot?.id);
+        return index >= 0
+          ? prev.map((item, itemIndex) => (itemIndex === index ? result.lot! : item))
+          : [...prev, result.lot!];
+      });
+    }
+    toast("Đã ghi nhận hàng mua và cập nhật kho.");
+    return result;
+  }, []);
+
+  const recordInventoryMovement = useCallback(async (
+    input: RecordInventoryMovementInput,
+  ): Promise<RecordInventoryMovementResult> => {
+    const result = await recordInventoryMovementAction(input);
+    touched.current.pantry = true;
+    touched.current.inventoryMovements = true;
+    setPantry((prev) => prev.map((lot) => (lot.id === result.lot.id ? result.lot : lot)));
+    setInventoryMovements((prev) => [
+      result.movement,
+      ...prev.filter((movement) => movement.id !== result.movement.id),
+    ]);
+    toast("Đã cập nhật số lượng trong kho.");
+    return result;
+  }, []);
+
+  const createLeftoverLot = useCallback(async (
+    input: CreateLeftoverLotInput,
+  ): Promise<LeftoverLot> => {
+    const lot = await createLeftoverLotAction(input);
+    touched.current.leftoverLots = true;
+    setLeftoverLots((previous) => {
+      const index = previous.findIndex((item) => item.id === lot.id);
+      return index >= 0
+        ? previous.map((item, itemIndex) => itemIndex === index ? lot : item)
+        : [...previous, lot];
+    });
+    toast("Đã ghi nhận món còn thừa.");
+    return lot;
+  }, []);
+
+  const recordLeftoverMovement = useCallback(async (
+    input: RecordLeftoverMovementInput,
+  ): Promise<RecordLeftoverMovementResult> => {
+    const result = await recordLeftoverMovementAction(input);
+    touched.current.leftoverLots = true;
+    touched.current.leftoverMovements = true;
+    setLeftoverLots((previous) =>
+      previous.map((lot) => lot.id === result.lot.id ? result.lot : lot),
+    );
+    setLeftoverMovements((previous) => [
+      result.movement,
+      ...previous.filter((movement) => movement.id !== result.movement.id),
+    ]);
+    toast("Đã cập nhật món còn thừa.");
+    return result;
   }, []);
 
   const optionsFor = useCallback(
@@ -334,17 +548,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const addPantry = useCallback((commodityId: string, qty: number, unit: string) => {
     if (!commodityId || qty <= 0) return;
     touched.current.pantry = true;
-    const i = pantry.findIndex((x) => x.commodityId === commodityId);
-    const next = i >= 0 ? pantry.map((x, j) => (j === i ? { ...x, qty: x.qty + qty } : x)) : [...pantry, { commodityId, qty, unit }];
-    setPantry(next);
-    safePersist({ pantry: next });
-  }, [pantry]);
-  const removePantry = useCallback((commodityId: string) => {
+    const group = commodities(commodityId)?.group;
+    createManualInventoryLot({
+      commodityId,
+      qty,
+      unit,
+      purchasedAt: new Date().toISOString(),
+      storageLocation: group === "gia vị" || group === "ngũ cốc" ? "pantry" : "fridge",
+    })
+      .then((lot) => setPantry((prev) => [...prev, lot]))
+      .catch(() => toast(SAVE_FAIL_MSG, "error"));
+  }, []);
+  const removePantry = useCallback((lotId: string) => {
     touched.current.pantry = true;
-    const next = pantry.filter((x) => x.commodityId !== commodityId);
-    setPantry(next);
-    safePersist({ pantry: next });
-  }, [pantry]);
+    setPantry((prev) => prev.filter((item) => item.id !== lotId));
+    deleteInventoryLot(lotId).catch(() => {
+      toast(SAVE_FAIL_MSG, "error");
+      getHouseholdState().then((state) => setPantry(state.pantry)).catch(() => {});
+    });
+  }, []);
 
   // ── Phase 2 — Suppliers (household-owned, DB-persisted) ──
   const saveSupplierFn = useCallback((input: SupplierInput) => {
@@ -452,6 +674,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // (denominator precedent stays intact; fork never re-computes nutrition). ──
   const isForked = useCallback((id: string) => b1.some((d) => d.sourceRepertoireId === id || d.id === id), [b1]);
   const forkDish = useCallback((id: string) => {
+    touched.current.b1 = true;
     setB1((prev) => {
       if (prev.some((d) => d.sourceRepertoireId === id)) return prev;
       const base = REPERTOIRE_BY_ID[id];
@@ -472,6 +695,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // from the source — it is computed downstream from the mapped commodity lines,
   // exactly like any B0 dish, so an import can never smuggle in a fabricated number.
   const addB1Dish = useCallback((dish: Dish) => {
+    touched.current.b1 = true;
     setB1((prev) => (prev.some((d) => d.id === dish.id) ? prev : [...prev, dish]));
   }, []);
 
@@ -479,12 +703,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     hydrated,
     household,
     plan,
-    notes,
+    planSyncState,
+    planConflict,
+    retryPlanSync,
+    acceptCanonicalPlan,
+    notes: planNotes,
     shopping,
     reroll,
     changeSlot,
     toggleLock,
     toggleShopping,
+    receiveShoppingItem,
     optionsFor,
     dish: resolve,
     commodity: commodities,
@@ -506,8 +735,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     addNote,
     deleteNote,
     pantry,
+    inventoryMovements,
     addPantry,
     removePantry,
+    recordInventoryMovement,
+    leftoverLots,
+    leftoverMovements,
+    createLeftoverLot,
+    recordLeftoverMovement,
     suppliers,
     saveSupplier: saveSupplierFn,
     deleteSupplier: deleteSupplierFn,

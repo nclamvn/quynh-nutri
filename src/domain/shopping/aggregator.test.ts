@@ -3,7 +3,7 @@ import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
-import type { WeekPlan, PlannedSlot } from "@/domain/types";
+import type { WeekPlan, PlannedSlot, InventoryLot, ShoppingFulfillment } from "@/domain/types";
 import { aggregateShopping, groupByTrip } from "./aggregator";
 
 const commodities: CommoditySource = (id) => COMMODITY_BY_ID[id];
@@ -71,6 +71,68 @@ describe("aggregateShopping — derive list from plan", () => {
     const second = aggregateShopping(plan2, dishes, commodities, DEFAULT_HOUSEHOLD, bought);
     expect(second.find((i) => i.commodityId === "thit_ga")!.checked).toBe(true);
     expect(second.find((i) => i.commodityId === "rau_muong")!.checked).toBe(false);
+  });
+
+  it("attaches a persisted fulfillment after reload", () => {
+    const plan = planWith([{ day: 0, slot: "MAN", dishId: "ga_luoc" }]);
+    const fulfillment: ShoppingFulfillment = {
+      id: "ful_1",
+      weekRef: plan.weekStart,
+      commodityId: "thit_ga",
+      vendor: "Chưa gán",
+      plannedQty: 533,
+      actualQty: 550,
+      unit: "g",
+      boughtAt: "2026-07-29T02:00:00.000Z",
+    };
+
+    const result = aggregateShopping(
+      plan,
+      dishes,
+      commodities,
+      DEFAULT_HOUSEHOLD,
+      [],
+      [],
+      [fulfillment],
+    );
+
+    const chicken = result.find((item) => item.commodityId === "thit_ga");
+    expect(chicken?.checked).toBe(true);
+    expect(chicken?.fulfillment?.actualQty).toBe(550);
+  });
+
+  it("does not subtract a lot reserved for the current week", () => {
+    const plan = planWith([{ day: 0, slot: "MAN", dishId: "ga_luoc" }]);
+    const reservedLot: InventoryLot = {
+      id: "lot_1",
+      commodityId: "thit_ga",
+      qty: 550,
+      unit: "g",
+      purchasedAt: "2026-07-29T02:00:00.000Z",
+      storageLocation: "fridge",
+      sourceWeekRef: plan.weekStart,
+      sourceShoppingKey: "thit_ga|Chưa gán",
+    };
+
+    const result = aggregateShopping(plan, dishes, commodities, DEFAULT_HOUSEHOLD, [], [reservedLot]);
+    expect(result.find((item) => item.commodityId === "thit_ga")).toBeDefined();
+  });
+
+  it("subtracts an unreserved lot from a later week's list", () => {
+    const plan = planWith([{ day: 0, slot: "MAN", dishId: "ga_luoc" }]);
+    const olderLot: InventoryLot = {
+      id: "lot_old",
+      commodityId: "thit_ga",
+      qty: 200,
+      unit: "g",
+      purchasedAt: "2026-07-20T02:00:00.000Z",
+      storageLocation: "freezer",
+      sourceWeekRef: "2026-07-20",
+      sourceShoppingKey: "thit_ga|Chưa gán",
+    };
+
+    const result = aggregateShopping(plan, dishes, commodities, DEFAULT_HOUSEHOLD, [], [olderLot]);
+    expect(result.find((item) => item.commodityId === "thit_ga")?.qtyTotal).toBe(333);
   });
 
   it("groups items by trip for display", () => {

@@ -57,4 +57,20 @@ test.describe("P0 honesty — provenance is shown, numbers aren't faked", () => 
       page.getByText(/đối chiếu|ước lượng|chưa đủ|độ phủ|coverage/i).first(),
     ).toBeVisible({ timeout: 20_000 });
   });
+
+  test("market guidance states its scope and links to reviewed sources", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 860 });
+    await page.goto("/shopping");
+
+    const guideTrigger = page.getByText("Cách chọn & cất").first();
+    await expect(guideTrigger).toBeVisible({ timeout: 20_000 });
+    await guideTrigger.click();
+
+    await expect(page.getByText(/Hướng dẫn (riêng|chung)/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Nên chọn" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Bảo quản" })).toBeVisible();
+    await expect(page.getByRole("link").filter({ hasText: /an toàn|thực phẩm|trang trại/i }).first()).toHaveAttribute("href", /^https:\/\//);
+    await expect(page.getByText(/rà soát 2026-07-29/).first()).toBeVisible();
+    await page.screenshot({ path: "e2e/__screens__/ingredient-guide-390.png", fullPage: true });
+  });
 });

@@ -46,6 +46,8 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
   useEffect(() => {
     if (!subject) return;
     const s = subject === "new" ? null : subject;
+    // Controlled sheet draft must reset when its subject changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(s?.name ?? "");
     setRole(s?.role ?? "adult");
     setSex(s?.sex ?? "F");

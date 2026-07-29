@@ -203,10 +203,155 @@ export interface PlannedSlot {
 /** What the household already has on hand (Phase A pantry). qty is PURCHASED
  *  grams (same basis as the shopping list), so it deducts directly. */
 export interface PantryItem {
+  /** Relation-backed lots always have an id. Legacy Household.pantry JSON is
+   * normalized to a stable `legacy:*` id at the repository boundary. */
+  id?: string;
   commodityId: string;
   qty: number;
   unit: string;
   expiry?: string; // ISO date, optional
+  purchasedAt?: string;
+  storageLocation?: StorageLocation;
+  bestBefore?: string;
+  sourceWeekRef?: string;
+  sourceShoppingKey?: string;
+  legacy?: boolean;
+}
+
+export type StorageLocation = "pantry" | "fridge" | "freezer";
+
+export interface InventoryLot extends PantryItem {
+  id: string;
+  purchasedAt: string;
+  storageLocation: StorageLocation;
+}
+
+export interface ShoppingFulfillment {
+  id: string;
+  weekRef: string;
+  commodityId: string;
+  vendor: string;
+  plannedQty: number;
+  actualQty: number;
+  unit: string;
+  boughtAt: string;
+  pricePaid?: number;
+  inventoryLotId?: string;
+}
+
+export interface ReceiveShoppingItemInput {
+  idempotencyKey: string;
+  weekRef: string;
+  commodityId: string;
+  vendor: string;
+  plannedQty: number;
+  actualQty: number;
+  unit: string;
+  boughtAt: string;
+  pricePaid?: number;
+  addToPantry: boolean;
+  storageLocation?: StorageLocation;
+  bestBefore?: string;
+}
+
+export interface ReceiveShoppingItemResult {
+  fulfillment: ShoppingFulfillment;
+  lot?: InventoryLot;
+  purchase: PurchaseRecord;
+}
+
+export type InventoryMovementKind = "consumed" | "discarded";
+
+export interface InventoryMovement {
+  id: string;
+  idempotencyKey: string;
+  inventoryLotId: string;
+  commodityId: string;
+  kind: InventoryMovementKind;
+  qty: number;
+  unit: string;
+  qtyBefore: number;
+  qtyAfter: number;
+  occurredAt: string;
+  note?: string;
+  createdAt: string;
+}
+
+export interface RecordInventoryMovementInput {
+  idempotencyKey: string;
+  lotId: string;
+  kind: InventoryMovementKind;
+  qty: number;
+  occurredAt: string;
+  note?: string;
+}
+
+export interface RecordInventoryMovementResult {
+  movement: InventoryMovement;
+  lot: InventoryLot;
+}
+
+export type LeftoverStorageLocation = "fridge" | "freezer";
+export type LeftoverMovementKind = "consumed" | "discarded" | "corrected";
+
+/** A cooked-dish lot. This is intentionally not an InventoryLot: a compound
+ * dish cannot be faithfully converted back into commodity stock. */
+export interface LeftoverLot {
+  id: string;
+  idempotencyKey: string;
+  dishRef: string;
+  dishLabelSnapshot: string;
+  remainingServings: number;
+  preparedAt: string;
+  chilledAt: string;
+  storageLocation: LeftoverStorageLocation;
+  hotWeatherConfirmed: boolean;
+  policyVersion: string;
+  sourceMealRunRef?: string;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeftoverMovement {
+  id: string;
+  idempotencyKey: string;
+  leftoverLotId: string;
+  dishLabelSnapshot: string;
+  kind: LeftoverMovementKind;
+  servings: number;
+  beforeServings: number;
+  afterServings: number;
+  occurredAt: string;
+  note?: string;
+  createdAt: string;
+}
+
+export interface CreateLeftoverLotInput {
+  idempotencyKey: string;
+  dishRef: string;
+  servings: number;
+  preparedAt: string;
+  chilledAt: string;
+  storageLocation: LeftoverStorageLocation;
+  hotWeatherConfirmed: boolean;
+  sourceMealRunRef?: string;
+  note?: string;
+}
+
+export interface RecordLeftoverMovementInput {
+  idempotencyKey: string;
+  lotId: string;
+  kind: LeftoverMovementKind;
+  /** Amount used/discarded. For a correction, this is the new balance. */
+  servings: number;
+  occurredAt: string;
+  note?: string;
+}
+
+export interface RecordLeftoverMovementResult {
+  movement: LeftoverMovement;
+  lot: LeftoverLot;
 }
 
 export interface WeekPlan {

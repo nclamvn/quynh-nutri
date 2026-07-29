@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 // TIP-P2-0 SPIKE — verify on a REAL phone (with Zalo) that navigator.share opens a
 // sheet with Zalo as a target AND the order text arrives intact. This is a probe,
@@ -23,14 +23,14 @@ const SAMPLE_ORDER = [
 const ZALO_PHONE = "0900000000"; // sample — replace with a real shop when testing
 
 export default function ShareSpike() {
-  const [supported, setSupported] = useState<null | boolean>(null);
+  const supported = useSyncExternalStore(
+    () => () => undefined,
+    () => typeof navigator.share === "function",
+    () => false,
+  );
   const [log, setLog] = useState<string[]>([]);
   const add = (m: string) =>
     setLog((xs) => [`${new Date().toLocaleTimeString("vi-VN")} · ${m}`, ...xs]);
-
-  useEffect(() => {
-    setSupported(typeof navigator !== "undefined" && typeof navigator.share === "function");
-  }, []);
 
   const tryShare = async () => {
     if (!navigator.share) {

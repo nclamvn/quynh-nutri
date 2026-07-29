@@ -3,9 +3,10 @@
 **"Toàn diện" = phủ có bằng chứng, không phải phủ 100% giả.** Bảng dưới phân rõ
 **auto** (Playwright, assertion thật) · **manual** (không auto được → checklist) ·
 **not-yet** (chưa phủ, để batch sau). Suite chạy hermetic: `E2E_BYPASS_AUTH` (commit,
-prod-guarded) + mock AI + mock geocode → **không gọi Clerk/AI/Nominatim/hotline thật**.
+prod-guarded) kích hoạt repo bộ nhớ + tripwire cấm Prisma, cùng mock AI/geocode →
+**không gọi Clerk/Neon/AI/Nominatim/hotline thật**.
 
-Chạy: `npm run test:e2e` (25 test) · unit: `npm test` (135 test). Ảnh: `e2e/__screens__/`.
+Chạy: `npm run test:e2e` · unit: `npm test`. Ảnh: `e2e/__screens__/`.
 
 ## P0 SAFETY
 | Hạng mục | Trạng thái | Bằng chứng |
@@ -36,6 +37,14 @@ Chạy: `npm run test:e2e` (25 test) · unit: `npm test` (135 test). Ảnh: `e2e
 | 11 route render không crash JS (overview…settings) | **auto** | core.spec |
 | Overview CTA row 390 không wrap (regression guard) | **auto** | core.spec + overview-cta-390.png |
 | Week reroll giữ ghim · shopping tick giữ · dish fork B1⊳B0 · settings VN/EN·theme | **not-yet** | batch sau (unit rotation/dish đã có) |
+| Kết thúc bữa → chặn quá mốc làm lạnh → ghi món thừa → dùng một phần → reload | **auto** | leftovers.spec + leftover-capture-390.png |
+| Món thừa tách kho nguyên liệu, idempotency và không overspend | **auto (unit/repository)** | leftover-safety.test.ts + household.test.ts |
+| Agenda derive → deep link nguồn → mutation nguồn làm task biến mất, không có done cục bộ | **auto** | kitchen-agenda.spec + kitchen-agenda-390.png |
+| Assistant đọc agenda server-side, không tự sinh/sửa việc | **auto** | kitchen-agenda.spec + assistant kitchen-agenda unit |
+| Chuẩn bị ngày mai: CTA → nhóm theo món → nguồn → đổi khẩu phần công thức, không mutation/done | **auto** | prep-ahead.spec + prep-ahead unit |
+| Assistant đọc registry chuẩn bị trước, unsupported không tự sinh fallback | **auto** | prep-ahead.spec + assistant prep-ahead unit |
+| Plan canonical: change/lock/reroll → reload, save failure → retry, stale conflict, B1 reload | **auto** | week-plan-persistence.spec + week-plan repository/domain tests |
+| Assistant đọc cùng plan canonical và không có mutation tool | **auto** | week-plan-persistence.spec + assistant adapter tests |
 
 ## P1 responsive / P2 edge
 | Hạng mục | Trạng thái |

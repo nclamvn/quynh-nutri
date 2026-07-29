@@ -1,20 +1,27 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
+import type { Commodity } from "@/domain/types";
 import { groupByTrip, type ShoppingItem } from "@/domain/shopping";
+import { kitchenGuideFor } from "@/data/seed/kitchen-guides";
 import { fmt } from "@/ui/format";
 import { Blossom } from "@/ui/components/Blossom";
 import { BasketIcon } from "@/ui/components/icons";
+import { IngredientGuideSheet } from "@/ui/components/IngredientGuideSheet";
+import { ReceiveShoppingItemSheet } from "@/ui/components/ReceiveShoppingItemSheet";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
 import { SupplierOrders } from "@/ui/components/SupplierOrders";
 
 export default function ShoppingPage() {
-  const { shopping, toggleShopping, commodity } = useStore();
+  const { shopping, plan, receiveShoppingItem, commodity } = useStore();
   const { t, lang } = useI18n();
   const groups = groupByTrip(shopping);
+  const [guideCommodity, setGuideCommodity] = useState<Commodity | undefined>();
+  const [receivingItem, setReceivingItem] = useState<ShoppingItem | null>(null);
 
   const name = (id: string) => {
     const c = commodity(id);
@@ -74,20 +81,43 @@ export default function ShoppingPage() {
                     <ul>
                       {items.map((it) => (
                         <li key={`${it.commodityId}|${it.vendor}`}>
-                          <button
-                            onClick={() => toggleShopping(it.commodityId, it.vendor)}
-                            className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface/60"
-                          >
-                            <span
-                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-transform active:scale-90 ${
-                                it.checked ? "border-brand bg-brand text-white" : "border-hairline"
-                              }`}
+                          <div className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface/60">
+                            <button
+                              type="button"
+                              onClick={() => setReceivingItem(it)}
+                              aria-label={`${it.checked ? t("receive.viewBought") : t("kitchen.markBought")}: ${name(it.commodityId)}`}
+                              aria-pressed={it.checked}
+                              className="shrink-0 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                             >
-                              {it.checked && "✓"}
-                            </span>
-                            <span className={`flex-1 text-sm ${it.checked ? "text-muted line-through" : ""}`}>{name(it.commodityId)}</span>
-                            <span className="tnum text-xs text-muted">{fmt(it.qtyTotal)} {it.unit}</span>
-                          </button>
+                              <span
+                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-transform active:scale-90 ${
+                                  it.checked ? "border-brand bg-brand text-white" : "border-hairline"
+                                }`}
+                              >
+                                {it.checked && "✓"}
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setGuideCommodity(commodity(it.commodityId))}
+                              className="min-w-0 flex-1 rounded text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                            >
+                              <span className={`block truncate text-sm ${it.checked ? "text-muted line-through" : ""}`}>
+                                {name(it.commodityId)}
+                              </span>
+                              {it.fulfillment && (
+                                <span className="mt-0.5 block text-[10px] font-medium text-accent">
+                                  {t("receive.actual")}: {fmt(it.fulfillment.actualQty)} {it.fulfillment.unit}
+                                </span>
+                              )}
+                              {kitchenGuideFor(commodity(it.commodityId)) && (
+                                <span className="mt-0.5 block text-[10px] font-medium text-brand">
+                                  {t("kitchen.openGuide")} →
+                                </span>
+                              )}
+                            </button>
+                            <span className="tnum shrink-0 text-xs text-muted">{fmt(it.qtyTotal)} {it.unit}</span>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -100,6 +130,16 @@ export default function ShoppingPage() {
       )}
 
       {shopping.length > 0 && <SupplierOrders />}
+      <IngredientGuideSheet commodity={guideCommodity} onClose={() => setGuideCommodity(undefined)} />
+      {receivingItem && (
+        <ReceiveShoppingItemSheet
+          item={receivingItem}
+          weekRef={plan.weekStart}
+          commodity={commodity(receivingItem.commodityId)}
+          onClose={() => setReceivingItem(null)}
+          onReceive={receiveShoppingItem}
+        />
+      )}
     </PageContainer>
   );
 }
