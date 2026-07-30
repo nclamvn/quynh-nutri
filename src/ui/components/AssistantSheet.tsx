@@ -6,6 +6,9 @@ import { FlowerLogo } from "./FlowerLogo";
 import { RichText } from "./RichText";
 import { Skeleton } from "./Skeleton";
 import { useStore } from "@/ui/store";
+import type {
+  AssistantWeekPlanProposal,
+} from "@/domain/assistant/week-plan-proposal";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -17,6 +20,22 @@ const SUGGESTIONS = [
   "Hết tôm, thay món gì?",
 ];
 const STORE_KEY = "qk-chat";
+const DAY_LABELS = [
+  "Thứ 2",
+  "Thứ 3",
+  "Thứ 4",
+  "Thứ 5",
+  "Thứ 6",
+  "Thứ 7",
+  "Chủ nhật",
+];
+const SLOT_LABELS = {
+  COM: "Cơm",
+  MAN: "Mặn",
+  RAU: "Rau",
+  CANH: "Canh",
+  TRANGMIENG: "Tráng miệng",
+} as const;
 
 /**
  * AI kitchen assistant. Opened via a global 'open-assistant' event. Streams the
@@ -25,12 +44,20 @@ const STORE_KEY = "qk-chat";
  * Numbers come from server-side tools, never the model.
  */
 export function AssistantSheet() {
-  const { household } = useStore();
+  const {
+    household,
+    dish,
+    applyAssistantWeekPlanProposal,
+  } = useStore();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [proposal, setProposal] =
+    useState<AssistantWeekPlanProposal | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const proposalRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const onOpen = () => {
@@ -56,6 +83,13 @@ export function AssistantSheet() {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages, busy]);
 
+  useEffect(() => {
+    if (!proposal) return;
+    requestAnimationFrame(() => {
+      proposalRef.current?.scrollIntoView({ block: "start" });
+    });
+  }, [proposal]);
+
   const send = async (text: string) => {
     const q = text.trim();
     if (!q || busy) return;
@@ -69,7 +103,29 @@ export function AssistantSheet() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history }),
       });
-      if (!res.ok || !res.body) throw new Error("stream");
+      if (!res.ok) throw new Error("assistant");
+      if (res.headers.get("content-type")?.includes("application/json")) {
+        const payload = await res.json() as {
+          type: "week-plan-proposal" | "proposal-unavailable";
+          message: string;
+          proposal?: AssistantWeekPlanProposal;
+        };
+        setProposal(
+          payload.type === "week-plan-proposal" && payload.proposal
+            ? payload.proposal
+            : null,
+        );
+        setMessages((current) => {
+          const next = [...current];
+          next[next.length - 1] = {
+            role: "assistant",
+            content: payload.message,
+          };
+          return next;
+        });
+        return;
+      }
+      if (!res.body) throw new Error("stream");
       const reader = res.body.getReader();
       const dec = new TextDecoder();
       let acc = "";
@@ -96,7 +152,56 @@ export function AssistantSheet() {
 
   const clear = () => {
     setMessages([]);
+    setProposal(null);
     try { localStorage.removeItem(`${STORE_KEY}:${household.id}`); } catch {}
+  };
+
+  const discardProposal = () => {
+    setProposal(null);
+    setMessages((current) => [
+      ...current,
+      {
+        role: "assistant",
+        content: "Đã bỏ đề xuất. Thực đơn hiện tại không thay đổi.",
+      },
+    ]);
+  };
+
+  const confirmProposal = async () => {
+    if (!proposal || applying) return;
+    setApplying(true);
+    try {
+      const result = await applyAssistantWeekPlanProposal({
+        proposalId: proposal.id,
+        kind: proposal.kind,
+        weekStart: proposal.weekStart,
+        baseVersion: proposal.baseVersion,
+        seed: proposal.seed,
+        slots: proposal.slots,
+        confirmedByUser: true,
+      });
+      setProposal(null);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: result.ok
+            ? "Đã áp dụng đúng phương án bạn vừa xác nhận."
+            : "Thực đơn đã thay đổi ở nơi khác nên đề xuất này không được áp dụng. Tôi không tự ghi đè.",
+        },
+      ]);
+    } catch {
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content:
+            "Chưa thể áp dụng đề xuất. Không có thay đổi nào được ghi.",
+        },
+      ]);
+    } finally {
+      setApplying(false);
+    }
   };
 
   const lastStreaming = busy && messages[messages.length - 1]?.role === "assistant";
@@ -140,6 +245,86 @@ export function AssistantSheet() {
             </div>
           </div>
         ))}
+        {proposal && (
+          <article
+            ref={proposalRef}
+            data-testid="assistant-week-plan-proposal"
+            className="overflow-hidden rounded-[20px] border border-brand/30 bg-surface shadow-[0_18px_50px_rgba(0,0,0,0.16)]"
+          >
+            <div className="border-b border-hairline px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand">
+                Đề xuất chờ xác nhận
+              </p>
+              <h3 className="mt-1 text-sm font-semibold">
+                Thay đổi thực đơn tuần
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-muted">
+                Chưa có thay đổi nào được áp dụng. Kiểm tra từng dòng trước khi
+                xác nhận.
+              </p>
+            </div>
+            <div className="max-h-64 divide-y divide-hairline overflow-y-auto">
+              {proposal.changes.map((change) => (
+                <div
+                  key={`${change.day}:${change.slot}`}
+                  data-day={change.day}
+                  data-slot={change.slot}
+                  className="px-4 py-3"
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                    {DAY_LABELS[change.day]} · {SLOT_LABELS[change.slot]}
+                  </p>
+                  <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs">
+                    <span
+                      data-testid="proposal-before"
+                      className="min-w-0 truncate rounded-lg bg-canvas px-2.5 py-2 text-muted line-through"
+                    >
+                      {change.beforeDishId
+                        ? dish(change.beforeDishId)?.vnName
+                          ?? change.beforeDishId
+                        : "Chưa có món"}
+                    </span>
+                    <span aria-hidden="true" className="text-brand">→</span>
+                    <span
+                      data-testid="proposal-after"
+                      className="min-w-0 truncate rounded-lg bg-brand-weak px-2.5 py-2 font-medium text-brand"
+                    >
+                      {change.afterDishId
+                        ? dish(change.afterDishId)?.vnName
+                          ?? change.afterDishId
+                        : "Bỏ món"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {proposal.notes.length > 0 && (
+              <div className="border-t border-hairline px-4 py-3 text-[11px] leading-relaxed text-amber">
+                {proposal.notes.map((note) => (
+                  <p key={note}>Lưu ý: {note}</p>
+                ))}
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-2 border-t border-hairline p-3">
+              <button
+                type="button"
+                onClick={discardProposal}
+                disabled={applying}
+                className="rounded-full border border-hairline px-3 py-2.5 text-xs font-semibold text-muted disabled:opacity-45"
+              >
+                Bỏ đề xuất
+              </button>
+              <button
+                type="button"
+                onClick={confirmProposal}
+                disabled={applying}
+                className="cta-primary rounded-full px-3 py-2.5 text-xs font-semibold text-white disabled:opacity-45"
+              >
+                {applying ? "Đang áp dụng…" : "Xác nhận áp dụng"}
+              </button>
+            </div>
+          </article>
+        )}
         {lastStreaming && messages[messages.length - 1].content === "" && (
           <p className="px-1 text-[11px] text-muted">⚙ đang tra cứu dữ liệu…</p>
         )}

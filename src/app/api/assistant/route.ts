@@ -6,6 +6,8 @@ import { getKitchenAgendaSnapshot } from "@/lib/assistant/kitchen-agenda";
 import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
 import { loadOrCreateCurrentWeekPlan } from "@/data/repo/week-plan";
 import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
+import { isWeekPlanProposalRequest } from "@/domain/assistant/week-plan-proposal";
+import { createAssistantWeekPlanProposal } from "@/lib/assistant/week-plan-proposal";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -25,11 +27,33 @@ export async function POST(req: Request) {
       return Response.json({ error: "Thử lại sau một phút." }, { status: 429 });
     }
     const { messages } = await parseJson(req, bodySchema, 128 * 1024);
+    const latest = messages.at(-1);
+    const latestMessage = latest?.content ?? "";
+    if (
+      latest?.role === "user"
+      && isWeekPlanProposalRequest(latestMessage)
+    ) {
+      const proposal = await createAssistantWeekPlanProposal();
+      return Response.json(
+        proposal
+          ? {
+              type: "week-plan-proposal",
+              message:
+                "Tôi đã chuẩn bị một phương án mới. Hãy xem toàn bộ phần thay đổi bên dưới. Chưa có gì được áp dụng.",
+              proposal,
+            }
+          : {
+              type: "proposal-unavailable",
+              message:
+                "Tôi chưa tìm được phương án khác vẫn giữ đủ các ràng buộc của gia đình. Thực đơn hiện tại không thay đổi.",
+            },
+      );
+    }
     if (
       process.env.NODE_ENV !== "production"
       && process.env.E2E_MOCK_AI === "1"
     ) {
-      const latest = messages.at(-1)?.content.toLocaleLowerCase("vi");
+      const latest = latestMessage.toLocaleLowerCase("vi");
       if (latest?.includes("thực đơn nhà tôi")) {
         const { plan, householdDishes } = await loadOrCreateCurrentWeekPlan();
         const first = plan.slots[0];

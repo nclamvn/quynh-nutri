@@ -69,6 +69,10 @@ Cố ý **né cluster AI-slop** cream #F4F1EA + terracotta #D97757. Palette kéo
    ngày mai” dùng registry song ngữ đã rà soát; ngưỡng an toàn lấy từ
    FoodSafety.gov/FDA. Món B1 hoặc ID lạ chưa có nội dung vẫn fail-closed, không
    được AI tự sinh hướng dẫn.
+7. **Đề xuất thực đơn của trợ lý không tự ghi.** Máy chủ tạo candidate theo
+   plan version và engine tất định; UI hiển thị toàn bộ diff trước/sau. Chỉ nút
+   xác nhận riêng mới gọi mutation, payload bị sửa hoặc proposal stale đều bị
+   từ chối thay vì tự rebase.
 
 ## Còn lại (phase sau)
 

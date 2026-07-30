@@ -20,6 +20,8 @@ import type {
   SaveWeekPlanResult,
 } from "@/domain/planning/persisted-week-plan";
 import { currentWeekStartIso } from "@/lib/week";
+import type { ConfirmAssistantWeekPlanProposalInput } from "@/domain/assistant/week-plan-proposal";
+import { verifyAssistantWeekPlanProposal } from "@/lib/assistant/week-plan-proposal";
 
 const id = z.string().trim().min(1).max(128);
 const shortText = z.string().trim().max(500);
@@ -239,6 +241,15 @@ const saveWeekPlanSchema = z.object({
   slots: z.array(plannedSlotSchema).max(35),
   householdDishes: z.array(householdDishSchema).max(100).optional(),
 }).strict();
+const confirmAssistantWeekPlanProposalSchema = z.object({
+  proposalId: z.string().uuid(),
+  kind: z.literal("week-plan"),
+  weekStart: z.iso.date(),
+  baseVersion: z.number().int().positive(),
+  seed: z.number().int().positive(),
+  slots: z.array(plannedSlotSchema).max(35),
+  confirmedByUser: z.literal(true),
+}).strict();
 
 // Server Action boundary — client store calls these to load/persist to Neon.
 export async function getHouseholdState(): Promise<HouseholdState> {
@@ -260,6 +271,29 @@ export async function persistCanonicalWeekPlan(
     throw new Error("WEEK_OUTSIDE_CURRENT_SCOPE");
   }
   const result = await saveWeekPlan(input);
+  revalidatePath("/week");
+  revalidatePath("/overview");
+  revalidatePath("/shopping");
+  return result;
+}
+
+export async function confirmAssistantWeekPlanProposal(
+  raw: ConfirmAssistantWeekPlanProposalInput,
+): Promise<SaveWeekPlanResult> {
+  await requireUserId();
+  const input = confirmAssistantWeekPlanProposalSchema.parse(
+    raw,
+  ) as ConfirmAssistantWeekPlanProposalInput;
+  if (input.weekStart !== currentWeekStartIso()) {
+    throw new Error("WEEK_OUTSIDE_CURRENT_SCOPE");
+  }
+  const verified = await verifyAssistantWeekPlanProposal(input);
+  if (!verified.ok) return verified;
+  const result = await saveWeekPlan({
+    weekStart: input.weekStart,
+    expectedVersion: input.baseVersion,
+    slots: verified.slots,
+  });
   revalidatePath("/week");
   revalidatePath("/overview");
   revalidatePath("/shopping");

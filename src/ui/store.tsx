@@ -10,13 +10,17 @@ import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
 import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
 import { dishSafety, safetyReason } from "@/domain/constraints";
-import { getHouseholdState, getCanonicalWeekPlan, persistCanonicalWeekPlan, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction } from "@/app/actions";
+import { getHouseholdState, getCanonicalWeekPlan, persistCanonicalWeekPlan, confirmAssistantWeekPlanProposal, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction } from "@/app/actions";
 import { toast } from "@/ui/toast";
 import { currentWeekStartIso } from "@/lib/week";
 import type {
   PersistedWeekPlan,
+  SaveWeekPlanResult,
   WeekPlanSyncState,
 } from "@/domain/planning/persisted-week-plan";
+import type {
+  ConfirmAssistantWeekPlanProposalInput,
+} from "@/domain/assistant/week-plan-proposal";
 
 const SYNC_FAIL_MSG = "Không tải được dữ liệu — đang dùng bản mặc định.";
 const SAVE_FAIL_MSG = "Chưa lưu được thay đổi. Kiểm tra kết nối.";
@@ -40,6 +44,9 @@ interface StoreValue {
   planConflict: PersistedWeekPlan | null;
   retryPlanSync: () => void;
   acceptCanonicalPlan: () => void;
+  applyAssistantWeekPlanProposal: (
+    input: ConfirmAssistantWeekPlanProposalInput,
+  ) => Promise<SaveWeekPlanResult>;
   notes: string[];
   shopping: ShoppingItem[];
   reroll: () => void;
@@ -321,6 +328,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setPlanConflict(null);
     setPlanSyncState("synced");
   }, [planConflict]);
+
+  const applyAssistantWeekPlanProposal = useCallback(async (
+    input: ConfirmAssistantWeekPlanProposalInput,
+  ): Promise<SaveWeekPlanResult> => {
+    setPlanSyncState("saving");
+    try {
+      const result = await confirmAssistantWeekPlanProposal(input);
+      if (!result.ok) {
+        pendingPlanRef.current = null;
+        setPlanConflict(result.canonical);
+        setPlanSyncState("conflict");
+        return result;
+      }
+      pendingPlanRef.current = null;
+      planRef.current = result.plan;
+      planVersionRef.current = result.plan.version;
+      setPlan(result.plan);
+      setPlanConflict(null);
+      setPlanSyncState("synced");
+      return result;
+    } catch (error) {
+      setPlanSyncState("unsynced");
+      throw error;
+    }
+  }, []);
 
   const changeSlot = useCallback(
     (day: number, slot: Slot, dishId: string) => {
@@ -715,6 +747,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     planConflict,
     retryPlanSync,
     acceptCanonicalPlan,
+    applyAssistantWeekPlanProposal,
     notes: planNotes,
     shopping,
     reroll,

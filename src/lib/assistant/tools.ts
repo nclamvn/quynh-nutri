@@ -13,7 +13,7 @@ import { substitute } from "@/lib/substitute";
 import { semanticSearch } from "@/lib/search";
 import { normalizeVn } from "@/lib/claude";
 import { dayDishes, dayNutrition } from "@/ui/derive";
-import type { Household, Allergen, DietRestriction, Slot } from "@/domain/types";
+import type { Household, Slot } from "@/domain/types";
 import { currentWeekStartIso } from "@/lib/week";
 import { getKitchenAgendaSnapshot } from "@/lib/assistant/kitchen-agenda";
 import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
@@ -50,31 +50,6 @@ export const tools = {
     description: "Đọc agenda bếp tất định hiện tại để trả lời 'tôi nên làm gì tiếp'. Đây là projection read-only theo dữ liệu hộ đã ghi nhận. Nếu mảng rỗng, phải nói chưa có việc nào đủ căn cứ và không tự nghĩ thêm.",
     inputSchema: z.object({}),
     execute: async () => (await getKitchenAgendaSnapshot()).tasks,
-  }),
-
-  plan_week: tool({
-    description: "Tạo bản xem trước thực đơn tuần (7 ngày), không lưu và không thay đổi thực đơn canonical. Tôn trọng ngày bận + dị ứng/ăn kiêng; trả tên món và ghi chú.",
-    inputSchema: z.object({
-      vegetarian: z.boolean().optional().describe("ăn chay"),
-      avoidAllergens: z.array(z.enum(["shellfish", "fish", "egg", "soy", "dairy", "gluten", "peanut"])).optional().describe("dị nguyên cần tránh"),
-    }),
-    execute: async ({ vegetarian, avoidAllergens }) => {
-      const base = await household();
-      const restrictions = [...(base.restrictions ?? [])];
-      if (vegetarian) restrictions.push("vegetarian" as DietRestriction);
-      const members = avoidAllergens?.length
-        ? base.members.map((m, i) => (i === 0 ? { ...m, allergies: [...(m.allergies ?? []), ...(avoidAllergens as Allergen[])] } : m))
-        : base.members;
-      const hh: Household = { ...base, restrictions, members };
-      const res = generateWeek({ household: hh, repertoire: dietaryRepertoire(REPERTOIRE, hh, src), weekStart: currentWeekStartIso(), seed: 1 });
-      return {
-        days: Array.from({ length: 7 }, (_, d) => ({
-          day: DAYS[d],
-          dishes: res.plan.slots.filter((s) => s.day === d).map((s) => REPERTOIRE_BY_ID[s.dishId]?.vnName).filter(Boolean),
-        })),
-        notes: res.notes,
-      };
-    },
   }),
 
   nutrition_report: tool({
