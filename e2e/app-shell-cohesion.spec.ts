@@ -157,6 +157,35 @@ test("mobile shell keeps a 20px gutter and brand returns to landing", async ({ p
   await expect(page).toHaveURL(/\/$/);
 });
 
+test("mobile page headers share a compact title axis without horizontal overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const routes = [
+    { path: "/overview", maxHeight: 125 },
+    { path: "/week", maxHeight: 125 },
+    { path: "/shopping", maxHeight: 75 },
+    { path: "/dishes", maxHeight: 175 },
+  ];
+
+  for (const route of routes) {
+    await page.goto(route.path);
+    const [contentBox, headerBox, titleBox, fontSize] = await Promise.all([
+      page.locator("[data-page-content]").boundingBox(),
+      page.locator("[data-page-header]").boundingBox(),
+      page.locator("[data-page-title]").boundingBox(),
+      page.locator("[data-page-title]").evaluate(
+        (element) => getComputedStyle(element).fontSize,
+      ),
+    ]);
+    expect(Math.abs(titleBox!.x - contentBox!.x), route.path).toBeLessThanOrEqual(1);
+    expect(fontSize, route.path).toBe("24px");
+    expect(headerBox!.height, route.path).toBeLessThanOrEqual(route.maxHeight);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, route.path).toBe(0);
+  }
+});
+
 test("active desktop navigation uses the folio bookmark treatment", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 960 });
   await page.goto("/overview");

@@ -68,9 +68,11 @@ export default function ShoppingPage() {
       <PageHeader
         title={t("shopping.title")}
         subtitle={shopping.length ? t("shopping.meta", { items: shopping.length, vendors }) : undefined}
+        mobileActions="inline"
         actions={
-          <Link href="/pantry" className="rounded-full border border-hairline px-3 py-1.5 text-sm text-muted active:bg-surface">
-            {t("pantry.title")} →
+          <Link href="/pantry" className="inline-flex min-h-9 items-center rounded-full border border-hairline px-3 text-xs text-muted active:bg-surface sm:text-sm">
+            <span className="sm:hidden">Mở kho →</span>
+            <span className="hidden sm:inline">{t("pantry.title")} →</span>
           </Link>
         }
       />

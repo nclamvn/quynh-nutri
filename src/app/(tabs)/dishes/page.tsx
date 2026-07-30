@@ -52,6 +52,7 @@ export default function DishesPage() {
         title={t("dishes.title")}
         subtitle={t("dishes.count", { n: all.length })}
         sticky
+        hideSubtitleOnMobile
         actions={
           <form
             onSubmit={(e) => { e.preventDefault(); runSearch(query); }}
@@ -72,7 +73,7 @@ export default function DishesPage() {
         }
       >
         {!searchIds ? (
-          <div className="scroll-x-thin flex gap-1.5 overflow-x-auto pb-1 pt-0.5">
+          <div className="flex flex-wrap gap-1.5 pb-1 pt-0.5 sm:flex-nowrap sm:overflow-x-auto sm:[scrollbar-width:none] sm:[&::-webkit-scrollbar]:hidden">
             <Chip active={slotFilter === "ALL"} onClick={() => setSlotFilter("ALL")}>{t("dishes.filterAll")}</Chip>
             {SLOTS.map((s) => (
               <Chip key={s} active={slotFilter === s} onClick={() => setSlotFilter(s)}>{t(`slot.${s}`)}</Chip>

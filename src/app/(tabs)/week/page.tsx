@@ -117,7 +117,7 @@ export default function WeekPage() {
               data-testid="week-plan-sync-state"
               data-control
               aria-live="polite"
-              className={`rounded-full px-3 py-1.5 text-xs font-medium ${
+              className={`rounded-full px-2.5 py-1.5 text-xs font-medium ${
                 planSyncState === "synced"
                   ? "bg-accent-weak text-accent"
                   : planSyncState === "saving"
@@ -139,31 +139,48 @@ export default function WeekPage() {
             {tomorrowPrep && (
               <button
                 type="button"
+                aria-label={`${t("prepAhead.open")}${
+                  tomorrowPrep.supported.length > 0
+                    ? ` · ${tomorrowPrep.supported.length}`
+                    : ""
+                }`}
                 onClick={() => setPrepOpen(true)}
-                className={`rounded-full border px-4 py-2.5 text-sm font-semibold ${
+                className={`rounded-full border px-3 py-2 text-xs font-semibold sm:px-4 sm:py-2.5 sm:text-sm ${
                   tomorrowPrep.supported.length > 0
                     ? "border-accent bg-accent-weak text-accent"
                     : "border-hairline bg-surface/60 text-muted"
                 }`}
               >
-                {t("prepAhead.open")}
-                {tomorrowPrep.supported.length > 0
-                  ? ` · ${tomorrowPrep.supported.length}`
-                  : ""}
+                <span className="sm:hidden">
+                  Chuẩn bị
+                  {tomorrowPrep.supported.length > 0
+                    ? ` · ${tomorrowPrep.supported.length}`
+                    : ""}
+                </span>
+                <span className="hidden sm:inline">
+                  {t("prepAhead.open")}
+                  {tomorrowPrep.supported.length > 0
+                    ? ` · ${tomorrowPrep.supported.length}`
+                    : ""}
+                </span>
               </button>
             )}
             <button
               disabled={!planEditable}
+              aria-label={t("common.reroll")}
               onClick={reroll}
-              className="cta-primary inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium text-white disabled:opacity-45"
+              className="cta-primary inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-white disabled:opacity-45 sm:px-5 sm:py-2.5 sm:text-sm"
             >
-              ↻ {t("common.reroll")}
+              ↻ <span className="sm:hidden">Đổi tuần</span>
+              <span className="hidden sm:inline">{t("common.reroll")}</span>
             </button>
             <Link
               href="/shopping"
-              className="rounded-full border border-hairline px-4 py-2 text-sm font-medium text-brand"
+              aria-label={t("week.export")}
+              className="rounded-full border border-hairline px-3 py-2 text-xs font-medium text-brand sm:px-4 sm:text-sm"
             >
-              {t("week.export")} →
+              <span className="sm:hidden">Đi chợ →</span>
+              <span className="hidden sm:inline">{t("week.export")} →</span>
             </Link>
           </>
         }

@@ -14,6 +14,14 @@ test("overview always exposes the three real-data housekeeper stages", async ({ 
   await expect(path.getByRole("link", { name: /Mở Kho & Tủ lạnh/ })).toHaveAttribute("href", "/pantry");
   await expect(path.locator('input[type="checkbox"]')).toHaveCount(0);
   await expect(path.getByText("Đang đọc dữ liệu nhà mình…")).toHaveCount(0);
+  const pathBox = await path.boundingBox();
+  for (const marker of await path.locator("[data-housekeeper-marker]").all()) {
+    const markerBox = await marker.boundingBox();
+    expect(markerBox!.x).toBeGreaterThanOrEqual(pathBox!.x);
+    expect(markerBox!.x + markerBox!.width).toBeLessThanOrEqual(
+      pathBox!.x + pathBox!.width,
+    );
+  }
   await page.screenshot({ path: "e2e/__screens__/housekeeper-path-390.png", fullPage: false });
 });
 

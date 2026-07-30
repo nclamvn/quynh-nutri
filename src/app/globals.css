@@ -304,6 +304,14 @@ body {
 .page-actions > form {
   min-height: 2.5rem;
 }
+@media (max-width: 639px) {
+  .page-actions > :is(a, button, [data-control]) {
+    height: 2.25rem;
+  }
+  .page-actions > form {
+    min-height: 2.25rem;
+  }
+}
 
 /* Sheet slide-up (authority §3.7: "đặt nhẹ xuống", no bounce). */
 @keyframes sheet-up {

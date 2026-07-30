@@ -83,7 +83,7 @@ export function HousekeeperPathCard() {
         size={150}
         className="pointer-events-none absolute -right-10 -top-12 rotate-12 text-brand/10"
       />
-      <div data-housekeeper-intro className="relative px-5 py-4">
+      <div data-housekeeper-intro className="relative px-5 pb-3 pt-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand">
           {t("housekeeper.eyebrow")}
         </p>
@@ -95,13 +95,16 @@ export function HousekeeperPathCard() {
         </p>
       </div>
 
-      <ol className="relative grid gap-0 p-4 md:grid-cols-3 md:p-5">
+      <ol className="relative grid gap-0 px-5 pb-5 pt-3 md:grid-cols-3 md:p-5">
         {steps.map(({ key, href, icon: Icon, detail }, index) => (
           <li
             key={key}
-            className="group relative grid grid-cols-[40px_minmax(0,1fr)] gap-3 border-l border-dashed border-brand/30 pb-5 pl-4 last:border-transparent last:pb-0 md:block md:border-l-0 md:border-t md:pb-0 md:pl-0 md:pr-5 md:pt-6 md:last:pr-0"
+            className="group relative grid grid-cols-[40px_minmax(0,1fr)] gap-3 pb-5 before:absolute before:bottom-0 before:left-5 before:top-10 before:border-l before:border-dashed before:border-brand/30 last:pb-0 last:before:hidden md:block md:border-t md:border-brand/30 md:pb-0 md:pr-5 md:pt-6 md:before:hidden md:last:pr-0"
           >
-            <span className="absolute -left-5 top-0 grid h-10 w-10 place-items-center rounded-full border border-brand/25 bg-bg text-brand shadow-[var(--shadow-sm)] md:-top-5 md:left-0">
+            <span
+              data-housekeeper-marker
+              className="relative z-[1] col-start-1 row-start-1 grid h-10 w-10 place-items-center rounded-full border border-brand/25 bg-bg text-brand shadow-[var(--shadow-sm)] md:absolute md:-top-5 md:left-0"
+            >
               <Icon className="h-[19px] w-[19px]" />
             </span>
             <div className="col-start-2 min-w-0 md:col-start-auto">
@@ -111,12 +114,12 @@ export function HousekeeperPathCard() {
               <h3 className="mt-0.5 text-sm font-semibold">
                 {t(`housekeeper.${key}.title`)}
               </h3>
-              <p className="mt-1 min-h-10 text-xs leading-relaxed text-muted">
+              <p className="mt-1 text-xs leading-relaxed text-muted md:min-h-10">
                 {detail}
               </p>
               <Link
                 href={href}
-                className="mt-3 inline-flex rounded-full border border-brand/25 bg-bg/80 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand-weak focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="mt-2.5 inline-flex min-h-9 items-center rounded-full border border-brand/25 bg-bg/80 px-3 text-xs font-semibold text-brand transition-colors hover:bg-brand-weak focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:mt-3"
               >
                 {t(`housekeeper.${key}.action`)} →
               </Link>

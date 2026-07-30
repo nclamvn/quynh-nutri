@@ -66,21 +66,23 @@ export default function OverviewPage() {
         title={t("ov.title")}
         subtitle={`${t("greeting")} · ${t("household.family", { n: household.size })}`}
         actions={
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <div className="flex w-max flex-nowrap items-center gap-2">
             <button
+              aria-label={t("ov.aiSuggest")}
               onClick={() => window.dispatchEvent(new Event("open-assistant"))}
-              className="cta-primary flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium text-white sm:w-auto"
+              className="cta-primary flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-xs font-semibold text-white sm:h-10 sm:px-4 sm:text-sm"
             >
-              ✨ {t("ov.aiSuggest")}
+              ✨ <span className="sm:hidden">Gợi ý món</span>
+              <span className="hidden sm:inline">{t("ov.aiSuggest")}</span>
             </button>
-            <div className="flex gap-2">
-              <button onClick={() => setMoodOpen(true)} className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-hairline px-4 py-2.5 text-sm text-muted active:bg-surface sm:flex-none">
-                Hôm nay bạn cần gì?
-              </button>
-              <button onClick={reroll} className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-hairline px-4 py-2.5 text-sm text-muted active:bg-surface sm:flex-none">
-                ↻ {t("common.reroll")}
-              </button>
-            </div>
+            <button aria-label="Hôm nay bạn cần gì?" onClick={() => setMoodOpen(true)} className="flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-hairline px-3 text-xs text-muted active:bg-surface sm:h-10 sm:px-4 sm:text-sm">
+              <span className="sm:hidden">Cần gì?</span>
+              <span className="hidden sm:inline">Hôm nay bạn cần gì?</span>
+            </button>
+            <button aria-label={t("common.reroll")} onClick={reroll} className="flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-hairline px-3 text-xs text-muted active:bg-surface sm:h-10 sm:px-4 sm:text-sm">
+              ↻ <span className="sm:hidden">Đổi tuần</span>
+              <span className="hidden sm:inline">{t("common.reroll")}</span>
+            </button>
           </div>
         }
       />
