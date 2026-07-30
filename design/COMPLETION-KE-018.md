@@ -51,6 +51,7 @@ assistant mutation path.
 - `src/data/repo/week-plan.ts`
 - `src/lib/assistant/kitchen-agenda.ts`
 - `src/lib/week.ts`
+- `src/proxy.ts`
 - `src/i18n/vn.json`
 - `src/i18n/en.json`
 - `public/sw.js`
@@ -104,6 +105,9 @@ assistant mutation path.
   no subscriptions remain.
 - The agenda builder previously resolved only B0 dishes. It now accepts
   household B1 dishes for both shopping derivation and task support.
+- The first production smoke found Clerk redirecting the cron request before
+  route-level bearer validation. The exact cron path is now public at the proxy
+  layer while the route still fails closed on `CRON_SECRET`.
 
 ## SECURITY AND HONESTY NOTES
 
