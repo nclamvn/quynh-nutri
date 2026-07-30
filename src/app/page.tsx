@@ -5,6 +5,7 @@ import { Manifesto } from "@/ui/marketing/Manifesto";
 import { Memory } from "@/ui/marketing/Memory";
 import { FinalCTA } from "@/ui/marketing/FinalCTA";
 import { DataTruth } from "@/ui/marketing/DataTruth";
+import { LandingResourceHints } from "@/ui/marketing/LandingResourceHints";
 import { FlowerLogo } from "@/ui/components/FlowerLogo";
 import "@/ui/marketing/landing.css";
 
@@ -12,9 +13,34 @@ import "@/ui/marketing/landing.css";
 // approved mock. Server component – static markup + CSS motion, scoped under `.lp`.
 // Real photos are local (see landing-media.ts); CTAs go to real Clerk routes.
 export const metadata: Metadata = {
-  title: "Ăn Ngon · Bữa cơm nhà – Một tuần vừa với nhịp sống nhà mình",
+  title: "Bữa cơm nhà – Một tuần vừa với nhịp sống nhà mình",
   description:
     "Bữa cơm nhà sắp thực đơn theo khẩu vị, số người và quỹ thời gian của gia đình Việt. Từ món ăn, định lượng đến danh sách đi chợ, nối lại gọn gàng cho cả tuần.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    url: "/",
+    siteName: "Ăn Ngon · Q's Kitchen",
+    title: "Ăn Ngon · Bữa cơm nhà",
+    description:
+      "Sắp thực đơn, cân lượng và gộp danh sách đi chợ theo nhịp sống thật của gia đình Việt.",
+    images: [
+      {
+        url: "/landing/hero.webp",
+        width: 2400,
+        height: 1920,
+        alt: LANDING_MEDIA.hero.alt,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ăn Ngon · Bữa cơm nhà",
+    description:
+      "Sắp thực đơn, cân lượng và gộp danh sách đi chợ theo nhịp sống thật của gia đình Việt.",
+    images: ["/landing/hero.webp"],
+  },
 };
 
 const hero = LANDING_MEDIA.hero;
@@ -30,6 +56,7 @@ const VALUE_STRIP = [
 export default function LandingPage() {
   return (
     <main className="lp">
+      <LandingResourceHints heroSrc={hero.src} />
       <div className="grain-layer" aria-hidden />
 
       {/* NAV */}

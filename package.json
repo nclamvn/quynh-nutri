@@ -12,6 +12,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:security": "playwright test e2e/security-readiness.spec.ts",
+    "test:marketing": "playwright test --config=playwright.marketing.config.ts",
+    "test:stress": "node scripts/stress-test.mjs",
+    "audit:production": "npm audit --omit=dev --audit-level=high",
+    "test:readiness": "npm run audit:production && npm run build && npm run test:security && npm run test:marketing && npm run test:stress",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:generate": "prisma generate",
@@ -33,6 +38,15 @@
     "server-only": "^0.0.1",
     "web-push": "^3.6.7",
     "zod": "^4.4.3"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.25",
+      "sharp": "0.35.3"
+    },
+    "minimatch@3.1.5": {
+      "brace-expansion": "1.1.17"
+    }
   },
   "devDependencies": {
     "@clerk/testing": "^2.2.14",

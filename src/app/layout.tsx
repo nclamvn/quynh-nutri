@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Lora } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Providers } from "@/ui/providers";
 import { isE2EMode } from "@/lib/auth";
@@ -20,9 +19,17 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Bữa cơm nhà",
+  metadataBase: new URL("https://anngon.io"),
+  title: {
+    default: "Ăn Ngon · Bữa cơm nhà",
+    template: "%s · Ăn Ngon",
+  },
   description: "Kế hoạch bữa cơm gia đình Việt — định lượng có nguồn, đi chợ gọn.",
   manifest: "/manifest.webmanifest",
+  applicationName: "Ăn Ngon",
+  authors: [{ name: "Q's Kitchen" }],
+  creator: "Q's Kitchen",
+  publisher: "Q's Kitchen",
   appleWebApp: { capable: true, title: "Bữa cơm nhà", statusBarStyle: "default" },
 };
 
@@ -41,18 +48,13 @@ const themeInit = `(function(){try{var t=localStorage.getItem('theme');var d=t?t
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const e2e = isE2EMode();
-  const content = <Providers e2e={e2e}>{children}</Providers>;
   return (
     <html lang="vi" className={`${inter.variable} ${lora.variable} h-full`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-full flex flex-col bg-bg text-ink">
-        {e2e ? content : (
-          <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-            {content}
-          </ClerkProvider>
-        )}
+        <Providers e2e={e2e}>{children}</Providers>
       </body>
     </html>
   );

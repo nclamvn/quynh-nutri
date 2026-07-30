@@ -8,6 +8,17 @@ prod-guarded) kích hoạt repo bộ nhớ + tripwire cấm Prisma, cùng mock A
 
 Chạy: `npm run test:e2e` · unit: `npm test`. Ảnh: `e2e/__screens__/`.
 
+## Marketing readiness (KE-024)
+| Hạng mục | Trạng thái | Bằng chứng |
+|---|---|---|
+| Headers CSP/frame/MIME/referrer/permissions/HSTS; không X-Powered-By/CORS rộng | **auto** | security-readiness.spec.ts |
+| JSON sai / payload quá cỡ fail-closed | **auto** | security-readiness.spec.ts |
+| Rate limit substitute tối đa 60/phút/instance | **auto** | security-readiness.spec.ts |
+| Landing production build: LCP/CLS/load/resource/transfer/JS budgets | **auto** | readiness/marketing-performance.spec.ts |
+| Canonical + OG + Twitter + robots + sitemap public-only | **auto** | readiness/marketing-performance.spec.ts |
+| Average/stress/spike có ngưỡng định lượng | **auto, localhost-only** | scripts/stress-test.mjs |
+| Remote stress target | **CẤM mặc định** | script thoát trước request nếu thiếu ALLOW_REMOTE_STRESS=1 |
+
 ## P0 SAFETY
 | Hạng mục | Trạng thái | Bằng chứng |
 |---|---|---|

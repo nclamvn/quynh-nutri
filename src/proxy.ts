@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 // Everything requires sign-in except the auth pages + static assets.
 function isPublic(pathname: string): boolean {
   return pathname === "/" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
     pathname === "/api/cron/reminders" ||

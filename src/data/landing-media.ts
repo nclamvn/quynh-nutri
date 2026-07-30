@@ -17,23 +17,23 @@ export interface LandingAsset {
 export const LANDING_MEDIA: Record<string, LandingAsset> = {
   hero: {
     id: "hero",
-    src: "/landing/hero.jpg",
+    src: "/landing/hero.webp",
     author: "National Cancer Institute",
     sourceUrl: "https://unsplash.com/photos/family-eating-at-the-table-BQPi8F_UON0",
     alt: "Một gia đình quây quần bên bàn ăn, cùng chia sẻ bữa cơm",
     cropFocus: "48% 50%",
     width: 2400,
-    height: 1600,
+    height: 1920,
   },
   stage: {
     id: "stage",
-    src: "/landing/stage-food.jpg",
+    src: "/landing/stage-food.webp",
     author: "Nguyen Mazic",
     sourceUrl: "https://unsplash.com/photos/a-spread-of-vietnamese-food-with-stuffed-bitter-melon-tlhWfPVzIQY",
     alt: "Mâm cơm Việt Nam với canh khổ qua nhồi thịt và các món ăn kèm",
     cropFocus: "50% 46%",
     width: 1800,
-    height: 2100,
+    height: 1200,
   },
 };
 

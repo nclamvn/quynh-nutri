@@ -1,9 +1,11 @@
-import { SignUp } from "@clerk/nextjs";
+import { ClerkProvider, SignUp } from "@clerk/nextjs";
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-dvh items-center justify-center p-4">
-      <SignUp />
-    </div>
+    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+      <div className="flex min-h-dvh items-center justify-center p-4">
+        <SignUp />
+      </div>
+    </ClerkProvider>
   );
 }
