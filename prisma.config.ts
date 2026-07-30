@@ -8,7 +8,12 @@ import { defineConfig } from "prisma/config";
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: process.env.POSTGRES_URL_NON_POOLING ?? process.env.DATABASE_URL,
+    // Explicit operator override must win over the workspace's main-branch
+    // variables. This keeps branch migration verification isolated.
+    url:
+      process.env.MIGRATION_DATABASE_URL
+      ?? process.env.POSTGRES_URL_NON_POOLING
+      ?? process.env.DATABASE_URL,
   },
   migrations: {
     seed: "tsx prisma/seed.ts",

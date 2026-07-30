@@ -13,7 +13,7 @@ const slotRow = (
   has: page.getByText(slotLabel, { exact: true }),
 });
 
-test("change, lock and reroll persist while assistant reads the same canonical plan", async ({ page }) => {
+test("change and lock persist while assistant reads the same canonical plan", async ({ page }) => {
   await page.goto("/week");
   await expect(syncState(page)).toHaveText("Đã lưu");
 
@@ -21,7 +21,9 @@ test("change, lock and reroll persist while assistant reads the same canonical p
     .replace(/⚡.*/, "")
     .trim();
   const mainRow = slotRow(page, "Mặn");
-  const initialMain = (await mainRow.locator("button.block").innerText()).trim();
+  const initialMain = (await mainRow.locator("button.block").innerText())
+    .replace(/⚡.*/, "")
+    .trim();
   await mainRow.locator("button.block").evaluate((element) => (element as HTMLElement).click());
   const choices = page.getByRole("dialog").locator("li button");
   const count = await choices.count();
@@ -35,25 +37,39 @@ test("change, lock and reroll persist while assistant reads the same canonical p
     }
   }
   expect(chosen).not.toBe("");
+  const changeDiff = page.getByTestId("occasion-plan-diff");
+  await expect(changeDiff).toContainText(initialMain);
+  await expect(changeDiff).toContainText(chosen);
+  await Promise.all([
+    page.waitForResponse((response) =>
+      response.url().endsWith("/week")
+      && response.request().method() === "POST",
+    ),
+    changeDiff.getByRole("button", { name: "Xác nhận" }).click(),
+  ]);
   await expect(syncState(page)).toHaveText("Đã lưu");
   await page.reload();
   await expect(syncState(page)).toHaveText("Đã lưu");
   await expect(slotRow(page, "Mặn").locator("button.block")).toContainText(chosen);
 
-  await slotRow(page, "Mặn").getByRole("button", { name: "lock" }).click();
-  await expect(syncState(page)).toHaveText("Đã lưu");
-  await page.getByRole("button", { name: /Đổi cả tuần/ }).click();
+  await Promise.all([
+    page.waitForResponse((response) =>
+      response.url().endsWith("/week")
+      && response.request().method() === "POST",
+    ),
+    slotRow(page, "Mặn").getByRole("button", { name: "lock" }).click(),
+  ]);
   await expect(syncState(page)).toHaveText("Đã lưu");
   await page.reload();
   await expect(slotRow(page, "Mặn").getByRole("button", { name: "lock" })).toHaveText("🔒");
 
   await page.goto("/overview");
   await page.getByRole("button", { name: /AI gợi ý thực đơn/ }).click();
-  const assistant = page.getByRole("dialog");
-  await assistant.getByPlaceholder("Nhắn cho trợ lý…").fill("Thực đơn nhà tôi là gì?");
-  await assistant.getByRole("button", { name: "Gửi" }).click();
-  await expect(assistant.getByText(new RegExp(riceName))).toBeVisible();
-  await expect(assistant.getByText(/không tự đổi hoặc lưu thực đơn/)).toBeVisible();
+  const overviewAssistant = page.getByRole("dialog");
+  await overviewAssistant.getByPlaceholder("Nhắn cho trợ lý…").fill("Thực đơn nhà tôi là gì?");
+  await overviewAssistant.getByRole("button", { name: "Gửi" }).click();
+  await expect(overviewAssistant.getByText(new RegExp(riceName))).toBeVisible();
+  await expect(overviewAssistant.getByText(/không tự đổi hoặc lưu thực đơn/)).toBeVisible();
 });
 
 test("a failed save keeps the draft unsynced until an explicit retry", async ({ page }) => {
@@ -72,14 +88,23 @@ test("a failed save keeps the draft unsynced until an explicit retry", async ({ 
   await slotRow(page, "Rau").getByRole("button", { name: "lock" }).click();
   await expect(syncState(page)).toHaveText("Chưa đồng bộ");
   await expect(page.getByText(/chưa được xác nhận trên máy chủ/)).toBeVisible();
-  await page.locator('a[href="/overview"]').first().click();
+  await page.locator('a[href="/overview"]').filter({ visible: true }).first().click();
+  await page.waitForURL("**/overview");
   const staleBrief = page.getByTestId("kitchen-agenda-card");
   await expect(staleBrief).toHaveAttribute("data-brief-status", "stale");
   await expect(staleBrief.getByText("Bản tin đang tạm dừng")).toBeVisible();
   await expect(staleBrief.locator("[data-brief-station]")).toHaveCount(0);
-  await page.locator('a[href="/week"]').first().click();
+  await page.locator('a[href="/week"]').filter({ visible: true }).first().click();
+  await page.waitForURL("**/week");
   await page.unroute("**/week");
-  await page.getByRole("button", { name: "Thử lại" }).first().click();
+  await Promise.all([
+    page.waitForResponse((response) =>
+      response.url().endsWith("/week")
+      && response.request().method() === "POST",
+    ),
+    page.getByRole("button", { name: "Thử lại" }).first().click(),
+  ]);
+  await page.goto("/week");
   await expect(syncState(page)).toHaveText("Đã lưu");
 });
 
@@ -128,6 +153,9 @@ test("a selected B1 dish resolves after local storage is cleared and the page re
   const choice = page.getByRole("dialog").getByRole("button").filter({ hasText: dishName }).first();
   await expect(choice).toBeVisible();
   await choice.click();
+  await page.getByTestId("occasion-plan-diff")
+    .getByRole("button", { name: "Xác nhận" })
+    .click();
   await expect(syncState(page)).toHaveText("Đã lưu");
 
   await page.evaluate(() => localStorage.clear());

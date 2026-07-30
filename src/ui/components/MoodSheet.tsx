@@ -77,7 +77,7 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const addToPlan = (dishId: string) => {
     const d = dish(dishId);
     if (!d) return;
-    changeSlot(0, d.slot, dishId);
+    changeSlot(0, "dinner", d.slot, dishId);
     toast("Đã thêm vào thực đơn tuần – chỉnh lại trong Thực đơn nếu cần.", "info");
   };
 

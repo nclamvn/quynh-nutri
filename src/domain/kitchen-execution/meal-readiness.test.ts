@@ -30,6 +30,7 @@ const plan = (dishIds: string[]): WeekPlan => ({
   weekStart: "2026-07-27",
   slots: dishIds.map((dishId, index) => ({
     day: 3,
+  occasion: "dinner",
     slot: ["COM", "MAN", "RAU", "CANH", "TRANGMIENG"][index] as WeekPlan["slots"][number]["slot"],
     dishId,
     locked: false,
@@ -41,6 +42,7 @@ const completion = (dishRefs: string[], source: string): MealCompletion => ({
   idempotencyKey: source,
   weekRef: "2026-07-27",
   day: 3,
+  occasion: "dinner",
   dishRefs,
   sourceSessionCreatedAt: source,
   completedAt: "2026-07-30T11:00:00.000Z",

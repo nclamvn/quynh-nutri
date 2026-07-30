@@ -50,6 +50,7 @@ describe("product event privacy contract", () => {
       name: "meal_completed",
       dedupeKey: "meal_completed:1",
       properties: {
+        occasion: "dinner",
         dishCount: 3,
         inventoryMovementCount: 2,
         openedLeftoverCapture: true,
@@ -59,6 +60,7 @@ describe("product event privacy contract", () => {
       name: "meal_completed",
       dedupeKey: "meal_completed:2",
       properties: {
+        occasion: "dinner",
         dishCount: 3,
         inventoryMovementCount: 2,
         openedLeftoverCapture: true,

@@ -8,6 +8,7 @@ export const PRODUCT_EVENT_NAMES = [
   "cooking_started",
   "meal_run_started",
   "meal_completed",
+  "meal_occasion_edited",
   "leftover_recorded",
   "meal_feedback_saved",
   "meal_feedback_deleted",
@@ -35,12 +36,18 @@ const schemas = {
   }).strict(),
   cooking_started: emptyProperties,
   meal_run_started: z.object({
+    occasion: z.enum(["breakfast", "lunch", "dinner", "snack"]),
     dishCount: z.number().int().min(1).max(5),
   }).strict(),
   meal_completed: z.object({
+    occasion: z.enum(["breakfast", "lunch", "dinner", "snack"]),
     dishCount: z.number().int().min(1).max(5),
     inventoryMovementCount: z.number().int().min(0).max(100),
     openedLeftoverCapture: z.boolean(),
+  }).strict(),
+  meal_occasion_edited: z.object({
+    occasion: z.enum(["breakfast", "lunch", "dinner", "snack"]),
+    action: z.enum(["add", "replace", "remove"]),
   }).strict(),
   leftover_recorded: z.object({
     storageLocation: z.enum(["fridge", "freezer"]),

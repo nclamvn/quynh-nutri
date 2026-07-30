@@ -21,6 +21,7 @@ const completion: MealCompletion = {
   idempotencyKey: "completion-key",
   weekRef: "2026-07-27",
   day: 0,
+  occasion: "dinner",
   dishRefs: ["fish", "rice"],
   sourceSessionCreatedAt: "2026-07-30T10:00:00.000Z",
   completedAt: "2026-07-30T11:00:00.000Z",

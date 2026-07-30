@@ -3,7 +3,7 @@
 import { currentHouseholdId, loadHouseholdState, saveHouseholdState, saveMemberHealthProfile, saveMemberAllergies, saveMember, deleteMember, addMemberState, deleteMemberState, saveSupplier, deleteSupplier, saveOrder, savePurchase, receiveShoppingItemRecord, createManualInventoryLotRecord, deleteInventoryLotRecord, recordInventoryMovementRecord, createLeftoverLotRecord, recordLeftoverMovementRecord, completeHouseholdOnboarding, type StatePatch, type HouseholdState } from "@/data/repo/household";
 import { semanticSearch } from "@/lib/search";
 import { isE2EMode, requireUserId } from "@/lib/auth";
-import type { HealthProfile, Allergen, Member, MemberState, Supplier, Order, PurchaseRecord, ReceiveShoppingItemInput, ReceiveShoppingItemResult, RecordInventoryMovementInput, RecordInventoryMovementResult, CreateLeftoverLotInput, LeftoverLot, RecordLeftoverMovementInput, RecordLeftoverMovementResult, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult, SaveMealFeedbackInput, SaveMealFeedbackResult, DeleteMealFeedbackInput, DeleteMealFeedbackResult } from "@/domain/types";
+import type { HealthProfile, Allergen, Member, MemberState, Supplier, Order, PurchaseRecord, ReceiveShoppingItemInput, ReceiveShoppingItemResult, RecordInventoryMovementInput, RecordInventoryMovementResult, CreateLeftoverLotInput, LeftoverLot, RecordLeftoverMovementInput, RecordLeftoverMovementResult, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult, SaveMealFeedbackInput, SaveMealFeedbackResult, DeleteMealFeedbackInput, DeleteMealFeedbackResult, MealOccasion } from "@/domain/types";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { validateReceiptBusinessRules } from "@/domain/kitchen-execution/receipt";
@@ -62,6 +62,7 @@ import {
 } from "@/data/repo/meal-feedback";
 
 const id = z.string().trim().min(1).max(128);
+const mealOccasionSchema = z.enum(["breakfast", "lunch", "dinner", "snack"]);
 const shortText = z.string().trim().max(500);
 const reminderSubscriptionSchema = z.object({
   endpoint: z.url().max(2_000),
@@ -244,6 +245,7 @@ const confirmMealCloseoutSchema = z.object({
   idempotencyKey: z.string().uuid(),
   weekRef: z.iso.date(),
   day: z.number().int().min(0).max(6),
+  occasion: mealOccasionSchema,
   expectedSessionVersion: z.number().int().positive(),
   completedAt: z.string().datetime(),
   consumptions: z.array(z.object({
@@ -297,6 +299,7 @@ const deleteMealFeedbackSchema = z.object({
 }).strict();
 const plannedSlotSchema = z.object({
   day: z.number().int().min(0).max(6),
+  occasion: mealOccasionSchema,
   slot: z.enum(["COM", "MAN", "RAU", "CANH", "TRANGMIENG"]),
   dishId: id,
   locked: z.boolean(),
@@ -325,7 +328,7 @@ const householdDishSchema = z.object({
 const saveWeekPlanSchema = z.object({
   weekStart: z.iso.date(),
   expectedVersion: z.number().int().positive(),
-  slots: z.array(plannedSlotSchema).max(35),
+  slots: z.array(plannedSlotSchema).max(140),
   householdDishes: z.array(householdDishSchema).max(100).optional(),
 }).strict();
 const confirmAssistantWeekPlanProposalSchema = z.object({
@@ -334,7 +337,7 @@ const confirmAssistantWeekPlanProposalSchema = z.object({
   weekStart: z.iso.date(),
   baseVersion: z.number().int().positive(),
   seed: z.number().int().positive(),
-  slots: z.array(plannedSlotSchema).max(35),
+  slots: z.array(plannedSlotSchema).max(140),
   confirmedByUser: z.literal(true),
 }).strict();
 const sessionVersionSchema = z.number().int().positive().nullable();
@@ -464,11 +467,13 @@ export async function clearCookingSession(
 export async function getMealRunSession(
   weekStart: string,
   day: number,
+  occasion: MealOccasion = "dinner",
 ): Promise<PersistedKitchenSession<MealRunSession> | undefined> {
   await requireUserId();
   const safeWeek = z.iso.date().parse(weekStart);
   const safeDay = z.number().int().min(0).max(6).parse(day);
-  const scopeKey = `${safeWeek}:${safeDay}`;
+  const safeOccasion = mealOccasionSchema.parse(occasion);
+  const scopeKey = `${safeWeek}:${safeDay}:${safeOccasion}`;
   const session = await loadKitchenSession<MealRunSession>(
     "meal-run",
     scopeKey,
@@ -487,16 +492,18 @@ export async function getMealRunSession(
 export async function persistMealRunSession(
   weekStart: string,
   day: number,
+  occasion: MealOccasion,
   raw: unknown,
   expectedVersion: number | null,
 ): Promise<SaveKitchenSessionResult<MealRunSession>> {
   await requireUserId();
   const safeWeek = z.iso.date().parse(weekStart);
   const safeDay = z.number().int().min(0).max(6).parse(day);
+  const safeOccasion = mealOccasionSchema.parse(occasion);
   const input = await validateMealRunPayload(safeWeek, safeDay, raw);
   const result = await saveKitchenSession(
     "meal-run",
-    `${safeWeek}:${safeDay}`,
+    `${safeWeek}:${safeDay}:${safeOccasion}`,
     input,
     sessionVersionSchema.parse(expectedVersion),
   );
@@ -504,7 +511,7 @@ export async function persistMealRunSession(
     await recordProductEventSafely({
       name: "meal_run_started",
       dedupeKey: `meal_run_started:${result.session.id}`,
-      properties: { dishCount: input.tasks.length },
+      properties: { occasion: safeOccasion, dishCount: input.tasks.length },
     });
   }
   return result;
@@ -513,17 +520,19 @@ export async function persistMealRunSession(
 export async function clearMealRunSession(
   weekStart: string,
   day: number,
+  occasion: MealOccasion,
   expectedVersion: number,
 ): Promise<DeleteKitchenSessionResult<MealRunSession>> {
   await requireUserId();
   const safeWeek = z.iso.date().parse(weekStart);
   const safeDay = z.number().int().min(0).max(6).parse(day);
+  const safeOccasion = mealOccasionSchema.parse(occasion);
   if (safeWeek !== currentWeekStartIso()) {
     throw new Error("WEEK_OUTSIDE_CURRENT_SCOPE");
   }
   return deleteKitchenSession(
     "meal-run",
-    `${safeWeek}:${safeDay}`,
+    `${safeWeek}:${safeDay}:${safeOccasion}`,
     z.number().int().positive().parse(expectedVersion),
   );
 }
@@ -539,7 +548,11 @@ export async function confirmMealCloseout(
   }
   const allowedDishIds = [...new Set(
     plan.slots
-      .filter((slot) => slot.day === input.day && cookingGuideFor(slot.dishId))
+      .filter((slot) =>
+        slot.day === input.day
+        && slot.occasion === input.occasion
+        && cookingGuideFor(slot.dishId)
+      )
       .map((slot) => slot.dishId),
   )];
   if (allowedDishIds.length === 0) throw new Error("NO_REVIEWED_DISH");
@@ -548,7 +561,7 @@ export async function confirmMealCloseout(
   const e2eSession = isE2EMode()
     ? await loadKitchenSession<MealRunSession>(
       "meal-run",
-      `${input.weekRef}:${input.day}`,
+      `${input.weekRef}:${input.day}:${input.occasion}`,
     )
     : undefined;
   const result = await confirmMealCloseoutRecord(
@@ -565,7 +578,7 @@ export async function confirmMealCloseout(
   if (isE2EMode() && result.ok) {
     await deleteKitchenSession(
       "meal-run",
-      `${input.weekRef}:${input.day}`,
+      `${input.weekRef}:${input.day}:${input.occasion}`,
       input.expectedSessionVersion,
     );
   }
@@ -645,7 +658,27 @@ export async function persistCanonicalWeekPlan(
   if (input.weekStart !== currentWeekStartIso()) {
     throw new Error("WEEK_OUTSIDE_CURRENT_SCOPE");
   }
+  const before = (await loadOrCreateCurrentWeekPlan()).plan;
   const result = await saveWeekPlan(input);
+  if (result.ok && result.plan.version !== before.version) {
+    const key = (slot: typeof input.slots[number]) =>
+      `${slot.day}:${slot.occasion}:${slot.slot}`;
+    const beforeByKey = new Map(before.slots.map((slot) => [key(slot), slot]));
+    const afterByKey = new Map(input.slots.map((slot) => [key(slot), slot]));
+    const changedKeys = new Set([...beforeByKey.keys(), ...afterByKey.keys()]);
+    await Promise.all([...changedKeys].flatMap((slotKey) => {
+      const previous = beforeByKey.get(slotKey);
+      const next = afterByKey.get(slotKey);
+      if (previous?.dishId === next?.dishId) return [];
+      const action = !previous ? "add" : !next ? "remove" : "replace";
+      const occasion = (next ?? previous)!.occasion;
+      return [recordProductEventSafely({
+        name: "meal_occasion_edited",
+        dedupeKey: `meal_occasion_edited:${result.plan.id}:${result.plan.version}:${slotKey}`,
+        properties: { occasion, action },
+      })];
+    }));
+  }
   revalidatePath("/week");
   revalidatePath("/overview");
   revalidatePath("/shopping");

@@ -131,7 +131,7 @@ describe("kitchen agenda", () => {
 
   it("derives a preparation task only from freezer lots needed tomorrow", () => {
     const agenda = buildKitchenAgenda(input({
-      plan: plan([{ day: 3, slot: "MAN", dishId: "one", locked: false }]),
+      plan: plan([{ day: 3, occasion: "dinner", slot: "MAN", dishId: "one", locked: false }]),
       pantry: [
         lot({ id: "frozen", storageLocation: "freezer" }),
         lot({ id: "cold", storageLocation: "fridge" }),
@@ -147,9 +147,9 @@ describe("kitchen agenda", () => {
   it("creates one grouped prep-ahead task for supported dishes tomorrow", () => {
     const agenda = buildKitchenAgenda(input({
       plan: plan([
-        { day: 3, slot: "MAN", dishId: "one", locked: false },
-        { day: 3, slot: "RAU", dishId: "two", locked: false },
-        { day: 3, slot: "CANH", dishId: "unsupported", locked: false },
+        { day: 3, occasion: "dinner", slot: "MAN", dishId: "one", locked: false },
+        { day: 3, occasion: "dinner", slot: "RAU", dishId: "two", locked: false },
+        { day: 3, occasion: "dinner", slot: "CANH", dishId: "unsupported", locked: false },
       ]),
     }));
     expect(agenda.tasks).toMatchObject([{
@@ -165,10 +165,10 @@ describe("kitchen agenda", () => {
     const sunday = new Date("2026-08-02T05:00:00.000Z");
     expect(buildKitchenAgenda(input({
       now: sunday,
-      plan: plan([{ day: 6, slot: "MAN", dishId: "one", locked: false }]),
+      plan: plan([{ day: 6, occasion: "dinner", slot: "MAN", dishId: "one", locked: false }]),
     })).tasks.some((task) => task.kind === "prep-ahead")).toBe(false);
     expect(buildKitchenAgenda(input({
-      plan: plan([{ day: 3, slot: "MAN", dishId: "unsupported", locked: false }]),
+      plan: plan([{ day: 3, occasion: "dinner", slot: "MAN", dishId: "unsupported", locked: false }]),
     })).tasks.some((task) => task.kind === "prep-ahead")).toBe(false);
   });
 
@@ -202,8 +202,8 @@ describe("kitchen agenda", () => {
   it("creates cook for one guide, coordinate for two, and reports unsupported dishes", () => {
     const one = buildKitchenAgenda(input({
       plan: plan([
-        { day: 2, slot: "MAN", dishId: "one", locked: false },
-        { day: 2, slot: "RAU", dishId: "unsupported", locked: false },
+        { day: 2, occasion: "dinner", slot: "MAN", dishId: "one", locked: false },
+        { day: 2, occasion: "dinner", slot: "RAU", dishId: "unsupported", locked: false },
       ]),
     }));
     expect(one.tasks).toMatchObject([{ kind: "cook", evidence: { supported: 1, unsupported: 1 } }]);
@@ -211,8 +211,8 @@ describe("kitchen agenda", () => {
 
     const two = buildKitchenAgenda(input({
       plan: plan([
-        { day: 2, slot: "MAN", dishId: "one", locked: false },
-        { day: 2, slot: "RAU", dishId: "two", locked: false },
+        { day: 2, occasion: "dinner", slot: "MAN", dishId: "one", locked: false },
+        { day: 2, occasion: "dinner", slot: "RAU", dishId: "two", locked: false },
       ]),
     }));
     expect(two.tasks.map((task) => task.kind)).toEqual(["coordinate-meal"]);
@@ -221,14 +221,15 @@ describe("kitchen agenda", () => {
   it("removes only dish refs recorded complete and keeps a newly changed dish actionable", () => {
     const agenda = buildKitchenAgenda(input({
       plan: plan([
-        { day: 2, slot: "MAN", dishId: "one", locked: false },
-        { day: 2, slot: "RAU", dishId: "two", locked: false },
+        { day: 2, occasion: "dinner", slot: "MAN", dishId: "one", locked: false },
+        { day: 2, occasion: "dinner", slot: "RAU", dishId: "two", locked: false },
       ]),
       completions: [{
         id: "completion-a",
         idempotencyKey: "key-a",
         weekRef: "2026-07-27",
         day: 2,
+  occasion: "dinner",
         dishRefs: ["one"],
         sourceSessionCreatedAt: "2026-07-29T04:00:00.000Z",
         completedAt: "2026-07-29T05:00:00.000Z",
@@ -245,8 +246,8 @@ describe("kitchen agenda", () => {
   it("deduplicates stable IDs, sorts deterministically and never mutates inputs", () => {
     const source = input({
       plan: plan([
-        { day: 2, slot: "MAN", dishId: "one", locked: false },
-        { day: 2, slot: "RAU", dishId: "one", locked: false },
+        { day: 2, occasion: "dinner", slot: "MAN", dishId: "one", locked: false },
+        { day: 2, occasion: "dinner", slot: "RAU", dishId: "one", locked: false },
       ]),
       shopping: [shopping(), shopping()],
       leftovers: [leftover(100), leftover(100)],

@@ -57,6 +57,13 @@ enum Slot {
   TRANGMIENG
 }
 
+enum MealOccasion {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+
 enum MemberRole {
   adult
   child
@@ -254,6 +261,7 @@ model MealCompletion {
   idempotencyKey         String
   weekRef                String
   day                    Int
+  occasion               MealOccasion        @default(dinner)
   dishRefs               String[]
   sourceSessionCreatedAt DateTime
   completedAt            DateTime
@@ -265,8 +273,8 @@ model MealCompletion {
   updatedAt              DateTime            @updatedAt
 
   @@unique([householdId, idempotencyKey])
-  @@unique([householdId, weekRef, day, sourceSessionCreatedAt])
-  @@index([householdId, weekRef, day])
+  @@unique([householdId, weekRef, day, occasion, sourceSessionCreatedAt])
+  @@index([householdId, weekRef, day, occasion])
   @@index([householdId, completedAt])
 }
 
@@ -556,13 +564,14 @@ model DaySlot {
   weekPlanId       String
   weekPlan         WeekPlan       @relation(fields: [weekPlanId], references: [id], onDelete: Cascade)
   day              Int // 0..6
+  occasion         MealOccasion    @default(dinner)
   slot             Slot
   repertoireDishId String? // ref B0
   householdDishId  String? // ref B1
   householdDish    HouseholdDish? @relation(fields: [householdDishId], references: [id])
   locked           Boolean        @default(false)
 
-  @@unique([weekPlanId, day, slot])
+  @@unique([weekPlanId, day, occasion, slot])
 }
 
 model ShoppingList {

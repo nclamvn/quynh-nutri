@@ -10,7 +10,7 @@ const slot = (
   kind: PlannedSlot["slot"],
   dishId: string,
   locked = false,
-): PlannedSlot => ({ day, slot: kind, dishId, locked });
+): PlannedSlot => ({ day, occasion: "dinner", slot: kind, dishId, locked });
 
 describe("assistant week plan proposal contract", () => {
   it("classifies change requests without intercepting read-only questions", () => {
@@ -35,18 +35,21 @@ describe("assistant week plan proposal contract", () => {
     expect(weekPlanProposalChanges(before, after)).toEqual([
       {
         day: 0,
+  occasion: "dinner",
         slot: "CANH",
         beforeDishId: null,
         afterDishId: "soup",
       },
       {
         day: 0,
+  occasion: "dinner",
         slot: "MAN",
         beforeDishId: "pork",
         afterDishId: "fish",
       },
       {
         day: 0,
+  occasion: "dinner",
         slot: "RAU",
         beforeDishId: "greens",
         afterDishId: null,

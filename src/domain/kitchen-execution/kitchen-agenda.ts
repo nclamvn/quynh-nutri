@@ -12,6 +12,7 @@ import {
   planDayForDate,
 } from "@/domain/kitchen-execution/inventory";
 import { evaluateLeftoverGuidance } from "@/domain/kitchen-execution/leftover-safety";
+import { MEAL_OCCASIONS } from "@/domain/planning/meal-occasion";
 
 export type KitchenAgendaTaskKind =
   | "review-leftover"
@@ -272,67 +273,75 @@ export function buildKitchenAgenda(input: KitchenAgendaInput): KitchenAgenda {
   }
 
   if (today !== undefined) {
-    const completedDishIds = new Set(
-      input.completions
-        .filter(
-          (completion) =>
-            completion.weekRef === input.plan.weekStart
-            && completion.day === today,
-        )
-        .flatMap((completion) => completion.dishRefs),
-    );
-    const plannedIds = [...new Set(
-      input.plan.slots
-        .filter((slot) => slot.day === today)
-        .map((slot) => slot.dishId),
-    )].filter((dishId) => !completedDishIds.has(dishId));
-    const supportedIds: string[] = [];
-    for (const dishId of plannedIds) {
-      const dish = input.dish(dishId);
-      if (!dish) continue;
-      if (input.reviewedCookingDishIds.has(dishId)) {
-        supportedIds.push(dishId);
-      } else {
-        const id = `cooking-guide:dish:${dishId}`;
-        unsupported.set(id, {
-          id,
-          kind: "cooking-guide",
-          sourceRef: `dish:${dishId}`,
-          reasonKey: "agenda.unsupported.cookingGuide",
-          evidence: { name: dish.vnName },
-        });
+    for (const occasion of MEAL_OCCASIONS) {
+      const completedDishIds = new Set(
+        input.completions
+          .filter(
+            (completion) =>
+              completion.weekRef === input.plan.weekStart
+              && completion.day === today
+              && completion.occasion === occasion,
+          )
+          .flatMap((completion) => completion.dishRefs),
+      );
+      const plannedIds = [...new Set(
+        input.plan.slots
+          .filter(
+            (slot) =>
+              slot.day === today && slot.occasion === occasion,
+          )
+          .map((slot) => slot.dishId),
+      )].filter((dishId) => !completedDishIds.has(dishId));
+      const supportedIds: string[] = [];
+      for (const dishId of plannedIds) {
+        const dish = input.dish(dishId);
+        if (!dish) continue;
+        if (input.reviewedCookingDishIds.has(dishId)) {
+          supportedIds.push(dishId);
+        } else {
+          const id = `cooking-guide:${occasion}:dish:${dishId}`;
+          unsupported.set(id, {
+            id,
+            kind: "cooking-guide",
+            sourceRef: `dish:${dishId}`,
+            reasonKey: "agenda.unsupported.cookingGuide",
+            evidence: { name: dish.vnName, occasion },
+          });
+        }
       }
-    }
-    if (supportedIds.length === 1) {
-      addTask(tasks, {
-        kind: "cook",
-        priority: "today",
-        titleKey: "agenda.task.cook.title",
-        reasonKey: "agenda.task.cook.reason",
-        sourceKey: "agenda.source.weekPlan",
-        sourceRef: `plan:${input.plan.weekStart}:day:${today}:cook`,
-        actionHref: "/week",
-        actionKey: "agenda.action.openWeek",
-        evidence: {
-          supported: 1,
-          unsupported: plannedIds.length - 1,
-        },
-      }, calendarDate);
-    } else if (supportedIds.length >= 2) {
-      addTask(tasks, {
-        kind: "coordinate-meal",
-        priority: "today",
-        titleKey: "agenda.task.coordinate.title",
-        reasonKey: "agenda.task.coordinate.reason",
-        sourceKey: "agenda.source.weekPlan",
-        sourceRef: `plan:${input.plan.weekStart}:day:${today}:coordinate`,
-        actionHref: "/week",
-        actionKey: "agenda.action.openWeek",
-        evidence: {
-          supported: supportedIds.length,
-          unsupported: plannedIds.length - supportedIds.length,
-        },
-      }, calendarDate);
+      if (supportedIds.length === 1) {
+        addTask(tasks, {
+          kind: "cook",
+          priority: "today",
+          titleKey: "agenda.task.cook.title",
+          reasonKey: "agenda.task.cook.reason",
+          sourceKey: "agenda.source.weekPlan",
+          sourceRef: `plan:${input.plan.weekStart}:day:${today}:${occasion}:cook`,
+          actionHref: "/week",
+          actionKey: "agenda.action.openWeek",
+          evidence: {
+            occasion,
+            supported: 1,
+            unsupported: plannedIds.length - 1,
+          },
+        }, calendarDate);
+      } else if (supportedIds.length >= 2) {
+        addTask(tasks, {
+          kind: "coordinate-meal",
+          priority: "today",
+          titleKey: "agenda.task.coordinate.title",
+          reasonKey: "agenda.task.coordinate.reason",
+          sourceKey: "agenda.source.weekPlan",
+          sourceRef: `plan:${input.plan.weekStart}:day:${today}:${occasion}:coordinate`,
+          actionHref: "/week",
+          actionKey: "agenda.action.openWeek",
+          evidence: {
+            occasion,
+            supported: supportedIds.length,
+            unsupported: plannedIds.length - supportedIds.length,
+          },
+        }, calendarDate);
+      }
     }
   }
 

@@ -16,6 +16,7 @@ export type ProteinType =
   | "rau";
 export type CookMethod = "kho" | "xao" | "luoc" | "hap" | "nuong" | "ran" | "song";
 export type Slot = "COM" | "MAN" | "RAU" | "CANH" | "TRANGMIENG";
+export type MealOccasion = "breakfast" | "lunch" | "dinner" | "snack";
 export type MemberRole = "adult" | "child";
 export type Activity = "light" | "moderate" | "heavy";
 export type DayName = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
@@ -195,6 +196,7 @@ export interface Household {
 /** A planned dish in a slot on a given day. */
 export interface PlannedSlot {
   day: number; // 0..6
+  occasion: MealOccasion;
   slot: Slot;
   dishId: string;
   locked: boolean;
@@ -267,6 +269,7 @@ export interface MealCompletion {
   idempotencyKey: string;
   weekRef: string;
   day: number;
+  occasion: MealOccasion;
   dishRefs: string[];
   sourceSessionCreatedAt: string;
   completedAt: string;
@@ -353,6 +356,7 @@ export interface ConfirmMealCloseoutInput {
   idempotencyKey: string;
   weekRef: string;
   day: number;
+  occasion: MealOccasion;
   expectedSessionVersion: number;
   completedAt: string;
   consumptions: MealConsumptionSelection[];

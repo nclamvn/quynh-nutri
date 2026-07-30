@@ -1,4 +1,4 @@
-import type { Dish, Household, Member, WeekPlan } from "@/domain/types";
+import type { Dish, Household, MealOccasion, Member, WeekPlan } from "@/domain/types";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
 import {
   dishMacro,
@@ -23,6 +23,21 @@ export function dayDishes(plan: WeekPlan, day: number, dish: (id: string) => Dis
     .sort((a, b) => order.indexOf(a.slot) - order.indexOf(b.slot))
     .map((s) => dish(s.dishId))
     .filter((d): d is Dish => Boolean(d));
+}
+
+/** Dishes explicitly planned for one meal occasion on a given day. */
+export function occasionDishes(
+  plan: WeekPlan,
+  day: number,
+  occasion: MealOccasion,
+  dish: (id: string) => Dish | undefined,
+): Dish[] {
+  const order = ["COM", "MAN", "RAU", "CANH", "TRANGMIENG"];
+  return plan.slots
+    .filter((item) => item.day === day && item.occasion === occasion)
+    .sort((left, right) => order.indexOf(left.slot) - order.indexOf(right.slot))
+    .map((item) => dish(item.dishId))
+    .filter((item): item is Dish => Boolean(item));
 }
 
 export interface DayNutrition {

@@ -43,7 +43,9 @@ export function generateWeek(input: RotationInput): RotationResult {
   const rand = mulberry32(input.seed ?? 1);
   const notes: string[] = [];
   const lockedByKey = new Map<string, PlannedSlot>();
-  for (const l of input.locked ?? []) lockedByKey.set(`${l.day}:${l.slot}`, l);
+  for (const l of input.locked ?? []) {
+    if (l.occasion === "dinner") lockedByKey.set(`${l.day}:${l.slot}`, l);
+  }
 
   const com = bySlot(repertoire, "COM")[0];
   const manPool = bySlot(repertoire, "MAN");
@@ -154,7 +156,7 @@ export function generateWeek(input: RotationInput): RotationResult {
 }
 
 function plain(day: number, slot: Slot, dishId: string): PlannedSlot {
-  return { day, slot, dishId, locked: false };
+  return { day, occasion: "dinner", slot, dishId, locked: false };
 }
 function lockedSlot(day: number, slot: Slot, dishId: string, locked: Map<string, PlannedSlot>): PlannedSlot | undefined {
   return locked.get(`${day}:${slot}`);

@@ -36,6 +36,12 @@ const SLOT_LABELS = {
   CANH: "Canh",
   TRANGMIENG: "Tráng miệng",
 } as const;
+const OCCASION_LABELS = {
+  breakfast: "Bữa sáng",
+  lunch: "Bữa trưa",
+  dinner: "Bữa tối",
+  snack: "Bữa phụ",
+} as const;
 
 /**
  * AI kitchen assistant. Opened via a global 'open-assistant' event. Streams the
@@ -60,13 +66,15 @@ export function AssistantSheet() {
   const proposalRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const onOpen = () => {
+    const onOpen = (event: Event) => {
       try {
         const saved = localStorage.getItem(`${STORE_KEY}:${household.id}`);
         setMessages(saved ? JSON.parse(saved) : []);
       } catch {
         setMessages([]);
       }
+      const prompt = (event as CustomEvent<{ prompt?: string }>).detail?.prompt;
+      if (prompt) setInput(prompt);
       setOpen(true);
     };
     window.addEventListener("open-assistant", onOpen);
@@ -266,13 +274,14 @@ export function AssistantSheet() {
             <div className="max-h-64 divide-y divide-hairline overflow-y-auto">
               {proposal.changes.map((change) => (
                 <div
-                  key={`${change.day}:${change.slot}`}
+                  key={`${change.day}:${change.occasion}:${change.slot}`}
                   data-day={change.day}
+                  data-occasion={change.occasion}
                   data-slot={change.slot}
                   className="px-4 py-3"
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
-                    {DAY_LABELS[change.day]} · {SLOT_LABELS[change.slot]}
+                    {DAY_LABELS[change.day]} · {OCCASION_LABELS[change.occasion]} · {SLOT_LABELS[change.slot]}
                   </p>
                   <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs">
                     <span

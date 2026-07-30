@@ -24,6 +24,26 @@ const openPlanProposal = async (page: import("@playwright/test").Page) => {
   return { assistant, proposal };
 };
 
+test("week reroll enters the same proposal and confirmation workflow", async ({
+  page,
+}) => {
+  await page.goto("/week");
+  await expect(syncState(page)).toHaveText("Đã lưu");
+  await page.getByRole("button", { name: /Đổi cả tuần/ }).click();
+  const assistant = page.getByRole("dialog");
+  await expect(assistant.getByPlaceholder("Nhắn cho trợ lý…"))
+    .toHaveValue("Đổi cả tuần");
+  await assistant.getByRole("button", { name: "Gửi" }).click();
+  const proposal = assistant.getByTestId("assistant-week-plan-proposal");
+  await expect(proposal).toBeVisible();
+  await expect(proposal.locator("[data-occasion=\"dinner\"]").first())
+    .toBeVisible();
+  await proposal.getByRole("button", { name: "Bỏ đề xuất" }).click();
+  await expect(
+    assistant.getByText("Đã bỏ đề xuất. Thực đơn hiện tại không thay đổi."),
+  ).toBeVisible();
+});
+
 test("assistant proposal is a full diff and discard writes nothing", async ({
   page,
 }) => {

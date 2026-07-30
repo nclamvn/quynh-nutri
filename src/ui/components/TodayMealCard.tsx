@@ -153,6 +153,7 @@ export function TodayMealCard() {
       {coordinatorOpen && readiness.day !== undefined && (
         <MealCoordinatorSheet
           day={readiness.day}
+          occasion="dinner"
           dishes={pending.map((item) => item.dish)}
           onClose={() => setCoordinatorOpen(false)}
         />

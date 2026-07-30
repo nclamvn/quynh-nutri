@@ -10,6 +10,7 @@ import { useI18n } from "@/i18n/context";
 import { Blossom } from "@/ui/components/Blossom";
 import { MealReflectionSheet } from "@/ui/components/MealReflectionSheet";
 import { useStore } from "@/ui/store";
+import { MEAL_OCCASION_LABELS } from "@/domain/planning/meal-occasion";
 
 type ReflectionTarget = {
   completion: MealCompletion;
@@ -127,7 +128,7 @@ export function HouseholdMealMemoryCard() {
                     onClick={() => setReflection(item)}
                     className="min-h-9 shrink-0 rounded-full border border-brand/25 bg-brand-weak/40 px-3 text-xs font-medium text-brand-ink"
                   >
-                    {name}
+                    {name} · {MEAL_OCCASION_LABELS[item.completion.occasion][vn ? "vn" : "en"]}
                   </button>
                 );
               })}

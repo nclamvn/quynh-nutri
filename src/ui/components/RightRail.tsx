@@ -63,8 +63,8 @@ function TodayRail() {
             <AdequacyStrip adequacy={nut.adequacy} />
           </div>
           <ul className="space-y-2">
-            {dishes.map((d) => (
-              <li key={d.id} className="flex items-center gap-2.5 text-sm">
+          {dishes.map((d, index) => (
+              <li key={`${d.id}:${index}`} className="flex items-center gap-2.5 text-sm">
                 <DishThumb dish={d} size={34} shape="rounded" />
                 <div className="min-w-0 flex-1">
                   <span className="block truncate">{dishName(d, lang)}</span>

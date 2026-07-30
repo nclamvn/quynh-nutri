@@ -22,8 +22,8 @@ const household = (overrides: Partial<Household> = {}): Household => ({
   ...overrides,
 });
 const base: PlannedSlot[] = [
-  { day: 1, slot: "MAN", dishId: "ga_kho_gung", locked: false },
-  { day: 0, slot: "COM", dishId: "com_trang", locked: true },
+  { day: 1, occasion: "dinner", slot: "MAN", dishId: "ga_kho_gung", locked: false },
+  { day: 0, occasion: "dinner", slot: "COM", dishId: "com_trang", locked: true },
 ];
 const validate = (
   slots: PlannedSlot[],
@@ -55,6 +55,27 @@ describe("canonical week plan contract", () => {
     expect(JSON.stringify(base)).toBe(before);
   });
 
+  it("permits the same food role in independent meal occasions", () => {
+    const slots = validate([
+      {
+        day: 0,
+        occasion: "lunch",
+        slot: "MAN",
+        dishId: "ga_kho_gung",
+        locked: false,
+      },
+      {
+        day: 0,
+        occasion: "dinner",
+        slot: "MAN",
+        dishId: "ga_kho_gung",
+        locked: false,
+      },
+    ]);
+    expect(slots).toHaveLength(2);
+    expect(slots.map((item) => item.occasion)).toEqual(["lunch", "dinner"]);
+  });
+
   it.each([
     [[...base, { ...base[0] }], "DUPLICATE_DAY_SLOT"],
     [[{ ...base[0], day: 7 }], "INVALID_PLAN_DAY"],
@@ -66,7 +87,7 @@ describe("canonical week plan contract", () => {
 
   it("rechecks dietary restrictions at the server boundary", () => {
     expect(() => validate(
-      [{ day: 0, slot: "MAN", dishId: "ga_kho_gung", locked: false }],
+      [{ day: 0, occasion: "dinner", slot: "MAN", dishId: "ga_kho_gung", locked: false }],
       household({ restrictions: ["vegetarian"] }),
     )).toThrow("DISH_RESTRICTION_UNSAFE");
   });
@@ -78,7 +99,7 @@ describe("canonical week plan contract", () => {
       origin: "B1",
     };
     expect(() => validate(
-      [{ day: 0, slot: "MAN", dishId: foreign.id, locked: false }],
+      [{ day: 0, occasion: "dinner", slot: "MAN", dishId: foreign.id, locked: false }],
       household(),
       () => undefined,
     )).toThrow("UNKNOWN_OR_UNOWNED_DISH");

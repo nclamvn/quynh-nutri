@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord, ShoppingFulfillment, ReceiveShoppingItemInput, ReceiveShoppingItemResult, InventoryMovement, RecordInventoryMovementInput, RecordInventoryMovementResult, LeftoverLot, LeftoverMovement, CreateLeftoverLotInput, RecordLeftoverMovementInput, RecordLeftoverMovementResult, MealCompletion, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult, MealFeedback, SaveMealFeedbackInput, SaveMealFeedbackResult, DeleteMealFeedbackInput, DeleteMealFeedbackResult } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, MealOccasion, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord, ShoppingFulfillment, ReceiveShoppingItemInput, ReceiveShoppingItemResult, InventoryMovement, RecordInventoryMovementInput, RecordInventoryMovementResult, LeftoverLot, LeftoverMovement, CreateLeftoverLotInput, RecordLeftoverMovementInput, RecordLeftoverMovementResult, MealCompletion, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult, MealFeedback, SaveMealFeedbackInput, SaveMealFeedbackResult, DeleteMealFeedbackInput, DeleteMealFeedbackResult } from "@/domain/types";
 import { splitOrders, type OrderSplit } from "@/domain/order";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -51,8 +51,9 @@ interface StoreValue {
   shopping: ShoppingItem[];
   fulfillments: ShoppingFulfillment[];
   reroll: () => void;
-  changeSlot: (day: number, slot: Slot, dishId: string) => void;
-  toggleLock: (day: number, slot: Slot) => void;
+  changeSlot: (day: number, occasion: MealOccasion, slot: Slot, dishId: string) => void;
+  removeSlot: (day: number, occasion: MealOccasion, slot: Slot) => void;
+  toggleLock: (day: number, occasion: MealOccasion, slot: Slot) => void;
   toggleShopping: (commodityId: string, vendor: string) => void;
   receiveShoppingItem: (input: ReceiveShoppingItemInput) => Promise<ReceiveShoppingItemResult>;
   optionsFor: (slot: Slot) => Dish[];
@@ -312,7 +313,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const current = planRef.current;
     if (!current.id) return;
     rerollSeed.current += 1;
-    const locked = current.slots.filter((slot) => slot.locked);
+    const nonDinner = current.slots.filter((slot) => slot.occasion !== "dinner");
+    const locked = current.slots.filter(
+      (slot) => slot.occasion === "dinner" && slot.locked,
+    );
     const result = generateWeek({
       household,
       repertoire: allowedRepertoire,
@@ -321,7 +325,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       locked,
     });
     setPlanNotes(result.notes);
-    commitPlan({ ...current, slots: result.plan.slots });
+    commitPlan({ ...current, slots: [...nonDinner, ...result.plan.slots] });
   }, [allowedRepertoire, commitPlan, household]);
 
   const retryPlanSync = useCallback(() => {
@@ -368,7 +372,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const changeSlot = useCallback(
-    (day: number, slot: Slot, dishId: string) => {
+    (day: number, occasion: MealOccasion, slot: Slot, dishId: string) => {
       // P0 SAFETY GATE: never place a dish that trips a household allergen – even
       // via a direct swap (defence-in-depth beyond optionsFor's filter, fail-closed).
       const d = resolveDish(dishId, REPERTOIRE, b1) ?? REPERTOIRE_BY_ID[dishId];
@@ -377,19 +381,35 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (!s.safe) { toast(safetyReason(s) ?? "Món này không an toàn cho nhà mình – đã bỏ qua.", "error"); return; }
       }
       editPlan((slots) => {
-        const idx = slots.findIndex((s) => s.day === day && s.slot === slot);
+        const idx = slots.findIndex(
+          (s) => s.day === day && s.occasion === occasion && s.slot === slot,
+        );
         if (idx >= 0) slots[idx] = { ...slots[idx], dishId };
-        else slots.push({ day, slot, dishId, locked: false });
+        else slots.push({ day, occasion, slot, dishId, locked: false });
         return slots;
       });
     },
     [editPlan, b1, household],
   );
 
+  const removeSlot = useCallback(
+    (day: number, occasion: MealOccasion, slot: Slot) => {
+      editPlan((slots) => slots.filter(
+        (item) =>
+          item.day !== day
+          || item.occasion !== occasion
+          || item.slot !== slot,
+      ));
+    },
+    [editPlan],
+  );
+
   const toggleLock = useCallback(
-    (day: number, slot: Slot) => {
+    (day: number, occasion: MealOccasion, slot: Slot) => {
       editPlan((slots) => {
-        const idx = slots.findIndex((s) => s.day === day && s.slot === slot);
+        const idx = slots.findIndex(
+          (s) => s.day === day && s.occasion === occasion && s.slot === slot,
+        );
         if (idx >= 0) slots[idx] = { ...slots[idx], locked: !slots[idx].locked };
         return slots;
       });
@@ -859,6 +879,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     fulfillments,
     reroll,
     changeSlot,
+    removeSlot,
     toggleLock,
     toggleShopping,
     receiveShoppingItem,

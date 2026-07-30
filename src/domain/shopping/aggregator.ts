@@ -1,4 +1,4 @@
-import type { Dish, Household, WeekPlan, PantryItem, ShoppingFulfillment } from "@/domain/types";
+import type { Dish, Household, MealOccasion, WeekPlan, PantryItem, ShoppingFulfillment } from "@/domain/types";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
 
 export type TripKind = "fresh" | "dry";
@@ -12,6 +12,8 @@ export interface ShoppingItem {
   kind: TripKind;
   checked: boolean;
   fulfillment?: ShoppingFulfillment;
+  /** Internal trace only: gross demand contributed by explicit occasions. */
+  occasionDemand?: Partial<Record<MealOccasion, number>>;
 }
 
 const DRY_GROUPS = new Set(["gia vị", "ngũ cốc"]);
@@ -44,6 +46,7 @@ interface Acc {
   vendor: string;
   earliestDay: number;
   kind: TripKind;
+  occasionDemand: Partial<Record<MealOccasion, number>>;
 }
 
 /**
@@ -89,8 +92,18 @@ export function aggregateShopping(
       if (prev) {
         prev.qtyTotal += qty;
         prev.earliestDay = Math.min(prev.earliestDay, slot.day);
+        prev.occasionDemand[slot.occasion] =
+          (prev.occasionDemand[slot.occasion] ?? 0) + qty;
       } else {
-        acc.set(key, { commodityId: line.commodityId, qtyTotal: qty, unit: line.unit, vendor, earliestDay: slot.day, kind });
+        acc.set(key, {
+          commodityId: line.commodityId,
+          qtyTotal: qty,
+          unit: line.unit,
+          vendor,
+          earliestDay: slot.day,
+          kind,
+          occasionDemand: { [slot.occasion]: qty },
+        });
       }
     }
   }
@@ -116,6 +129,12 @@ export function aggregateShopping(
       trip,
       kind: a.kind,
       checked: checkedKeys.has(`${a.commodityId}|${a.vendor}`),
+      occasionDemand: Object.fromEntries(
+        Object.entries(a.occasionDemand).map(([occasion, quantity]) => [
+          occasion,
+          Math.round(quantity),
+        ]),
+      ),
     });
   }
 

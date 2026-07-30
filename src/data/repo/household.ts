@@ -349,6 +349,7 @@ type MealCompletionRow = {
   idempotencyKey: string;
   weekRef: string;
   day: number;
+  occasion: MealCompletion["occasion"];
   dishRefs: string[];
   sourceSessionCreatedAt: Date;
   completedAt: Date;
@@ -362,6 +363,7 @@ function rowToMealCompletion(row: MealCompletionRow): MealCompletion {
     idempotencyKey: row.idempotencyKey,
     weekRef: row.weekRef,
     day: row.day,
+    occasion: row.occasion,
     dishRefs: [...row.dishRefs],
     sourceSessionCreatedAt: row.sourceSessionCreatedAt.toISOString(),
     completedAt: row.completedAt.toISOString(),

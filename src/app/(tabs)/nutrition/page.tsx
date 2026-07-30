@@ -16,6 +16,7 @@ import { pregnancyWarnings, hasPregnancyData } from "@/domain/dish/pregnancy";
 import { isPregnant } from "@/domain/health";
 import { COMMODITIES } from "@/data/seed/commodity";
 import type { FoodGroup } from "@/domain/nutrition";
+import { MEAL_OCCASIONS } from "@/domain/planning/meal-occasion";
 
 const MACRO_FIELDS: { field: "kcal" | "proteinG" | "carbG" | "fatG" | "fiberG"; label: string; unit: string }[] = [
   { field: "kcal", label: "Năng lượng", unit: "kcal" },
@@ -40,6 +41,11 @@ export default function NutritionPage() {
   const [memberId, setMemberId] = useState<string>("household");
 
   const dishes = dayDishes(plan, day, dish);
+  const plannedOccasionCount = MEAL_OCCASIONS.filter((occasion) =>
+    plan.slots.some(
+      (slot) => slot.day === day && slot.occasion === occasion,
+    )
+  ).length;
   const nut = dayNutrition(dishes, household, commodity);
   const member = household.members.find((m) => m.id === memberId);
   const adequacy = member ? memberDayAdequacy(dishes, member, household, commodity) : nut.adequacy;
@@ -97,6 +103,14 @@ export default function NutritionPage() {
       </PageHeader>
 
       {hasStage && <HealthDisclaimer className="mb-4" />}
+
+      {plannedOccasionCount < MEAL_OCCASIONS.length && (
+        <p className="mb-4 rounded-[14px] border border-hairline bg-surface/55 px-3 py-2 text-xs leading-relaxed text-muted">
+          {plannedOccasionCount === 0
+            ? "Ngày này chưa có bữa nào được lên; số liệu không đại diện cho cả ngày."
+            : `Đang tính từ ${plannedOccasionCount}/4 bữa đã lên; đây chưa phải đánh giá dinh dưỡng trọn ngày.`}
+        </p>
+      )}
 
       <div data-stagger className="grid gap-4 lg:grid-cols-2">
         <section style={{ "--i": 0 } as React.CSSProperties} className="card p-5">

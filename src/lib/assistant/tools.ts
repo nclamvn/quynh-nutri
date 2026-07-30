@@ -4,8 +4,6 @@ import { z } from "zod";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { COMMODITY_BY_ID, COMMODITIES } from "@/data/seed/commodity";
 import { loadHouseholdState } from "@/data/repo/household";
-import { generateWeek } from "@/domain/rotation";
-import { dietaryRepertoire } from "@/domain/dish";
 import { cookFromPantry } from "@/domain/pantry";
 import { aggregateShopping } from "@/domain/shopping";
 import { costReport, formatVnd } from "@/domain/cost";
@@ -14,10 +12,11 @@ import { semanticSearch } from "@/lib/search";
 import { normalizeVn } from "@/lib/claude";
 import { dayDishes, dayNutrition } from "@/ui/derive";
 import type { Household, Slot } from "@/domain/types";
-import { currentWeekStartIso } from "@/lib/week";
 import { getDailyHousekeeperBriefSnapshot, getTodayMealReadinessSnapshot } from "@/lib/assistant/kitchen-agenda";
 import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
 import { getHouseholdMealMemorySnapshot } from "@/lib/assistant/meal-memory";
+import { loadOrCreateCurrentWeekPlan } from "@/data/repo/week-plan";
+import { MEAL_OCCASIONS } from "@/domain/planning/meal-occasion";
 
 // Tools wrap the DETERMINISTIC engines – the LLM orchestrates + explains, the
 // engines compute the numbers (with provenance). This is the honesty moat: no
@@ -29,9 +28,6 @@ const name = (id: string) => COMMODITIES.find((c) => c.id === id)?.canonicalVn ?
 
 async function household(): Promise<Household> {
   return (await loadHouseholdState()).household;
-}
-function planFor(hh: Household) {
-  return generateWeek({ household: hh, repertoire: dietaryRepertoire(REPERTOIRE, hh, src), weekStart: currentWeekStartIso(), seed: 1 }).plan;
 }
 function matchCommodity(q: string): string | undefined {
   const n = normalizeVn(q);
@@ -70,8 +66,17 @@ export const tools = {
     inputSchema: z.object({ day: z.number().int().min(0).max(6).default(0) }),
     execute: async ({ day }) => {
       const hh = await household();
-      const dishes = dayDishes(planFor(hh), day, (id) => REPERTOIRE_BY_ID[id]);
+      const { plan, householdDishes } = await loadOrCreateCurrentWeekPlan();
+      const resolved = new Map(
+        [...REPERTOIRE, ...householdDishes].map((dish) => [dish.id, dish]),
+      );
+      const dishes = dayDishes(plan, day, (id) => resolved.get(id));
       const nut = dayNutrition(dishes, hh, src);
+      const plannedOccasions = MEAL_OCCASIONS.filter((occasion) =>
+        plan.slots.some(
+          (slot) => slot.day === day && slot.occasion === occasion,
+        )
+      );
       return {
         day: DAYS[day],
         dishes: dishes.map((d) => d.vnName),
@@ -82,6 +87,8 @@ export const tools = {
         kcalRange: nut.display.range ? [Math.round(nut.display.range.low.kcal), Math.round(nut.display.range.high.kcal)] : null,
         groupsPresent: [...nut.groups.present],
         missingGroups: nut.groups.missingCore,
+        plannedOccasions,
+        completeDayPlan: plannedOccasions.length === MEAL_OCCASIONS.length,
         pctOfDayNeed: Math.round(nut.adequacy.kcalRatio * 100), // bữa này = ?% nhu cầu NGÀY của hộ
       };
     },
@@ -122,7 +129,18 @@ export const tools = {
     inputSchema: z.object({ budgetVnd: z.number().int().positive().optional().describe("ngân sách tuần nếu người dùng nêu, VND") }),
     execute: async ({ budgetVnd }) => {
       const hh = await household();
-      const items = aggregateShopping(planFor(hh), (id) => REPERTOIRE_BY_ID[id], src, hh, [], []);
+      const { plan, householdDishes } = await loadOrCreateCurrentWeekPlan();
+      const resolved = new Map(
+        [...REPERTOIRE, ...householdDishes].map((dish) => [dish.id, dish]),
+      );
+      const items = aggregateShopping(
+        plan,
+        (id) => resolved.get(id),
+        src,
+        hh,
+        [],
+        [],
+      );
       const r = costReport(items, src, budgetVnd);
       return {
         estimatedWeeklyVnd: r.totalVnd,

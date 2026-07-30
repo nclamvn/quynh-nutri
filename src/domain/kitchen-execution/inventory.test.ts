@@ -67,7 +67,7 @@ describe("inventory execution", () => {
     const plan: WeekPlan = {
       householdId: "hh",
       weekStart: "2026-07-27",
-      slots: [{ day: 3, slot: "MAN", dishId: "dish", locked: false }],
+      slots: [{ day: 3, occasion: "dinner", slot: "MAN", dishId: "dish", locked: false }],
     };
     const result = frozenLotsNeededForDay(
       [

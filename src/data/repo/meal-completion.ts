@@ -7,6 +7,7 @@ import type {
   InventoryLot,
   InventoryMovement,
   MealCompletion,
+  MealOccasion,
   PantryItem,
 } from "@/domain/types";
 import {
@@ -21,6 +22,7 @@ type CompletionRow = {
   idempotencyKey: string;
   weekRef: string;
   day: number;
+  occasion: MealOccasion;
   dishRefs: string[];
   sourceSessionCreatedAt: Date;
   completedAt: Date;
@@ -33,6 +35,7 @@ const toCompletion = (row: CompletionRow): MealCompletion => ({
   idempotencyKey: row.idempotencyKey,
   weekRef: row.weekRef,
   day: row.day,
+  occasion: row.occasion,
   dishRefs: [...row.dishRefs],
   sourceSessionCreatedAt: row.sourceSessionCreatedAt.toISOString(),
   completedAt: row.completedAt.toISOString(),
@@ -219,6 +222,7 @@ async function confirmE2E(
     (item) =>
       item.weekRef === input.weekRef
       && item.day === input.day
+      && item.occasion === input.occasion
       && item.sourceSessionCreatedAt === parsed.createdAt,
   );
   if (conflict) {
@@ -239,6 +243,7 @@ async function confirmE2E(
     idempotencyKey: input.idempotencyKey,
     weekRef: input.weekRef,
     day: input.day,
+    occasion: input.occasion,
     dishRefs: parsed.tasks.map((task) => task.dishId),
     sourceSessionCreatedAt: parsed.createdAt,
     completedAt: input.completedAt,
@@ -321,7 +326,7 @@ export async function confirmMealCloseoutRecord(
   let sourceSessionCreatedAt: Date | undefined;
   try {
     return await db.$transaction(async (tx) => {
-      const scopeKey = `${input.weekRef}:${input.day}`;
+      const scopeKey = `${input.weekRef}:${input.day}:${input.occasion}`;
       const session = await tx.kitchenSession.findUnique({
         where: {
           householdId_kind_scopeKey: {
@@ -342,10 +347,11 @@ export async function confirmMealCloseoutRecord(
       sourceSessionCreatedAt = new Date(parsed.createdAt);
       const prior = await tx.mealCompletion.findUnique({
         where: {
-          householdId_weekRef_day_sourceSessionCreatedAt: {
+          householdId_weekRef_day_occasion_sourceSessionCreatedAt: {
             householdId: input.householdId,
             weekRef: input.weekRef,
             day: input.day,
+            occasion: input.occasion,
             sourceSessionCreatedAt,
           },
         },
@@ -375,6 +381,7 @@ export async function confirmMealCloseoutRecord(
           idempotencyKey: input.idempotencyKey,
           weekRef: input.weekRef,
           day: input.day,
+          occasion: input.occasion,
           dishRefs: parsed.tasks.map((task) => task.dishId),
           sourceSessionCreatedAt,
           completedAt: new Date(input.completedAt),
@@ -426,6 +433,7 @@ export async function confirmMealCloseoutRecord(
           dedupeKey: `meal_completed:${input.idempotencyKey}`,
           properties: {
             dishCount: parsed.tasks.length,
+            occasion: input.occasion,
             inventoryMovementCount: movements.length,
             openedLeftoverCapture: true,
           } as Prisma.InputJsonValue,
@@ -475,10 +483,11 @@ export async function confirmMealCloseoutRecord(
       const canonical = sourceSessionCreatedAt
         ? await db.mealCompletion.findUnique({
           where: {
-            householdId_weekRef_day_sourceSessionCreatedAt: {
+            householdId_weekRef_day_occasion_sourceSessionCreatedAt: {
               householdId: input.householdId,
               weekRef: input.weekRef,
               day: input.day,
+              occasion: input.occasion,
               sourceSessionCreatedAt,
             },
           },

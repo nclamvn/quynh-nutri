@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Dish, MealCompletion } from "@/domain/types";
+import type { Dish, MealCompletion, MealOccasion } from "@/domain/types";
 import {
   COOKING_GUIDES,
   cookingGuideFor,
@@ -32,10 +32,12 @@ const toLocalDateTime = (date: Date) => {
 
 export function MealCoordinatorSheet({
   day,
+  occasion,
   dishes,
   onClose,
 }: {
   day: number;
+  occasion: MealOccasion;
   dishes: Dish[];
   onClose: () => void;
 }) {
@@ -50,7 +52,7 @@ export function MealCoordinatorSheet({
     [dishes],
   );
   const supportedIds = useMemo(() => new Set(supported.map((dish) => dish.id)), [supported]);
-  const storageKey = `qk-meal-run:${household.id}:${plan.weekStart}:${day}`;
+  const storageKey = `qk-meal-run:${household.id}:${plan.weekStart}:${day}:${occasion}`;
   const versionRef = useRef<number | null>(null);
   const sessionRef = useRef<MealRunSession | undefined>(undefined);
   const mutationRef = useRef<Promise<boolean>>(Promise.resolve(true));
@@ -99,7 +101,7 @@ export function MealCoordinatorSheet({
   useEffect(() => {
     mutationRef.current = (async () => {
       try {
-        const canonical = await getMealRunSession(plan.weekStart, day);
+        const canonical = await getMealRunSession(plan.weekStart, day, occasion);
         if (canonical) {
           versionRef.current = canonical.version;
           sessionRef.current = canonical.payload;
@@ -113,6 +115,7 @@ export function MealCoordinatorSheet({
         const result = await persistMealRunSession(
           plan.weekStart,
           day,
+          occasion,
           legacy,
           null,
         );
@@ -139,7 +142,7 @@ export function MealCoordinatorSheet({
         return false;
       }
     })();
-  }, [day, plan.weekStart, storageKey]);
+  }, [day, occasion, plan.weekStart, storageKey]);
 
   const queueSave = (next: MealRunSession) => {
     sessionStorage.setItem(storageKey, JSON.stringify(next));
@@ -150,6 +153,7 @@ export function MealCoordinatorSheet({
         const result = await persistMealRunSession(
           plan.weekStart,
           day,
+          occasion,
           next,
           versionRef.current,
         );
@@ -211,6 +215,7 @@ export function MealCoordinatorSheet({
       const result = await clearMealRunSession(
         plan.weekStart,
         day,
+        occasion,
         version,
       );
       if (!result.ok) {
@@ -360,6 +365,7 @@ export function MealCoordinatorSheet({
       {finishedSession && !mealCompletion && closeoutVersion !== undefined && (
         <MealCloseoutSheet
           day={day}
+          occasion={occasion}
           session={finishedSession}
           dishes={supported}
           expectedSessionVersion={closeoutVersion}
@@ -371,7 +377,7 @@ export function MealCoordinatorSheet({
         <LeftoverCaptureSheet
           session={finishedSession}
           dishes={supported}
-          sourceMealRunRef={`${household.id}:${plan.weekStart}:${day}:${finishedSession.createdAt}`}
+          sourceMealRunRef={`${household.id}:${plan.weekStart}:${day}:${occasion}:${finishedSession.createdAt}`}
           mealCompletionId={mealCompletion.id}
           onClose={() => setPostMealStep("reflection")}
         />

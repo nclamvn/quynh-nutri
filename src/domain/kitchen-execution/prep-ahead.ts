@@ -1,4 +1,4 @@
-import type { Dish, Slot, WeekPlan } from "@/domain/types";
+import type { Dish, MealOccasion, Slot, WeekPlan } from "@/domain/types";
 import type { KitchenGuideSource, LocalizedText } from "./index";
 
 export type PrepAheadKind =
@@ -34,12 +34,14 @@ export interface ResolvedPrepAheadGuide {
 
 export interface PrepAheadDish {
   dish: Dish;
+  occasion: MealOccasion;
   slot: Slot;
   guide: PrepAheadGuide;
 }
 
 export interface UnsupportedPrepAheadDish {
   dish: Dish;
+  occasion: MealOccasion;
   slot: Slot;
 }
 
@@ -87,8 +89,20 @@ export function prepAheadForPlanDay(
     const dish = dishResolver(slot.dishId);
     if (!dish) continue;
     const guide = guides.find((candidate) => candidate.dishId === slot.dishId);
-    if (guide) supported.push({ dish, slot: slot.slot, guide });
-    else unsupported.push({ dish, slot: slot.slot });
+    if (guide) {
+      supported.push({
+        dish,
+        occasion: slot.occasion,
+        slot: slot.slot,
+        guide,
+      });
+    } else {
+      unsupported.push({
+        dish,
+        occasion: slot.occasion,
+        slot: slot.slot,
+      });
+    }
   }
 
   return { day, supported, unsupported };

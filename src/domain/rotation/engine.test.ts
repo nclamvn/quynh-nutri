@@ -69,7 +69,7 @@ describe("generateWeek – determinism & locking", () => {
   });
 
   it("preserves locked slots verbatim", () => {
-    const locked: PlannedSlot[] = [{ day: 2, slot: "MAN", dishId: "ca_kho_to", locked: true }];
+    const locked: PlannedSlot[] = [{ day: 2, occasion: "dinner", slot: "MAN", dishId: "ca_kho_to", locked: true }];
     const { plan } = generateWeek({ ...base, seed: 5, locked });
     const slot = plan.slots.find((s) => s.day === 2 && s.slot === "MAN");
     expect(slot?.dishId).toBe("ca_kho_to");

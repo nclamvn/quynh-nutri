@@ -45,16 +45,28 @@ function generateCandidate(
   const memoryByDish = new Map(
     memory.dishes.map((item) => [item.dishId, item]),
   );
-  return {
-    generated: generateWeek({
+  const dinner = generateWeek({
     household,
     repertoire,
     weekStart: envelope.plan.weekStart,
     seed,
-    locked: envelope.plan.slots.filter((slot) => slot.locked),
+    locked: envelope.plan.slots.filter(
+      (slot) => slot.occasion === "dinner" && slot.locked,
+    ),
     dishScore: (dish, context) =>
       memoryPreferenceForDish(memoryByDish.get(dish.id), context.busy).score,
-    }),
+  });
+  return {
+    generated: {
+      ...dinner,
+      plan: {
+        ...dinner.plan,
+        slots: [
+          ...envelope.plan.slots.filter((slot) => slot.occasion !== "dinner"),
+          ...dinner.plan.slots,
+        ],
+      },
+    },
     memory,
     memoryByDish,
   };

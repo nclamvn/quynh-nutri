@@ -13,7 +13,14 @@ function planWith(slots: Partial<PlannedSlot>[]): WeekPlan {
   return {
     householdId: "hh_default",
     weekStart: "2026-07-27",
-    slots: slots.map((s) => ({ day: 0, slot: "MAN", locked: false, dishId: "", ...s })) as PlannedSlot[],
+    slots: slots.map((s) => ({
+      day: 0,
+      occasion: "dinner",
+      slot: "MAN",
+      locked: false,
+      dishId: "",
+      ...s,
+    })) as PlannedSlot[],
   };
 }
 
@@ -28,6 +35,43 @@ describe("aggregateShopping – derive list from plan", () => {
     const tom = items.find((i) => i.commodityId === "tom");
     expect(tom).toBeDefined();
     expect(tom!.qtyTotal).toBe(747);
+  });
+
+  it("counts the same explicit dish once per planned occasion", () => {
+    const one = aggregateShopping(
+      planWith([{
+        occasion: "lunch",
+        slot: "MAN",
+        dishId: "ga_luoc",
+      }]),
+      dishes,
+      commodities,
+      DEFAULT_HOUSEHOLD,
+    );
+    const two = aggregateShopping(
+      planWith([
+        {
+          occasion: "lunch",
+          slot: "MAN",
+          dishId: "ga_luoc",
+        },
+        {
+          occasion: "dinner",
+          slot: "MAN",
+          dishId: "ga_luoc",
+        },
+      ]),
+      dishes,
+      commodities,
+      DEFAULT_HOUSEHOLD,
+    );
+    const lunchQty = one.find((item) => item.commodityId === "thit_ga")!.qtyTotal;
+    const both = two.find((item) => item.commodityId === "thit_ga")!;
+    expect(both.qtyTotal).toBeCloseTo(lunchQty * 2, -1);
+    expect(both.occasionDemand).toMatchObject({
+      lunch: lunchQty,
+      dinner: lunchQty,
+    });
   });
 
   it("scales quantities to household size (edible → purchased)", () => {

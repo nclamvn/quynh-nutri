@@ -1,7 +1,8 @@
-import type { PlannedSlot, Slot } from "@/domain/types";
+import type { MealOccasion, PlannedSlot, Slot } from "@/domain/types";
 
 export interface WeekPlanProposalChange {
   day: number;
+  occasion: MealOccasion;
   slot: Slot;
   beforeDishId: string | null;
   afterDishId: string | null;
@@ -34,8 +35,8 @@ export interface ConfirmAssistantWeekPlanProposalInput {
   confirmedByUser: true;
 }
 
-const keyFor = (slot: Pick<PlannedSlot, "day" | "slot">) =>
-  `${slot.day}:${slot.slot}`;
+const keyFor = (slot: Pick<PlannedSlot, "day" | "occasion" | "slot">) =>
+  `${slot.day}:${slot.occasion}:${slot.slot}`;
 
 export function weekPlanProposalChanges(
   before: readonly PlannedSlot[],
@@ -51,6 +52,7 @@ export function weekPlanProposalChanges(
       const next = afterByKey.get(key);
       return {
         day: next?.day ?? previous!.day,
+        occasion: next?.occasion ?? previous!.occasion,
         slot: next?.slot ?? previous!.slot,
         beforeDishId: previous?.dishId ?? null,
         afterDishId: next?.dishId ?? null,
@@ -58,7 +60,9 @@ export function weekPlanProposalChanges(
     })
     .filter((change) => change.beforeDishId !== change.afterDishId)
     .sort((left, right) =>
-      left.day - right.day || left.slot.localeCompare(right.slot)
+      left.day - right.day
+      || left.occasion.localeCompare(right.occasion)
+      || left.slot.localeCompare(right.slot)
     );
 }
 

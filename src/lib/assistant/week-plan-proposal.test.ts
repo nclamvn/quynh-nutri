@@ -126,6 +126,7 @@ describe("server assistant week plan proposal", () => {
       idempotencyKey: "completion-key",
       weekRef: "2026-07-20",
       day: 1,
+  occasion: "dinner",
       dishRefs: [rememberedDish],
       sourceSessionCreatedAt: "2026-07-20T10:00:00.000Z",
       completedAt: "2026-07-20T11:00:00.000Z",

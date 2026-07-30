@@ -21,6 +21,7 @@ import { useDailyHousekeeperBrief } from "@/ui/hooks/useKitchenAgenda";
 import { KitchenAgendaCard } from "@/ui/components/KitchenAgendaCard";
 import { HousekeeperPathCard } from "@/ui/components/HousekeeperPathCard";
 import { TodayMealCard } from "@/ui/components/TodayMealCard";
+import { DailyMealRhythmCard } from "@/ui/components/DailyMealRhythmCard";
 
 const GROUP_COLORS: [FoodGroup, string][] = [
   ["đạm", "var(--chart-protein)"],
@@ -42,10 +43,23 @@ const dayShort = (d: number) => (d === 6 ? "CN" : `T${d + 2}`);
 const TODAY = 0; // representative "today" = first day of the plan
 
 export default function OverviewPage() {
-  const { plan, household, dish, commodity, shopping, reroll, optionsFor } = useStore();
+  const {
+    plan,
+    planSyncState,
+    household,
+    dish,
+    commodity,
+    shopping,
+    optionsFor,
+  } = useStore();
   const { t, lang } = useI18n();
   const [moodOpen, setMoodOpen] = useState(false);
   const dailyBrief = useDailyHousekeeperBrief();
+  const openWeekProposal = () => window.dispatchEvent(
+    new CustomEvent("open-assistant", {
+      detail: { prompt: "Đổi cả tuần" },
+    }),
+  );
 
   const today = dayDishes(plan, TODAY, dish);
   const nut = dayNutrition(today, household, commodity);
@@ -58,7 +72,12 @@ export default function OverviewPage() {
   const manOptions = optionsFor("MAN");
   const suggestion = manOptions.find((d) => d.quick && !todayIds.has(d.id)) ?? manOptions[0];
 
-  const slotDish = (day: number, slot: Slot) => dish(plan.slots.find((s) => s.day === day && s.slot === slot)?.dishId ?? "");
+  const slotDish = (day: number, slot: Slot) => dish(plan.slots.find(
+    (item) =>
+      item.day === day
+      && item.occasion === "dinner"
+      && item.slot === slot,
+  )?.dishId ?? "");
   const needCount = Math.round(useCountUp(shopping.length)); // count-up flourish
 
   return (
@@ -80,7 +99,7 @@ export default function OverviewPage() {
               <span className="sm:hidden">Cần gì?</span>
               <span className="hidden sm:inline">Hôm nay bạn cần gì?</span>
             </button>
-            <button aria-label={t("common.reroll")} onClick={reroll} className="flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-hairline px-3 text-xs text-muted active:bg-surface sm:h-10 sm:px-4 sm:text-sm">
+            <button disabled={planSyncState !== "synced"} aria-label={t("common.reroll")} onClick={openWeekProposal} className="flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-hairline px-3 text-xs text-muted active:bg-surface disabled:opacity-45 sm:h-10 sm:px-4 sm:text-sm">
               ↻ <span className="sm:hidden">Đổi tuần</span>
               <span className="hidden sm:inline">{t("common.reroll")}</span>
             </button>
@@ -89,6 +108,7 @@ export default function OverviewPage() {
       />
 
       <HousekeeperPathCard />
+      <DailyMealRhythmCard />
       <KitchenAgendaCard
         agenda={dailyBrief.agenda}
         brief={dailyBrief.brief}
@@ -99,7 +119,7 @@ export default function OverviewPage() {
       {plan.slots.length === 0 ? (
         <div className="card grid min-h-[40vh] place-content-center p-10 text-center">
           <p className="mb-3 text-sm text-muted">{t("ov.emptyWeek")}</p>
-          <button onClick={reroll} className="mx-auto rounded-full bg-brand px-4 py-2 text-sm font-medium text-white">{t("ov.createWeek")}</button>
+          <button disabled={planSyncState !== "synced"} onClick={openWeekProposal} className="mx-auto rounded-full bg-brand px-4 py-2 text-sm font-medium text-white disabled:opacity-45">{t("ov.createWeek")}</button>
         </div>
       ) : (
         <>

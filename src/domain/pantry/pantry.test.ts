@@ -11,7 +11,7 @@ const commodities: CommoditySource = (id) => COMMODITY_BY_ID[id];
 const dishes = (id: string) => REPERTOIRE_BY_ID[id];
 const planWith = (dishId: string): WeekPlan => ({
   householdId: "hh", weekStart: "2026-07-27",
-  slots: [{ day: 0, slot: "MAN", dishId, locked: false }],
+  slots: [{ day: 0, occasion: "dinner", slot: "MAN", dishId, locked: false }],
 });
 
 describe("pantry deduction in shopping", () => {

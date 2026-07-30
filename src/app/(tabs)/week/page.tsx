@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import type { Lang } from "@/i18n/context";
-import type { Dish, Slot } from "@/domain/types";
-import { dayDishes, dayNutrition, dishDisplay } from "@/ui/derive";
+import type { Dish, MealOccasion, Slot } from "@/domain/types";
+import { dayNutrition, dishDisplay, occasionDishes } from "@/ui/derive";
 import { AdequacyStrip } from "@/ui/components/AdequacyStrip";
 import { BottomSheet } from "@/ui/components/BottomSheet";
 import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
@@ -25,6 +25,10 @@ import { planDayForDate } from "@/domain/kitchen-execution/inventory";
 import { prepAheadForPlanDay } from "@/domain/kitchen-execution/prep-ahead";
 import { PREP_AHEAD_GUIDES } from "@/data/seed/prep-ahead-guides";
 import { PrepAheadSheet } from "@/ui/components/PrepAheadSheet";
+import {
+  MEAL_OCCASIONS,
+  MEAL_OCCASION_LABELS,
+} from "@/domain/planning/meal-occasion";
 
 const SLOT_ORDER: Slot[] = ["COM", "MAN", "RAU", "CANH", "TRANGMIENG"];
 const BUSY_INDEX: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
@@ -40,16 +44,31 @@ export default function WeekPage() {
     acceptCanonicalPlan,
     household,
     notes,
-    reroll,
     changeSlot,
+    removeSlot,
     toggleLock,
     dish,
     commodity,
     optionsFor,
   } = useStore();
   const { t, lang } = useI18n();
-  const [sheet, setSheet] = useState<{ day: number; slot: Slot } | null>(null);
-  const [coordDay, setCoordDay] = useState<number | null>(null);
+  const [occasion, setOccasion] = useState<MealOccasion>("dinner");
+  const [sheet, setSheet] = useState<{
+    day: number;
+    occasion: MealOccasion;
+    slot: Slot;
+  } | null>(null);
+  const [pendingChange, setPendingChange] = useState<{
+    day: number;
+    occasion: MealOccasion;
+    slot: Slot;
+    beforeDishId: string | null;
+    afterDishId: string | null;
+  } | null>(null);
+  const [coord, setCoord] = useState<{
+    day: number;
+    occasion: MealOccasion;
+  } | null>(null);
   const [prepOpen, setPrepOpen] = useState(false);
   const today = planDayForDate(plan.weekStart, new Date(), "Asia/Ho_Chi_Minh");
   const tomorrow = today !== undefined && today < 6 ? today + 1 : undefined;
@@ -62,7 +81,12 @@ export default function WeekPage() {
   // Soft pregnancy warning on the mâm (dormant until hazard tags are sourced).
   const pregnantMember = household.members.find((m) => m.healthProfile && isPregnant(m.healthProfile.lifeStage));
   const warned = (d: ReturnType<typeof dish>) => !!(pregnantMember && d && pregnancyWarnings(d, pregnantMember, commodity).length > 0);
-  const planEditable = planSyncState !== "loading" && planSyncState !== "conflict";
+  const planEditable = planSyncState === "synced";
+  const openWeekProposal = () => window.dispatchEvent(
+    new CustomEvent("open-assistant", {
+      detail: { prompt: "Đổi cả tuần" },
+    }),
+  );
 
   if (planSyncState === "loading") {
     return (
@@ -168,7 +192,7 @@ export default function WeekPage() {
             <button
               disabled={!planEditable}
               aria-label={t("common.reroll")}
-              onClick={reroll}
+              onClick={openWeekProposal}
               className="cta-primary inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-white disabled:opacity-45 sm:px-5 sm:py-2.5 sm:text-sm"
             >
               ↻ <span className="sm:hidden">Đổi tuần</span>
@@ -219,13 +243,45 @@ export default function WeekPage() {
         </div>
       )}
 
+      <div
+        className="mb-4 overflow-x-auto [scrollbar-width:none]"
+        aria-label={lang === "en" ? "Meal occasion" : "Nhịp ăn trong ngày"}
+      >
+        <div className="flex min-w-max gap-2">
+          {MEAL_OCCASIONS.map((item) => {
+            const count = plan.slots.filter(
+              (slot) => slot.occasion === item,
+            ).length;
+            const active = occasion === item;
+            return (
+              <button
+                key={item}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setOccasion(item)}
+                className={`h-10 rounded-full border px-4 text-sm font-semibold transition-colors ${
+                  active
+                    ? "border-brand bg-brand text-white"
+                    : "border-hairline bg-surface/60 text-muted"
+                }`}
+              >
+                {MEAL_OCCASION_LABELS[item][lang === "en" ? "en" : "vn"]}
+                <span className="ml-1.5 text-xs opacity-75">· {count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 7 }, (_, day) => {
-          const dishes = dayDishes(plan, day, dish);
+          const dishes = occasionDishes(plan, day, occasion, dish);
           const nut = dayNutrition(dishes, household, commodity);
           const busy = busyDayIdx.has(day);
           const reviewedCount = dishes.filter((item) => REVIEWED_COOKING_DISH_IDS.has(item.id)).length;
-          const daySlots = plan.slots.filter((s) => s.day === day).sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
+          const daySlots = plan.slots.filter(
+            (item) => item.day === day && item.occasion === occasion,
+          );
 
           return (
             <section key={day} style={{ "--i": day } as React.CSSProperties} className="card flex flex-col p-3.5">
@@ -247,18 +303,45 @@ export default function WeekPage() {
               </div>
 
               <ul className="space-y-1">
-                {daySlots.map((s) => {
+                {SLOT_ORDER.map((slot) => {
+                  const s = daySlots.find((item) => item.slot === slot);
+                  if (!s) {
+                    return (
+                      <li
+                        key={slot}
+                        style={{ borderInlineStartColor: SLOT_COLOR[slot] }}
+                        className="flex min-h-12 items-center gap-2 rounded-[12px] border-l-[3px] border-dashed bg-surface/30 px-2 py-1.5"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className="text-[9px] font-medium uppercase tracking-wide"
+                            style={{ color: SLOT_COLOR[slot] }}
+                          >
+                            {t(`slot.${slot}`)}
+                          </p>
+                          <button
+                            type="button"
+                            disabled={!planEditable}
+                            onClick={() => setSheet({ day, occasion, slot })}
+                            className="mt-0.5 text-left text-xs font-semibold text-brand disabled:opacity-50"
+                          >
+                            + {lang === "en" ? "Add dish" : "Thêm món"}
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  }
                   const d = dish(s.dishId);
                   return (
                     <li
-                      key={s.slot}
+                      key={slot}
                       style={{ borderInlineStartColor: SLOT_COLOR[s.slot] }}
                       className="group flex items-center gap-2 rounded-[12px] border-l-[3px] bg-surface/50 px-2 py-1.5 transition-colors hover:bg-surface"
                     >
                       <DishThumb dish={d} size={52} shape="rounded" />
                       <div className="min-w-0 flex-1">
                         <p className="text-[9px] font-medium uppercase tracking-wide" style={{ color: SLOT_COLOR[s.slot] }}>{t(`slot.${s.slot}`)}</p>
-                        <button disabled={!planEditable} className="block w-full truncate text-left text-sm disabled:opacity-50" onClick={() => setSheet({ day, slot: s.slot })}>
+                        <button disabled={!planEditable} className="block w-full truncate text-left text-sm disabled:opacity-50" onClick={() => setSheet({ day, occasion, slot: s.slot })}>
                           {dishName(d, lang)}
                           {d?.quick && <span className="ml-1.5 text-[10px] text-brand-ink">⚡</span>}
                           {warned(d) && <span className="ml-1.5 text-[10px] text-amber" title={t("health.warnBadge")}>⚠</span>}
@@ -268,11 +351,28 @@ export default function WeekPage() {
                       <button
                         aria-label="lock"
                         disabled={!planEditable}
-                        onClick={() => toggleLock(day, s.slot)}
+                        onClick={() => toggleLock(day, occasion, s.slot)}
                         className={`shrink-0 rounded p-1 text-xs ${s.locked ? "text-brand" : "text-muted/50"}`}
                       >
                         {s.locked ? "🔒" : "🔓"}
                       </button>
+                      {!s.locked && (
+                        <button
+                          type="button"
+                          aria-label={lang === "en" ? "Remove dish" : "Bỏ món"}
+                          disabled={!planEditable}
+                          onClick={() => setPendingChange({
+                            day,
+                            occasion,
+                            slot: s.slot,
+                            beforeDishId: s.dishId,
+                            afterDishId: null,
+                          })}
+                          className="shrink-0 rounded p-1 text-xs text-muted/70"
+                        >
+                          ×
+                        </button>
+                      )}
                     </li>
                   );
                 })}
@@ -281,7 +381,7 @@ export default function WeekPage() {
                 <button
                   disabled={!planEditable || reviewedCount < 1}
                   type="button"
-                  onClick={() => setCoordDay(day)}
+                  onClick={() => setCoord({ day, occasion })}
                   aria-describedby={reviewedCount < 1 ? `coord-reason-${day}` : undefined}
                   className="w-full rounded-full border border-brand bg-brand-weak px-3 py-2 text-xs font-semibold text-brand disabled:cursor-not-allowed disabled:border-hairline disabled:bg-surface/60 disabled:text-muted disabled:opacity-75"
                 >
@@ -309,7 +409,19 @@ export default function WeekPage() {
               <li key={opt.id}>
                 <button
                   onClick={() => {
-                    changeSlot(sheet.day, sheet.slot, opt.id);
+                    const before = plan.slots.find(
+                      (item) =>
+                        item.day === sheet.day
+                        && item.occasion === sheet.occasion
+                        && item.slot === sheet.slot,
+                    );
+                    setPendingChange({
+                      day: sheet.day,
+                      occasion: sheet.occasion,
+                      slot: sheet.slot,
+                      beforeDishId: before?.dishId ?? null,
+                      afterDishId: opt.id,
+                    });
                     setSheet(null);
                   }}
                   className="flex w-full items-center justify-between gap-2 rounded-lg border border-hairline px-3 py-2.5 text-left active:bg-surface"
@@ -325,11 +437,77 @@ export default function WeekPage() {
           </ul>
         )}
       </BottomSheet>
-      {coordDay !== null && (
+      <BottomSheet
+        open={Boolean(pendingChange)}
+        onClose={() => setPendingChange(null)}
+        title={lang === "en" ? "Confirm plan change" : "Xác nhận đổi thực đơn"}
+      >
+        {pendingChange && (
+          <div className="space-y-4" data-testid="occasion-plan-diff">
+            <div className="rounded-[16px] border border-hairline bg-surface/55 p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
+                {t(`day.${pendingChange.day}`)} · {MEAL_OCCASION_LABELS[pendingChange.occasion][lang === "en" ? "en" : "vn"]} · {t(`slot.${pendingChange.slot}`)}
+              </p>
+              <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 text-sm">
+                <span className="min-w-0 truncate rounded-[12px] border border-hairline px-3 py-2 text-muted">
+                  {pendingChange.beforeDishId
+                    ? dishName(dish(pendingChange.beforeDishId), lang)
+                    : lang === "en" ? "Empty" : "Đang trống"}
+                </span>
+                <span aria-hidden className="text-brand">→</span>
+                <span className="min-w-0 truncate rounded-[12px] border border-brand/30 bg-brand-weak/40 px-3 py-2 font-semibold text-brand-ink">
+                  {pendingChange.afterDishId
+                    ? dishName(dish(pendingChange.afterDishId), lang)
+                    : lang === "en" ? "Remove" : "Bỏ món"}
+                </span>
+              </div>
+            </div>
+            <p className="text-xs leading-relaxed text-muted">
+              {lang === "en"
+                ? "Nothing changes until you confirm this exact difference."
+                : "Thực đơn chỉ thay đổi sau khi bạn xác nhận đúng phần chênh lệch này."}
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setPendingChange(null)}
+                className="h-11 rounded-full border border-hairline text-sm font-semibold text-muted"
+              >
+                {lang === "en" ? "Cancel" : "Huỷ"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (pendingChange.afterDishId) {
+                    changeSlot(
+                      pendingChange.day,
+                      pendingChange.occasion,
+                      pendingChange.slot,
+                      pendingChange.afterDishId,
+                    );
+                  } else {
+                    removeSlot(
+                      pendingChange.day,
+                      pendingChange.occasion,
+                      pendingChange.slot,
+                    );
+                  }
+                  setPendingChange(null);
+                }}
+                className="h-11 rounded-full bg-brand text-sm font-semibold text-white"
+              >
+                {lang === "en" ? "Confirm" : "Xác nhận"}
+              </button>
+            </div>
+          </div>
+        )}
+      </BottomSheet>
+      {coord && (
         <MealCoordinatorSheet
-          day={coordDay}
-          dishes={dayDishes(plan, coordDay, dish)}
-          onClose={() => setCoordDay(null)}
+          day={coord.day}
+          occasion={coord.occasion}
+          dishes={occasionDishes(plan, coord.day, coord.occasion, dish)}
+          onClose={() => setCoord(null)}
         />
       )}
       {tomorrowPrep && (

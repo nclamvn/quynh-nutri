@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Dish, MealCompletion } from "@/domain/types";
+import type { Dish, MealCompletion, MealOccasion } from "@/domain/types";
 import type { MealRunSession } from "@/domain/kitchen-execution/meal-coordination";
 import { BottomSheet } from "@/ui/components/BottomSheet";
 import { useI18n } from "@/i18n/context";
@@ -9,6 +9,7 @@ import { useStore } from "@/ui/store";
 
 export function MealCloseoutSheet({
   day,
+  occasion,
   session,
   dishes,
   expectedSessionVersion,
@@ -16,6 +17,7 @@ export function MealCloseoutSheet({
   onConfirmed,
 }: {
   day: number;
+  occasion: MealOccasion;
   session: MealRunSession;
   dishes: Dish[];
   expectedSessionVersion: number;
@@ -74,6 +76,7 @@ export function MealCloseoutSheet({
         idempotencyKey,
         weekRef: plan.weekStart,
         day,
+        occasion,
         expectedSessionVersion,
         completedAt,
         consumptions: relevantLots.flatMap((lot) => {

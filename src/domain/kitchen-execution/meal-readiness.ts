@@ -1,5 +1,6 @@
 import type {
   Dish,
+  MealOccasion,
   MealCompletion,
   PantryItem,
   WeekPlan,
@@ -53,6 +54,7 @@ export interface TodayMealReadinessInput {
   completions: readonly MealCompletion[];
   dish: (id: string) => Dish | undefined;
   reviewedCookingDishIds: ReadonlySet<string>;
+  occasion?: MealOccasion;
 }
 
 /**
@@ -65,6 +67,7 @@ export function buildTodayMealReadiness(
 ): TodayMealReadiness {
   const calendarDate = calendarDateInTimeZone(input.now, input.timeZone);
   const day = planDayForDate(input.plan.weekStart, input.now, input.timeZone);
+  const occasion = input.occasion ?? "dinner";
   const completedDishIds = new Set(
     day === undefined
       ? []
@@ -72,7 +75,8 @@ export function buildTodayMealReadiness(
           .filter(
             (completion) =>
               completion.weekRef === input.plan.weekStart
-              && completion.day === day,
+              && completion.day === day
+              && completion.occasion === occasion,
           )
           .flatMap((completion) => completion.dishRefs),
   );
@@ -80,7 +84,9 @@ export function buildTodayMealReadiness(
     ? []
     : [...new Set(
         input.plan.slots
-          .filter((slot) => slot.day === day)
+          .filter(
+            (slot) => slot.day === day && slot.occasion === occasion,
+          )
           .map((slot) => slot.dishId),
       )];
   const plannedDishes = plannedIds.flatMap((dishId) => {

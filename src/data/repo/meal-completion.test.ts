@@ -21,6 +21,7 @@ const completedSession = {
   version: 3,
   payload: {
     day: 0,
+  occasion: "dinner" as const,
     targetServeAt: "2026-07-30T12:00:00.000Z",
     createdAt: "2026-07-30T10:00:00.000Z",
     tasks: [{
@@ -45,6 +46,7 @@ const baseInput = {
   idempotencyKey: "88b9f001-bd7b-4c44-8988-468fd0de27ff",
   weekRef: "2026-07-27",
   day: 0,
+  occasion: "dinner" as const,
   expectedSessionVersion: 3,
   completedAt: "2026-07-30T11:31:00.000Z",
   allowedDishIds: ["dish-a"],
@@ -129,5 +131,30 @@ describe("meal completion repository E2E adapter", () => {
       completion: { dishRefs: ["dish-a"] },
     });
     expect(await loadMealCompletionsForHousehold("household-b")).toEqual([]);
+  });
+
+  it("keeps lunch and dinner closeouts independent on the same day", async () => {
+    const lunch = await confirmMealCloseoutRecord(
+      { ...baseInput, occasion: "lunch", consumptions: [] },
+      { pantry, session: completedSession },
+    );
+    const dinner = await confirmMealCloseoutRecord(
+      {
+        ...baseInput,
+        occasion: "dinner",
+        idempotencyKey: "c7277609-d2b2-441f-a59e-87dcc3766ff6",
+        consumptions: [],
+      },
+      { pantry, session: completedSession },
+    );
+    expect(lunch).toMatchObject({
+      ok: true,
+      completion: { occasion: "lunch" },
+    });
+    expect(dinner).toMatchObject({
+      ok: true,
+      completion: { occasion: "dinner" },
+    });
+    expect(await loadMealCompletionsForHousehold("household-a")).toHaveLength(2);
   });
 });

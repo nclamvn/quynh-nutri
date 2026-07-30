@@ -84,10 +84,10 @@ describe("prepAheadForPlanDay", () => {
       householdId: "h",
       weekStart: "2026-07-27",
       slots: [
-        { day: 3, slot: "RAU", dishId: "unknown", locked: false },
-        { day: 3, slot: "MAN", dishId: "ga_kho_gung", locked: false },
-        { day: 3, slot: "COM", dishId: "com_trang", locked: false },
-        { day: 3, slot: "CANH", dishId: "ga_kho_gung", locked: false },
+        { day: 3, occasion: "dinner", slot: "RAU", dishId: "unknown", locked: false },
+        { day: 3, occasion: "dinner", slot: "MAN", dishId: "ga_kho_gung", locked: false },
+        { day: 3, occasion: "dinner", slot: "COM", dishId: "com_trang", locked: false },
+        { day: 3, occasion: "dinner", slot: "CANH", dishId: "ga_kho_gung", locked: false },
       ],
     };
     expect(prepAheadForPlanDay(plan, 3, (id) => dishes.get(id), PREP_AHEAD_GUIDES))
@@ -105,7 +105,7 @@ describe("prepAheadForPlanDay", () => {
     const plan: WeekPlan = {
       householdId: "h",
       weekStart: "2026-07-27",
-      slots: [{ day: 3, slot: "MAN", dishId: "ga_kho_gung", locked: false }],
+      slots: [{ day: 3, occasion: "dinner", slot: "MAN", dishId: "ga_kho_gung", locked: false }],
     };
     const before = JSON.stringify(plan);
     const resolve = (id: string) => dish(id);

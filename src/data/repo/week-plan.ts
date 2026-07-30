@@ -45,6 +45,7 @@ type WeekPlanRow = {
   updatedAt: Date;
   daySlots: {
     day: number;
+    occasion: string;
     slot: string;
     repertoireDishId: string | null;
     householdDishId: string | null;
@@ -89,6 +90,7 @@ const toPlan = (row: WeekPlanRow): PersistedWeekPlan => ({
   updatedAt: row.updatedAt.toISOString(),
   slots: sortPlannedSlots(row.daySlots.map((slot) => ({
     day: slot.day,
+    occasion: slot.occasion as PlannedSlot["occasion"],
     slot: slot.slot as PlannedSlot["slot"],
     dishId: slot.householdDishId ?? slot.repertoireDishId ?? "",
     locked: slot.locked,
@@ -272,6 +274,7 @@ export async function loadOrCreateWeekPlan(
       daySlots: {
         create: slots.map((slot) => ({
           day: slot.day,
+          occasion: slot.occasion,
           slot: slot.slot,
           repertoireDishId: slot.dishId,
           locked: slot.locked,
@@ -486,6 +489,7 @@ export async function saveWeekPlan(
         return {
           weekPlanId: current.id,
           day: slot.day,
+          occasion: slot.occasion,
           slot: slot.slot,
           repertoireDishId: isB1 ? null : slot.dishId,
           householdDishId: isB1 ? slot.dishId : null,

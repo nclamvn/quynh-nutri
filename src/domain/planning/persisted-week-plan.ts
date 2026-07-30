@@ -1,4 +1,5 @@
 import type { Dish, Household, PlannedSlot, Slot, WeekPlan } from "@/domain/types";
+import { isMealOccasion, mealOccasionOrder } from "./meal-occasion";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
 import { dishAllowed } from "@/domain/dish";
 import { dishSafety } from "@/domain/constraints";
@@ -53,6 +54,7 @@ export function sortPlannedSlots(slots: readonly PlannedSlot[]): PlannedSlot[] {
     .map((slot) => ({ ...slot }))
     .sort((a, b) =>
       a.day - b.day
+      || mealOccasionOrder(a.occasion) - mealOccasionOrder(b.occasion)
       || SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot)
       || a.dishId.localeCompare(b.dishId)
     );
@@ -77,7 +79,7 @@ export function validateWeekPlanSlots(input: {
   if (!Number.isInteger(input.expectedVersion) || input.expectedVersion < 1) {
     throw new WeekPlanValidationError("INVALID_PLAN_VERSION");
   }
-  if (input.slots.length > 35) throw new WeekPlanValidationError("TOO_MANY_SLOTS");
+  if (input.slots.length > 140) throw new WeekPlanValidationError("TOO_MANY_SLOTS");
 
   const keys = new Set<string>();
   for (const slot of input.slots) {
@@ -87,10 +89,13 @@ export function validateWeekPlanSlots(input: {
     if (!SLOT_ORDER.includes(slot.slot)) {
       throw new WeekPlanValidationError("INVALID_PLAN_SLOT");
     }
+    if (!isMealOccasion(slot.occasion)) {
+      throw new WeekPlanValidationError("INVALID_MEAL_OCCASION");
+    }
     if (typeof slot.locked !== "boolean") {
       throw new WeekPlanValidationError("INVALID_LOCK_STATE");
     }
-    const key = `${slot.day}:${slot.slot}`;
+    const key = `${slot.day}:${slot.occasion}:${slot.slot}`;
     if (keys.has(key)) throw new WeekPlanValidationError("DUPLICATE_DAY_SLOT");
     keys.add(key);
 
