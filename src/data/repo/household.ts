@@ -111,9 +111,32 @@ const e2eId = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 export async function loadHouseholdState(): Promise<HouseholdState> {
   await requireUserId();
   if (isE2EMode()) return cloneE2EState();
-  const db = getDb();
   const id = await currentHouseholdId();
-  const row = await db.household.findUnique({
+  return (await loadHouseholdStateForSystem(id)) ?? {
+    household: DEFAULT_HOUSEHOLD,
+    favorites: [],
+    notes: [],
+    pantry: [],
+    suppliers: [],
+    orders: [],
+    purchases: [],
+    fulfillments: [],
+    inventoryMovements: [],
+    leftoverLots: [],
+    leftoverMovements: [],
+  };
+}
+
+/**
+ * System-only household projection for the protected reminder dispatcher.
+ * Callers must resolve the household id from server-owned rows, never request
+ * input. Interactive flows must continue to use loadHouseholdState().
+ */
+export async function loadHouseholdStateForSystem(
+  id: string,
+): Promise<HouseholdState | null> {
+  if (isE2EMode()) return cloneE2EState();
+  const row = await getDb().household.findUnique({
     where: { id },
     include: {
       members: { include: { states: true } },
@@ -135,19 +158,7 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
       shoppingFulfillments: { include: { inventoryLot: true } },
     },
   });
-  if (!row) return {
-    household: DEFAULT_HOUSEHOLD,
-    favorites: [],
-    notes: [],
-    pantry: [],
-    suppliers: [],
-    orders: [],
-    purchases: [],
-    fulfillments: [],
-    inventoryMovements: [],
-    leftoverLots: [],
-    leftoverMovements: [],
-  };
+  if (!row) return null;
 
   const household: Household = {
     id: row.id,

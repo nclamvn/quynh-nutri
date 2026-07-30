@@ -9,6 +9,7 @@ import { MemberSheet, type MemberSubject } from "@/ui/components/MemberSheet";
 import { useState } from "react";
 import type { DietRestriction } from "@/domain/types";
 import type { DayName, Household } from "@/domain/types";
+import { ReminderSettingsCard } from "@/ui/components/ReminderSettings";
 
 const DIET_RESTRICTIONS: DietRestriction[] = ["vegetarian", "pescatarian", "no_pork", "no_beef"];
 
@@ -136,6 +137,7 @@ export default function SettingsPage() {
               })}
             </div>
           </Section>
+          <ReminderSettingsCard />
         </div>
 
         <p className="text-[11px] leading-relaxed text-muted xl:col-span-2">

@@ -73,6 +73,11 @@ Cố ý **né cluster AI-slop** cream #F4F1EA + terracotta #D97757. Palette kéo
    plan version và engine tất định; UI hiển thị toàn bộ diff trước/sau. Chỉ nút
    xác nhận riêng mới gọi mutation, payload bị sửa hoặc proposal stale đều bị
    từ chối thay vì tự rebase.
+8. **Nhắc việc là Web Push opt-in.** Vercel cron gọi dispatcher mỗi 15 phút;
+   từng hộ chỉ được xét trong cửa sổ giờ địa phương đã chọn. Delivery ledger
+   chống gửi trùng theo thiết bị/task; nguồn việc vẫn là kitchen agenda dẫn xuất,
+   không có task table hay trạng thái “done”. Production cần
+   `CRON_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` và `VAPID_SUBJECT`.
 
 ## Còn lại (phase sau)
 

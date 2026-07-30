@@ -20,6 +20,11 @@ never faked as auto.
       - Cấp cứu y tế **115** — 24/7
 
 ## Separate smoke (real keys — NOT in CI)
+- [ ] **Web Push trên thiết bị thật.** Trên HTTPS `anngon.io`, bật nhắc việc từ
+      Cài đặt, cho phép thông báo, đóng app và gọi cron trong đúng cửa sổ giờ địa
+      phương. Xác nhận thông báo xuất hiện một lần và bấm vào mở đúng luồng
+      `/week`, `/shopping` hoặc `/pantry`. CI chỉ mock capability trình duyệt và
+      sender; không thể chứng minh dịch vụ push của hệ điều hành.
 - [ ] **AI warmth with the real gateway.** In CI the mood-advisory warmth is mocked
       (`E2E_MOCK_AI`). Once, with the real key, confirm the warmth reads naturally and
       never adds a food/claim/diagnosis. Run locally, not in the hermetic suite.

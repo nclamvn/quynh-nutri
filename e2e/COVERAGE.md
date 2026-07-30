@@ -46,6 +46,7 @@ Chạy: `npm run test:e2e` · unit: `npm test`. Ảnh: `e2e/__screens__/`.
 | Plan canonical: change/lock/reroll → reload, save failure → retry, stale conflict, B1 reload | **auto** | week-plan-persistence.spec + week-plan repository/domain tests |
 | Assistant đọc cùng plan canonical và không có mutation tool | **auto** | week-plan-persistence.spec + assistant adapter tests |
 | Assistant proposal: diff đầy đủ, bỏ không ghi, xác nhận mới ghi, stale không rebase | **auto** | assistant-proposal.spec + week-plan-proposal unit tests |
+| Nhắc việc: không prompt khi tải trang, chỉ opt-in khi bấm; timezone/window, dedup, retry, expired subscription và cron auth | **auto + manual push smoke** | reminders.spec + reminder policy/repo/dispatcher/route unit tests |
 
 ## P1 responsive / P2 edge
 | Hạng mục | Trạng thái |

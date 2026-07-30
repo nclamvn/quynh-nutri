@@ -183,6 +183,9 @@ model Household {
   busyDays                String[] // ["Mon","Wed"]
   lactatingMember         Boolean                  @default(false)
   restrictions            String[] // diet: vegetarian, no_pork, …
+  reminderEnabled         Boolean                  @default(false)
+  reminderTimeZone        String                   @default("Asia/Ho_Chi_Minh")
+  reminderHour            Int                      @default(7)
   // Mutable per-household user state (Phase A persistence). Collections kept on
   // the household row to avoid many tiny tables; promote to relations if needed.
   favorites               String[] // dish ids
@@ -200,6 +203,39 @@ model Household {
   leftoverMovements       LeftoverMovement[]
   shoppingFulfillments    ShoppingFulfillment[]
   shoppingReceiveRequests ShoppingReceiveRequest[]
+  pushSubscriptions       PushSubscription[]
+}
+
+// Web Push is an explicitly enabled delivery channel around the derived
+// kitchen agenda. These rows are device capabilities and delivery receipts,
+// never a second task source or completion ledger.
+model PushSubscription {
+  id          String             @id @default(cuid())
+  householdId String
+  household   Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  endpoint    String             @unique
+  p256dh      String
+  auth        String
+  userAgent   String?
+  deliveries  ReminderDelivery[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([householdId])
+}
+
+model ReminderDelivery {
+  id             String           @id @default(cuid())
+  subscriptionId String
+  subscription   PushSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  taskId         String
+  calendarDate   String
+  status         String           @default("sending") // sending | sent
+  attemptedAt    DateTime         @default(now())
+  sentAt         DateTime?
+
+  @@unique([subscriptionId, taskId])
+  @@index([attemptedAt])
 }
 
 // ── Lane 2 — Purchase log (real-price catch-bucket; pricePaid = B1 ground truth) ──

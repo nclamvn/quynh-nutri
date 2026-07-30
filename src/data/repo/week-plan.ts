@@ -181,6 +181,30 @@ export async function loadWeekPlan(
   };
 }
 
+/** Read-only system projection used by the protected reminder dispatcher. */
+export async function loadWeekPlanForSystem(
+  householdId: string,
+  weekStart: string,
+): Promise<WeekPlanEnvelope | undefined> {
+  if (isE2EMode()) {
+    const plan = e2ePlans.get(planKey(householdId, weekStart));
+    return plan
+      ? {
+          plan: structuredClone(plan),
+          householdDishes: [...e2eDishes.values()]
+            .filter((entry) => entry.householdId === householdId)
+            .map((entry) => structuredClone(entry.dish)),
+        }
+      : undefined;
+  }
+  const plan = await findProductionPlan(householdId, weekStart);
+  if (!plan) return undefined;
+  return {
+    plan,
+    householdDishes: await loadProductionHouseholdDishes(householdId),
+  };
+}
+
 export async function loadOrCreateWeekPlan(
   weekStart = currentWeekStartIso(),
 ): Promise<WeekPlanEnvelope> {

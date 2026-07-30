@@ -22,9 +22,24 @@ import type {
 import { currentWeekStartIso } from "@/lib/week";
 import type { ConfirmAssistantWeekPlanProposalInput } from "@/domain/assistant/week-plan-proposal";
 import { verifyAssistantWeekPlanProposal } from "@/lib/assistant/week-plan-proposal";
+import {
+  disableHouseholdReminders,
+  enableReminderSubscription,
+  getReminderSettings as getStoredReminderSettings,
+} from "@/data/repo/reminders";
+import { isValidTimeZone } from "@/domain/reminders/policy";
+import { vapidPublicKey } from "@/lib/reminders/web-push";
 
 const id = z.string().trim().min(1).max(128);
 const shortText = z.string().trim().max(500);
+const reminderSubscriptionSchema = z.object({
+  endpoint: z.url().max(2_000),
+  p256dh: z.string().trim().min(1).max(512),
+  auth: z.string().trim().min(1).max(512),
+  userAgent: z.string().trim().max(500).optional(),
+  timeZone: z.string().trim().min(1).max(100).refine(isValidTimeZone),
+  reminderHour: z.number().int().min(0).max(23),
+}).strict();
 const statePatchSchema = z.object({
   size: z.number().int().min(0).max(30).optional(),
   marketMode: z.enum(["traditional", "supermarket", "mixed"]).optional(),
@@ -303,6 +318,26 @@ export async function confirmAssistantWeekPlanProposal(
 export async function persistState(patch: StatePatch): Promise<void> {
   await requireUserId();
   await saveHouseholdState(statePatchSchema.parse(patch) as StatePatch);
+}
+
+export async function loadReminderSettings() {
+  await requireUserId();
+  return {
+    settings: await getStoredReminderSettings(),
+    publicKey: vapidPublicKey(),
+  };
+}
+
+export async function enableKitchenReminders(
+  raw: z.infer<typeof reminderSubscriptionSchema>,
+) {
+  await requireUserId();
+  return enableReminderSubscription(reminderSubscriptionSchema.parse(raw));
+}
+
+export async function disableKitchenReminders(): Promise<void> {
+  await requireUserId();
+  await disableHouseholdReminders();
 }
 
 export async function persistMemberHealthProfile(memberId: string, profile: HealthProfile | null): Promise<void> {

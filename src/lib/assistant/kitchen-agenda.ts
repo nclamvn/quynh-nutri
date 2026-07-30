@@ -11,6 +11,7 @@ import {
   type KitchenAgenda,
 } from "@/domain/kitchen-execution/kitchen-agenda";
 import type { WeekPlan } from "@/domain/types";
+import type { Dish } from "@/domain/types";
 import { loadOrCreateCurrentWeekPlan } from "@/data/repo/week-plan";
 
 export const KITCHEN_AGENDA_TIME_ZONE = "Asia/Ho_Chi_Minh";
@@ -22,10 +23,15 @@ export function buildAssistantKitchenAgenda(input: {
   plan: WeekPlan;
   now: Date;
   timeZone?: string;
+  householdDishes?: readonly Dish[];
 }): KitchenAgenda {
+  const householdDishById = new Map(
+    (input.householdDishes ?? []).map((dish) => [dish.id, dish]),
+  );
+  const dish = (id: string) => householdDishById.get(id) ?? REPERTOIRE_BY_ID[id];
   const shopping = aggregateShopping(
     input.plan,
-    (id) => REPERTOIRE_BY_ID[id],
+    dish,
     commodity,
     input.state.household,
     [],
@@ -39,7 +45,7 @@ export function buildAssistantKitchenAgenda(input: {
     shopping,
     pantry: input.state.pantry,
     leftovers: input.state.leftoverLots,
-    dish: (id) => REPERTOIRE_BY_ID[id],
+    dish,
     reviewedCookingDishIds: REVIEWED_DISH_IDS,
     prepAheadDishIds: PREP_AHEAD_DISH_IDS,
   });
