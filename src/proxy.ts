@@ -17,6 +17,15 @@ function isPublic(pathname: string): boolean {
 // hand, remember to restore before commit" QA dance. The E2E harness sets this env.
 const E2E_BYPASS = process.env.E2E_BYPASS_AUTH === "1" && process.env.NODE_ENV !== "production";
 
+// Production-build performance tests run under `next start`, so the development
+// bypass above is intentionally unavailable. This second gate is narrower: it
+// requires the dedicated readiness flag, a CI process, and a non-Vercel runtime.
+// Vercel sets VERCEL=1, keeping deployed environments hard-closed even if a
+// readiness variable were ever configured by mistake.
+const READINESS_BYPASS = process.env.READINESS_BYPASS_AUTH === "1" &&
+  process.env.CI === "true" &&
+  process.env.VERCEL !== "1";
+
 const authenticatedProxy = clerkMiddleware(async (auth, req) => {
   // Canonical host: send www.anngon.io → anngon.io (permanent).
   if (req.nextUrl.hostname === "www.anngon.io") {
@@ -41,7 +50,7 @@ const authenticatedProxy = clerkMiddleware(async (auth, req) => {
 // Do not run a request through Clerk at all in hermetic E2E mode. Returning
 // from inside `clerkMiddleware` is too late: the middleware may already derive
 // its frontend API from the placeholder CI key and redirect off-origin.
-export default E2E_BYPASS
+export default E2E_BYPASS || READINESS_BYPASS
   ? function e2eProxy() {
       return NextResponse.next();
     }

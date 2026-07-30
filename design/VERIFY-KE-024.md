@@ -60,10 +60,11 @@ Database migration             NOT REQUIRED
 
 1. Stress automation is loopback-only by default.
 2. E2E bypass remains impossible when `NODE_ENV=production`.
-3. Marketing tests do not mutate household or production data.
-4. Auth, nutrition, meal, shopping, pantry and cooking contracts are unchanged.
-5. No task, local completion flag or AI-authored action was introduced.
-6. Runtime AI cannot generate or repair the readiness evidence.
+3. Production-build readiness bypass requires CI and is hard-disabled on Vercel.
+4. Marketing tests do not mutate household or production data.
+5. Auth, nutrition, meal, shopping, pantry and cooking contracts are unchanged.
+6. No task, local completion flag or AI-authored action was introduced.
+7. Runtime AI cannot generate or repair the readiness evidence.
 
 ## DEFERRED P2
 

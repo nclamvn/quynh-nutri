@@ -19,6 +19,10 @@ export default defineConfig({
     url: `http://127.0.0.1:${port}`,
     reuseExistingServer: false,
     timeout: 120_000,
+    env: {
+      CI: "true",
+      READINESS_BYPASS_AUTH: "1",
+    },
   },
   projects: [
     {

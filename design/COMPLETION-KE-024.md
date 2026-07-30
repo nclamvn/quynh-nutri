@@ -146,6 +146,11 @@ manifest. A remote target exits with code 2 before any request unless
    fix is a breaking/mismatched toolchain change. The leaf was raised to its
    latest compatible 1.x version and the remaining dev-only advisory is
    deferred pending an upstream compatible ESLint/Next toolchain release.
+4. The first GitHub readiness run exposed that its intentionally fake Clerk
+   keys redirect a production-mode local server before the public landing can
+   render. The harness now uses a dedicated proxy bypass that requires all of:
+   `READINESS_BYPASS_AUTH=1`, `CI=true`, and `VERCEL!=1`. This keeps the test
+   hermetic while making the branch impossible on Vercel.
 
 ## RELEASE
 
