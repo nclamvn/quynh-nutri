@@ -52,6 +52,12 @@ Local load requests            660 / 660 PASS
 Local load worst p95           47.4 ms PASS
 Remote stress guard            exit 2 PASS
 Clerk sign-in CSP smoke        HTTP 200 / visible / 0 CSP errors PASS
+Live mobile LCP / CLS          1,084 ms / 0 PASS
+Live desktop LCP / CLS         580 ms / 0 PASS
+Live landing Clerk resources   0 PASS
+GitHub CI                      PASS (run 30529437756)
+Vercel production              READY (dpl_6MQ9V8ADMz51khBZ2BM4gnKWX6JD)
+anngon.io                      HTTP 200 / alias verified
 git diff --check               PASS
 Database migration             NOT REQUIRED
 ```
@@ -77,6 +83,5 @@ accepts the patched brace-expansion major.
 
 ## OVERALL STATUS
 
-READY FOR RELEASE — all KE-024 P0/P1 requirements and quantitative local gates
-pass. Production deployment and live smoke remain deliberately unclaimed until
-the release identifiers are recorded.
+READY — all KE-024 P0/P1 requirements, local gates, GitHub CI, Vercel
+production deployment and live `anngon.io` smoke checks pass.

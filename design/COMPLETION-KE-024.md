@@ -1,6 +1,6 @@
 # COMPLETION REPORT — TIP-KE-024
 
-**STATUS:** RELEASE CANDIDATE VERIFIED
+**STATUS:** PRODUCTION RELEASED
 
 ## OUTCOME
 
@@ -125,7 +125,9 @@ manifest. A remote target exits with code 2 before any request unless
   `upgrade-insecure-requests`.
 - HSTS, frame denial, MIME sniffing denial, strict referrer, COOP, CORP and a
   narrow browser permissions policy are present.
-- No permissive `Access-Control-Allow-Origin` header was introduced.
+- API and authenticated redirect responses do not expose permissive ACAO.
+  Vercel adds `Access-Control-Allow-Origin: *` to the prerendered public landing;
+  that response is intentionally public and contains no household data.
 - Invalid JSON returns 400; oversized body returns 413.
 - The substitute boundary permits no more than 60 calls per fixed instance
   window and returns 429 thereafter.
@@ -154,6 +156,22 @@ manifest. A remote target exits with code 2 before any request unless
 
 ## RELEASE
 
-Commit, GitHub CI, Vercel deployment and live `anngon.io` verification are
-pending the release step. This report will be updated with immutable release
-identifiers after deployment; it does not claim production completion early.
+- Application commits:
+  - `093197c0b8df54bbf8bc93b489eea331838a103f`
+  - `28461b33ecc60ba10dc64833b6ad85c6a6709243`
+- GitHub CI: run `30529437756`, all quality, E2E and readiness jobs passed.
+- Vercel deployment: `dpl_6MQ9V8ADMz51khBZ2BM4gnKWX6JD`.
+- Production URL:
+  `https://quynh-nutri-h8kav74gx-nclamvn-gmailcoms-projects.vercel.app`.
+- Production alias: `https://anngon.io`.
+- Live landing:
+  - mobile LCP 1,084 ms, CLS 0, transfer 978,796 B, JS 190,554 B;
+  - desktop LCP 580 ms, CLS 0, transfer 1,001,278 B, JS 190,554 B;
+  - 0 Clerk resources on the landing and 0 browser/page error.
+- Live sign-in: HTTP 200, Clerk UI visible, 0 CSP blocked request and 0 CSP
+  console error.
+- Live crawler routes: HTTP 200, public-only robots and sitemap content.
+- Protected `/overview` and `/api/substitute`: expected HTTP 307 to same-origin
+  Clerk sign-in; security headers present and no permissive ACAO.
+
+KE-024 is live on `anngon.io`.
