@@ -1,6 +1,6 @@
 # COMPLETION REPORT — TIP-KE-023
 
-**STATUS:** READY FOR RELEASE
+**STATUS:** PRODUCTION RELEASED
 
 ## OUTCOME
 
@@ -101,6 +101,8 @@ does not change product behavior or acceptance semantics.
 - Next.js 16.2.12 production build and TypeScript: passed.
 - Static parameter generation: 49 reviewed dish routes.
 - `git diff --check`: passed.
+- Vercel production build: passed.
+- GitHub CI run `30525930947`: quality and E2E jobs passed.
 
 ## DATA AND TRUST REVIEW
 
@@ -132,7 +134,26 @@ integer from 1 through 12.
 
 None.
 
+GitHub emitted one non-blocking infrastructure annotation that
+`actions/checkout@v4` and `actions/setup-node@v4` still target the deprecated
+Node.js 20 action runtime and were forced onto Node.js 24. Both jobs completed
+successfully; the workflow already requests Node.js 24 for application steps.
+
+## PRODUCTION RELEASE
+
+- Application commit: `688f3f74c721f3677785958ac84a13b5072506b2`.
+- Vercel deployment: `dpl_3j4czDUaHQHzBmGEt9WgGGgEyFcK`.
+- Production deployment URL:
+  `https://quynh-nutri-jvmwaehdp-nclamvn-gmailcoms-projects.vercel.app`.
+- Production alias: `https://anngon.io`.
+- GitHub CI run: `30525930947`.
+- Smoke:
+  - landing returned HTTP 200;
+  - protected `/dishes/com_trang` returned the expected Clerk HTTP 307 redirect
+    to sign-in;
+  - the redirect response loaded assets carrying deployment ID
+    `dpl_3j4czDUaHQHzBmGEt9WgGGgEyFcK`.
+
 ## RELEASE NOTE
 
-Awaiting Git commit, GitHub push, Vercel production deployment and `anngon.io`
-smoke verification.
+KE-023 is live on `anngon.io`.

@@ -54,6 +54,10 @@ Static pages generated         72 PASS
 git diff --check               PASS
 Database migration             NOT REQUIRED
 New dependency                 NOT REQUIRED
+Vercel production              READY (dpl_3j4czDUaHQHzBmGEt9WgGGgEyFcK)
+anngon.io landing smoke        HTTP 200
+Protected recipe auth smoke    HTTP 307 → Clerk sign-in
+GitHub CI                      PASS (quality + E2E, run 30525930947)
 ```
 
 ## TRUST BOUNDARIES
@@ -73,5 +77,5 @@ New dependency                 NOT REQUIRED
 
 ## OVERALL STATUS
 
-READY FOR RELEASE — implementation and all local automated evidence are
-verified; production evidence will be appended after deployment.
+READY — implementation, local automated evidence, GitHub CI and the
+`anngon.io` production release are verified.
