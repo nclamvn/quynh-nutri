@@ -49,6 +49,7 @@ interface StoreValue {
   ) => Promise<SaveWeekPlanResult>;
   notes: string[];
   shopping: ShoppingItem[];
+  fulfillments: ShoppingFulfillment[];
   reroll: () => void;
   changeSlot: (day: number, slot: Slot, dishId: string) => void;
   toggleLock: (day: number, slot: Slot) => void;
@@ -782,6 +783,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     applyAssistantWeekPlanProposal,
     notes: planNotes,
     shopping,
+    fulfillments,
     reroll,
     changeSlot,
     toggleLock,
