@@ -5,17 +5,15 @@ Environment: local and temporary Neon branch, `Asia/Ho_Chi_Minh`
 
 ## Contractor verdict
 
-**IMPLEMENTATION ACCEPTED – RELEASE HOLD**
+**ACCEPTED FOR PRODUCTION RELEASE**
 
 The approved KE-030 architecture is implemented without overloading food
 slots, inventing meals, adding mutable task state, or granting AI a mutation
 path. No unresolved P0 or P1 implementation defect remains in the reviewed
 package.
 
-Release remains on hold until the Homeowner separately authorizes commit,
-push, and deployment. Neon main already contains the additive migration because
-of the documented configuration incident; the application bundle is not
-released.
+The Homeowner separately authorized commit, push, and deployment. Neon main and
+the production application now contain the same KE-030 contract.
 
 ## Acceptance findings
 
@@ -33,7 +31,8 @@ released.
 - AC-12 to AC-14: household scope, concurrency, idempotency, existing dinner
   behavior, and current URLs are preserved.
 - AC-15: 375 px light and dark E2E checks pass without horizontal overflow.
-- AC-16: release actions remain separate and were not performed by the Builder.
+- AC-16: release actions remained separate until the Homeowner explicitly
+  authorized them.
 
 ## Independent gate review
 
@@ -55,7 +54,20 @@ released.
 - The migration-target precedence hardening prevents the same `.env.local`
   shadowing path in subsequent verification runs.
 
+## Production verification
+
+- Feature commit:
+  `f4a4cc5cecc993098c359a6474445880b3d4417c`.
+- CI stabilization commit:
+  `da495e10c25ba52e1c1252db331137e9651534b9`.
+- GitHub CI run `30559287709` passed quality, E2E, onboarding, and readiness.
+- Vercel production deployment:
+  `dpl_AZ2sP7gvzgC3Bbf2GCyex7P2axki`, status `READY`.
+- Aliases: `https://anngon.io`, `https://www.anngon.io`, and
+  `https://quynh-nutri.vercel.app`.
+- Smoke: `/` returned 200; `www` returned the expected canonical 308;
+  signed-out `/overview` returned the expected Clerk 307.
+
 ## Result
 
-KE-030 satisfies the approved blueprint and is ready for the separate release
-decision. It is not represented as committed, pushed, deployed, or live.
+KE-030 meets the approved blueprint and is live in production.

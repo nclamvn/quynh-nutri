@@ -1,6 +1,6 @@
 # COMPLETION-KE-030 – Nhịp ăn cả ngày có nguồn sự thật
 
-**STATUS:** BUILT AND LOCALLY VERIFIED – RELEASE NOT PERFORMED
+**STATUS:** PRODUCTION RELEASED
 
 ## Scope delivered
 
@@ -79,7 +79,23 @@ pushed, or deployed.
 - Production dependency audit – 0 vulnerabilities.
 - `git diff --check` – passed.
 
-## Delivery boundary
+## Production release
 
-The Builder has completed the approved implementation and evidence package.
-No commit, push, Vercel deployment, or production release claim is included.
+- Feature commit:
+  `f4a4cc5cecc993098c359a6474445880b3d4417c`.
+- CI stabilization commit:
+  `da495e10c25ba52e1c1252db331137e9651534b9`.
+- GitHub CI run `30559287709` completed successfully across quality, 79 E2E
+  tests, onboarding, and readiness.
+- Vercel deployment `dpl_AZ2sP7gvzgC3Bbf2GCyex7P2axki` is `READY` for the
+  production target.
+- Production aliases are `https://anngon.io`, `https://www.anngon.io`, and
+  `https://quynh-nutri.vercel.app`.
+- Production smoke returned 200 for `/`, 308 from `www` to the canonical
+  domain, and the expected unauthenticated 307 from `/overview` to Clerk.
+- Neon main contains migration `20260731010000_meal_occasions`; the application
+  and production schema are now in the intended steady state.
+
+## Delivery result
+
+KE-030 is committed, pushed, verified by CI, and live on `anngon.io`.
