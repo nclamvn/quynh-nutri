@@ -1,6 +1,6 @@
 # COMPLETION-KE-029 – Explicit Family Meal Memory
 
-**STATUS:** RELEASE IN PROGRESS
+**STATUS:** PRODUCTION RELEASED
 
 ## Scope delivered
 
@@ -87,8 +87,20 @@ an automatic expiry. After explicit release approval, migration
 `20260730233000_meal_feedback` was applied successfully to Neon main and Prisma
 reported all 9 migrations up to date.
 
+## Production release
+
+- Application commit:
+  `81eb805aa8b0c782fed58612cbb965ef80041acc`.
+- GitHub CI run: `30553753290`, completed successfully.
+- Neon main: migration `20260730233000_meal_feedback` applied and all 9
+  migrations reported up to date.
+- Vercel deployment: `dpl_7uo41ftqHZDogw2NneTo1vbSJF81`, target production,
+  status `READY`.
+- Production aliases: `https://anngon.io` and `https://www.anngon.io`.
+- Production smoke: landing returned HTTP 200; protected `/overview` returned
+  the expected Clerk HTTP 307 redirect while signed out.
+
 ## Delivery result
 
-The Builder completed the corrected KE-029 scope and handed it to the
-Contractor for acceptance. Local quality gates and acceptance evidence are
-recorded in `design/VERIFY-KE-029.md`.
+KE-029 is committed, migrated, deployed, verified by CI, and live on
+`anngon.io`.

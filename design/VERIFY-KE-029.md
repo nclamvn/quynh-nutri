@@ -84,4 +84,18 @@ in the locally verified package.
 ## Result
 
 KE-029 meets the corrected, approved blueprint. Neon main is migrated and the
-application package is ready to commit, push, and deploy.
+application is production released.
+
+## Production verification
+
+- Application commit:
+  `81eb805aa8b0c782fed58612cbb965ef80041acc`.
+- GitHub CI: run `30553753290`, passed all quality, E2E, onboarding, and
+  readiness jobs.
+- Neon main: all 9 migrations applied; schema up to date.
+- Vercel: deployment `dpl_7uo41ftqHZDogw2NneTo1vbSJF81`, target production,
+  ready.
+- Aliases: `https://anngon.io` and `https://www.anngon.io`.
+- Smoke:
+  - `/` returned HTTP 200.
+  - `/overview` returned the expected unauthenticated HTTP 307 redirect.
