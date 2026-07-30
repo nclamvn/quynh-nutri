@@ -99,8 +99,8 @@ test("a failed save keeps the draft unsynced until an explicit retry", async ({ 
   await page.unroute("**/week");
   await Promise.all([
     page.waitForResponse((response) =>
-      response.url().endsWith("/week")
-      && response.request().method() === "POST",
+      response.request().method() === "POST"
+      && Boolean(response.request().headers()["next-action"]),
     ),
     page.getByRole("button", { name: "Thử lại" }).first().click(),
   ]);
