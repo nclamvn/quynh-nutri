@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
+import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import {
   COOKING_GUIDES,
   COOKING_GUIDE_SOURCE_BY_ID,
@@ -11,27 +11,16 @@ import {
   scaleDishLines,
 } from "./cooking";
 
-const REQUIRED_DISH_IDS = [
-  "com_trang",
-  "thit_kho_trung",
-  "ga_kho_gung",
-  "ca_kho_to",
-  "ca_chien_sot_ca",
-  "tom_rang",
-  "trung_chien",
-  "rau_muong_xao_toi",
-  "cai_ngot_luoc",
-  "bi_xanh_luoc",
-  "canh_bi_dao_tom",
-  "canh_rau_ngot_thit",
-];
+const REQUIRED_DISH_IDS = REPERTOIRE.map((dish) => dish.id);
 
 describe("cooking guide registry", () => {
-  it("contains exactly the 12 reviewed dish-specific guides with stable steps", () => {
+  it("covers every B0 dish exactly once with stable dish-specific steps", () => {
     expect(COOKING_GUIDES.map((guide) => guide.dishId).sort()).toEqual(
       REQUIRED_DISH_IDS.slice().sort(),
     );
-    expect(new Set(COOKING_GUIDES.map((guide) => guide.dishId)).size).toBe(12);
+    expect(new Set(COOKING_GUIDES.map((guide) => guide.dishId)).size).toBe(
+      REPERTOIRE.length,
+    );
     for (const guide of COOKING_GUIDES) {
       expect(REPERTOIRE_BY_ID[guide.dishId]).toBeDefined();
       expect(guide.specificity).toBe("dish");
@@ -55,6 +44,52 @@ describe("cooking guide registry", () => {
           recipeStep.sourceIds?.every((id) => COOKING_GUIDE_SOURCE_BY_ID[id]),
         ).toBe(true);
       }
+    }
+  });
+
+  it("keeps produce guidance source-backed and free of soap washing", () => {
+    const produceContent = COOKING_GUIDES
+      .filter((guide) => guide.sourceIds.includes("fda-produce"))
+      .map((guide) => guide.steps.map((item) => `${item.instruction.vi} ${item.instruction.en}`).join(" "))
+      .join(" ")
+      .toLowerCase();
+    expect(produceContent).toContain("running water");
+    expect(produceContent).not.toMatch(/rửa (bằng|với) xà phòng|wash (with|using) soap/);
+  });
+
+  it("uses the reviewed temperature or visual check for each newly covered risk group", () => {
+    const contentFor = (dishId: string) =>
+      JSON.stringify(COOKING_GUIDES.find((guide) => guide.dishId === dishId));
+    for (const dishId of [
+      "ba_chi_luoc", "suon_xao_chua_ngot", "suon_nuong",
+      "bo_xao_can", "bo_kho", "bo_luc_lac",
+      "canh_su_su_suon", "canh_bi_xanh_suon",
+    ]) {
+      expect(contentFor(dishId)).toContain("63°C");
+      expect(contentFor(dishId)).toMatch(/3 phút|3 minutes/);
+    }
+    for (const dishId of ["thit_bam_xao_muop", "dau_hu_sot_ca", "canh_cai_thit", "trung_hap_thit"]) {
+      expect(contentFor(dishId)).toContain("71°C");
+    }
+    for (const dishId of ["ga_luoc", "ga_rang_muoi", "ga_kho_nuoc_dua"]) {
+      expect(contentFor(dishId)).toContain("74°C");
+    }
+    for (const dishId of ["ca_nuong", "ca_hap_xi_dau", "canh_chua_ca"]) {
+      expect(contentFor(dishId)).toContain("63°C");
+    }
+    for (const dishId of ["tom_hap", "ghe_hap", "cua_rang_me", "canh_cua_rau_day", "canh_rieu_cua", "canh_mong_toi_tom"]) {
+      expect(contentFor(dishId)).toMatch(/ngọc trai|pearly/);
+      expect(contentFor(dishId)).toMatch(/đục|opaque/);
+    }
+  });
+
+  it("treats fresh fruit as clean preparation rather than invented cooking", () => {
+    for (const dishId of ["tm_chuoi", "tm_cam", "tm_dua_hau", "tm_thanh_long"]) {
+      const guide = COOKING_GUIDES.find((item) => item.dishId === dishId)!;
+      expect(guide.sourceIds).toContain("fda-produce");
+      expect(guide.steps).toHaveLength(3);
+      expect(JSON.stringify(guide)).toMatch(/Dọn bằng dụng cụ sạch|Serve with clean utensils/);
+      expect(JSON.stringify(guide)).not.toMatch(/°C|temperature/);
     }
   });
 

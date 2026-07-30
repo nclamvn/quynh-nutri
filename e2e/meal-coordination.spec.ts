@@ -8,7 +8,6 @@ test("day plan → estimated timeline → manual progress → guide → restore 
   await expect(coordinate).toBeVisible({ timeout: 20_000 });
   await coordinate.click();
   await expect(page.getByRole("heading", { name: "Phối hợp các món" })).toBeVisible();
-  await expect(page.getByText("Chưa đưa vào timeline")).toBeVisible();
 
   const target = page.getByLabel("Giờ dự kiến dọn cơm");
   const originalTarget = await target.inputValue();
@@ -25,7 +24,9 @@ test("day plan → estimated timeline → manual progress → guide → restore 
 
   const run = () => page.getByRole("dialog", { name: "Timeline dọn cơm" });
   await expect(run()).toBeVisible();
-  await expect(run().getByText("xong 0/2 món")).toBeVisible();
+  const totalDishes = await run().getByRole("button", { name: "Bắt đầu món" }).count();
+  expect(totalDishes).toBeGreaterThanOrEqual(2);
+  await expect(run().getByText(`xong 0/${totalDishes} món`)).toBeVisible();
   await expect(run().getByText(/ước tính để sắp việc/)).toBeVisible();
 
   await page.keyboard.press("Shift+Tab");
@@ -39,9 +40,9 @@ test("day plan → estimated timeline → manual progress → guide → restore 
   await expect(run().getByText("Đang nấu")).toBeVisible();
   await run().getByRole("button", { name: "Mở hướng dẫn" }).first().click();
 
-  const cooking = page.getByRole("dialog", { name: "Cơm trắng", exact: true });
-  await expect(cooking).toBeVisible();
-  await cooking.getByRole("button", { name: "Về chi tiết món" }).click();
+  const cookingBack = page.getByRole("button", { name: "Về chi tiết món" });
+  await expect(cookingBack).toBeVisible();
+  await cookingBack.click();
   await expect(run()).toBeVisible();
 
   await page.reload();
@@ -50,9 +51,11 @@ test("day plan → estimated timeline → manual progress → guide → restore 
   await expect(run().getByText("Đang nấu")).toBeVisible();
 
   await run().getByRole("button", { name: "Đánh dấu món xong" }).click();
-  await run().getByRole("button", { name: "Bắt đầu món" }).click();
-  await run().getByRole("button", { name: "Đánh dấu món xong" }).click();
-  await expect(run().getByText("xong 2/2 món")).toBeVisible();
+  for (let index = 1; index < totalDishes; index += 1) {
+    await run().getByRole("button", { name: "Bắt đầu món" }).first().click();
+    await run().getByRole("button", { name: "Đánh dấu món xong" }).click();
+  }
+  await expect(run().getByText(`xong ${totalDishes}/${totalDishes} món`)).toBeVisible();
 
   await page.screenshot({ path: "e2e/__screens__/meal-run-390.png" });
 

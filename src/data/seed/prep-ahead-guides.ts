@@ -5,9 +5,10 @@ import {
   type PrepAheadKind,
   type PrepAheadStep,
 } from "@/domain/kitchen-execution/prep-ahead";
+import { EXPANDED_PREP_AHEAD_GUIDES } from "./prep-ahead-guides-expanded";
 
 const l = (vi: string, en: string): LocalizedText => ({ vi, en });
-const reviewedAt = "2026-07-29";
+const reviewedAt = "2026-07-30";
 
 export const PREP_AHEAD_SOURCES: KitchenGuideSource[] = [
   {
@@ -154,7 +155,7 @@ const guide = (
   sourceIds: [...new Set([SAFE, ...sourceIds])],
 });
 
-export const PREP_AHEAD_GUIDES: PrepAheadGuide[] = [
+const CORE_PREP_AHEAD_GUIDES: PrepAheadGuide[] = [
   guide("com_trang", "cơm trắng", "steamed rice", [
     defer(
       "Giữ gạo khô trong đồ chứa sạch; vo và nấu theo công thức khi bắt đầu bữa.",
@@ -255,6 +256,11 @@ export const PREP_AHEAD_GUIDES: PrepAheadGuide[] = [
       [SAFE, TEMP],
     ),
   ], [STORE, PRODUCE, TEMP]),
+];
+
+export const PREP_AHEAD_GUIDES: PrepAheadGuide[] = [
+  ...CORE_PREP_AHEAD_GUIDES,
+  ...EXPANDED_PREP_AHEAD_GUIDES,
 ];
 
 export const PREP_AHEAD_DISH_IDS = new Set(

@@ -57,10 +57,8 @@ test("week keeps preparation and coordination capabilities discoverable", async 
   const coordinatorButtons = page.getByRole("button", { name: /Phối hợp nấu/ });
   await expect(coordinatorButtons).toHaveCount(7);
 
-  const unsupportedReasons = page.getByText("Cần ít nhất 2 món có hướng dẫn đã rà soát");
-  const unsupportedCount = await unsupportedReasons.count();
-  expect(unsupportedCount).toBeGreaterThan(0);
-  for (const button of await page.locator('button:disabled').filter({ hasText: "Phối hợp nấu" }).all()) {
-    await expect(button).toBeDisabled();
+  await expect(page.getByText("Cần ít nhất 2 món có hướng dẫn đã rà soát")).toHaveCount(0);
+  for (const button of await coordinatorButtons.all()) {
+    await expect(button).toBeEnabled();
   }
 });

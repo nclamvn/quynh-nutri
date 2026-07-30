@@ -1,5 +1,6 @@
 import type { KitchenGuideSource, LocalizedText } from "@/domain/kitchen-execution";
 import type { CookingGuide } from "@/domain/kitchen-execution/cooking";
+import { EXPANDED_COOKING_GUIDES } from "./cooking-guides-expanded";
 
 const l = (vi: string, en: string): LocalizedText => ({ vi, en });
 const step = (
@@ -16,21 +17,21 @@ export const COOKING_GUIDE_SOURCES: KitchenGuideSource[] = [
     publisher: "FoodSafety.gov",
     title: l("Nhiệt độ bên trong tối thiểu an toàn", "Safe Minimum Internal Temperatures"),
     url: "https://www.foodsafety.gov/food-safety-charts/safe-minimum-internal-temperatures",
-    reviewedAt: "2026-07-29",
+    reviewedAt: "2026-07-30",
   },
   {
     id: "fda-safe-handling",
     publisher: "U.S. Food and Drug Administration",
     title: l("Xử lý thực phẩm an toàn", "Safe Food Handling"),
     url: "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling",
-    reviewedAt: "2026-07-29",
+    reviewedAt: "2026-07-30",
   },
   {
     id: "fda-produce",
     publisher: "U.S. Food and Drug Administration",
     title: l("Chọn và dùng rau quả an toàn", "Selecting and Serving Produce Safely"),
     url: "https://www.fda.gov/food/buy-store-serve-safe-food/selecting-and-serving-produce-safely",
-    reviewedAt: "2026-07-29",
+    reviewedAt: "2026-07-30",
   },
 ];
 
@@ -41,9 +42,9 @@ export const COOKING_GUIDE_SOURCE_BY_ID = Object.fromEntries(
 const CLEAN = "fda-safe-handling";
 const TEMP = "foodsafety-safe-temperatures";
 const PRODUCE = "fda-produce";
-const reviewedAt = "2026-07-29";
+const reviewedAt = "2026-07-30";
 
-export const COOKING_GUIDES: CookingGuide[] = [
+const CORE_COOKING_GUIDES: CookingGuide[] = [
   {
     id: "cook-com-trang-v1",
     dishId: "com_trang",
@@ -273,6 +274,11 @@ export const COOKING_GUIDES: CookingGuide[] = [
     ],
     sourceIds: [CLEAN, PRODUCE, TEMP],
   },
+];
+
+export const COOKING_GUIDES: CookingGuide[] = [
+  ...CORE_COOKING_GUIDES,
+  ...EXPANDED_COOKING_GUIDES,
 ];
 
 export const cookingGuideFor = (dishId: string) => {

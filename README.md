@@ -65,6 +65,10 @@ Cố ý **né cluster AI-slop** cream #F4F1EA + terracotta #D97757. Palette kéo
 3. **AI đi qua Vercel AI Gateway; E2E luôn mock.** Assistant/import/mood framing dùng model qua gateway; con số vẫn do engine thuần xác định. Import URL có SSRF guard, redirect validation, timeout và giới hạn body. `substitute` thuần deterministic.
 4. **PWA + auth đã hoạt động.** Clerk scope mỗi user vào một household Neon. Proxy chỉ làm redirect lạc quan; layout, API, Server Actions và repo đều kiểm tra auth độc lập.
 5. **Next 16 (không phải 15)** — scaffold hiện hành; Tailwind v4 CSS-first.
+6. **Kitchen execution đã phủ 49/49 món B0.** Cooking Mode và “Chuẩn bị cho
+   ngày mai” dùng registry song ngữ đã rà soát; ngưỡng an toàn lấy từ
+   FoodSafety.gov/FDA. Món B1 hoặc ID lạ chưa có nội dung vẫn fail-closed, không
+   được AI tự sinh hướng dẫn.
 
 ## Còn lại (phase sau)
 

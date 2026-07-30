@@ -6,22 +6,10 @@ import {
   PREP_AHEAD_SOURCE_BY_ID,
   prepAheadGuideFor,
 } from "@/data/seed/prep-ahead-guides";
+import { REPERTOIRE } from "@/data/seed/repertoire";
 import { prepAheadForPlanDay } from "./prep-ahead";
 
-const EXPECTED = [
-  "com_trang",
-  "thit_kho_trung",
-  "ga_kho_gung",
-  "ca_kho_to",
-  "ca_chien_sot_ca",
-  "tom_rang",
-  "trung_chien",
-  "rau_muong_xao_toi",
-  "cai_ngot_luoc",
-  "bi_xanh_luoc",
-  "canh_bi_dao_tom",
-  "canh_rau_ngot_thit",
-].sort();
+const EXPECTED = REPERTOIRE.map((item) => item.id).sort();
 
 const dish = (id: string, slot: Dish["slot"] = "MAN"): Dish => ({
   id,
@@ -37,10 +25,10 @@ const dish = (id: string, slot: Dish["slot"] = "MAN"): Dish => ({
 });
 
 describe("reviewed prep-ahead registry", () => {
-  it("covers exactly the twelve reviewed cooking dishes once", () => {
+  it("covers every reviewed B0 cooking dish exactly once", () => {
     const ids = PREP_AHEAD_GUIDES.map((guide) => guide.dishId);
     expect(ids.slice().sort()).toEqual(EXPECTED);
-    expect(new Set(ids).size).toBe(12);
+    expect(new Set(ids).size).toBe(REPERTOIRE.length);
     expect(PREP_AHEAD_GUIDES.every((guide) => guide.scope === "previous-evening")).toBe(true);
   });
 

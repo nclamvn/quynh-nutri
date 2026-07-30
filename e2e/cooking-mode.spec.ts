@@ -49,11 +49,16 @@ test("reviewed dish → cooking progress restores → finish clears the session"
   await cookingMode().getByRole("button", { name: "Huỷ phiên và xoá tiến độ" }).click();
 });
 
-test("unsupported dish fails honestly and has no Start cooking action", async ({ page }) => {
+test("a newly reviewed dish exposes its source-backed cooking mode", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 860 });
   await page.goto("/dishes");
 
   await page.getByRole("heading", { name: "Ba chỉ luộc mắm tôm", exact: true }).click();
-  await expect(page.getByText("Chưa có quy trình đã kiểm chứng")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Bắt đầu nấu" })).toHaveCount(0);
+  await expect(page.getByText("Quy trình nấu đã rà soát")).toBeVisible();
+  await expect(page.locator('a[href="https://www.foodsafety.gov/food-safety-charts/safe-minimum-internal-temperatures"]')).toBeVisible();
+  await page.getByRole("button", { name: "Bắt đầu nấu" }).click();
+  const cookingMode = page.getByRole("dialog", { name: "Ba chỉ luộc mắm tôm", exact: true });
+  await expect(cookingMode).toBeVisible();
+  await expect(cookingMode.getByText("Đã xong 0/4 bước")).toBeVisible();
+  await cookingMode.getByRole("button", { name: "Huỷ phiên và xoá tiến độ" }).click();
 });
