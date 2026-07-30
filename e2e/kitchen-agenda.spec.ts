@@ -6,7 +6,7 @@ const toLocalDateTime = (date: Date) => {
 };
 
 test("derived agenda → leftover source flow → agenda updates without local done state", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 860 });
+  await page.setViewportSize({ width: 375, height: 860 });
   await page.goto("/week");
 
   await page.locator('button:not(:disabled)').filter({ hasText: "Phối hợp nấu" }).first().click();
@@ -34,11 +34,16 @@ test("derived agenda → leftover source flow → agenda updates without local d
   await page.goto("/overview");
   const card = page.getByTestId("kitchen-agenda-card");
   await expect(card).toBeVisible();
+  await expect(card).toHaveAttribute("data-brief-status", "ready");
+  await expect(card.locator("[data-brief-station]")).toHaveCount(3);
+  await expect(card.getByText("Chuẩn bị", { exact: true })).toBeVisible();
+  await expect(card.getByText("Mua & nhận", { exact: true })).toBeVisible();
+  await expect(card.getByText("Dùng sớm", { exact: true })).toBeVisible();
   await expect(card.getByText(`Xem lại ${selectedDish}`)).toBeVisible();
-  const previewCount = await card.locator("ol > li").count();
-  expect(previewCount).toBeGreaterThan(0);
-  expect(previewCount).toBeLessThanOrEqual(3);
   await expect(card.locator('input[type="checkbox"]')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth))
+    .toBeLessThanOrEqual(375);
+  await page.screenshot({ path: "e2e/__screens__/daily-brief-375.png" });
 
   await card.getByRole("button", { name: "Xem tất cả" }).click();
   const sheet = page.getByRole("dialog", { name: "Việc bếp hôm nay" });
@@ -46,7 +51,7 @@ test("derived agenda → leftover source flow → agenda updates without local d
   await expect(sheet.getByText(/Không có nút hoàn tất/)).toBeVisible();
   await expect(sheet.getByText(/Tạo từ: món còn thừa đã xác nhận/)).toBeVisible();
   await page.waitForTimeout(350);
-  await page.screenshot({ path: "e2e/__screens__/kitchen-agenda-390.png" });
+  await page.screenshot({ path: "e2e/__screens__/kitchen-agenda-375.png" });
   await page.keyboard.press("Escape");
   await expect(sheet).toHaveCount(0);
 

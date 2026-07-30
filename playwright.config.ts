@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const port = Number.parseInt(process.env.E2E_PORT ?? "3000", 10);
+const baseURL = `http://localhost:${port}`;
+
 // E2E harness. Default run uses the committed, prod-guarded E2E auth bypass
 // (E2E_BYPASS_AUTH) + deterministic mocks for AI + geocode — so the suite is
 // hermetic: no real calls to Clerk / the AI gateway / Nominatim / the hotline.
@@ -13,14 +16,14 @@ export default defineConfig({
   timeout: 60_000,
   reporter: [["list"]],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL,
     trace: "off",
     screenshot: "off",
   },
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    command: `npm run dev -- --port ${port}`,
+    url: baseURL,
+    reuseExistingServer: !process.env.CI && !process.env.E2E_PORT,
     timeout: 120_000,
     env: {
       E2E_BYPASS_AUTH: "1",

@@ -17,7 +17,7 @@ import { PageHeader } from "@/ui/components/PageHeader";
 import { SLOT_COLOR } from "@/ui/slotColor";
 import { useCountUp } from "@/ui/hooks/useCountUp";
 import type { FoodGroup } from "@/domain/nutrition";
-import { useKitchenAgenda } from "@/ui/hooks/useKitchenAgenda";
+import { useDailyHousekeeperBrief } from "@/ui/hooks/useKitchenAgenda";
 import { KitchenAgendaCard } from "@/ui/components/KitchenAgendaCard";
 import { HousekeeperPathCard } from "@/ui/components/HousekeeperPathCard";
 
@@ -44,7 +44,7 @@ export default function OverviewPage() {
   const { plan, household, dish, commodity, shopping, reroll, optionsFor } = useStore();
   const { t, lang } = useI18n();
   const [moodOpen, setMoodOpen] = useState(false);
-  const agenda = useKitchenAgenda();
+  const dailyBrief = useDailyHousekeeperBrief();
 
   const today = dayDishes(plan, TODAY, dish);
   const nut = dayNutrition(today, household, commodity);
@@ -88,7 +88,11 @@ export default function OverviewPage() {
       />
 
       <HousekeeperPathCard />
-      <KitchenAgendaCard agenda={agenda} />
+      <KitchenAgendaCard
+        agenda={dailyBrief.agenda}
+        brief={dailyBrief.brief}
+        status={dailyBrief.status}
+      />
 
       {plan.slots.length === 0 ? (
         <div className="card grid min-h-[40vh] place-content-center p-10 text-center">

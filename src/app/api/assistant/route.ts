@@ -2,7 +2,7 @@ import { kitchenAgent } from "@/lib/assistant/agent";
 import { apiUserId } from "@/lib/auth";
 import { parseJson, rateLimit, RequestError } from "@/lib/request-security";
 import { z } from "zod";
-import { getKitchenAgendaSnapshot } from "@/lib/assistant/kitchen-agenda";
+import { getDailyHousekeeperBriefSnapshot } from "@/lib/assistant/kitchen-agenda";
 import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
 import { loadOrCreateCurrentWeekPlan } from "@/data/repo/week-plan";
 import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -81,9 +81,10 @@ export async function POST(req: Request) {
         });
       }
       if (latest?.includes("làm gì tiếp") || latest?.includes("việc bếp")) {
-        const agenda = await getKitchenAgendaSnapshot();
-        const summary = agenda.tasks.length
-          ? `Theo dữ liệu bạn đã ghi nhận, hiện có ${agenda.tasks.length} việc bếp đủ căn cứ. Tôi chỉ đọc agenda và không tự đánh dấu hoàn tất.`
+        const brief = await getDailyHousekeeperBriefSnapshot();
+        const activeStations = brief.stations.filter((station) => station.tasks.length > 0);
+        const summary = brief.tasks.length
+          ? `Theo dữ liệu bạn đã ghi nhận, hiện có ${brief.tasks.length} việc bếp tại ${activeStations.length} trạm đủ căn cứ. Tôi chỉ đọc bản tin và không tự đánh dấu hoàn tất.`
           : "Theo dữ liệu bạn đã ghi nhận, chưa có việc bếp nào đủ căn cứ để nhắc. Tôi không tự nghĩ thêm việc.";
         return new Response(summary, {
           headers: { "Content-Type": "text/plain; charset=utf-8" },

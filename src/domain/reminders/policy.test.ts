@@ -7,6 +7,7 @@ import {
   safeReminderHref,
 } from "./policy";
 import type { KitchenAgendaTask } from "@/domain/kitchen-execution/kitchen-agenda";
+import { buildDailyHousekeeperBrief } from "@/domain/kitchen-execution/daily-housekeeper-brief";
 
 const task = (
   id: string,
@@ -22,6 +23,13 @@ const task = (
   actionHref: "/shopping",
   actionKey: "open",
   evidence: {},
+});
+
+const brief = (tasks: KitchenAgendaTask[]) => buildDailyHousekeeperBrief({
+  generatedAt: "2026-07-30T00:00:00.000Z",
+  calendarDate: "2026-07-30",
+  tasks,
+  unsupported: [],
 });
 
 describe("reminder policy", () => {
@@ -52,13 +60,13 @@ describe("reminder policy", () => {
   });
 
   it("keeps only urgent/today tasks and caps notification volume", () => {
-    expect(reminderTasks([
+    expect(reminderTasks(brief([
       task("a", "now"),
       task("b", "today"),
       task("c", "next"),
       task("d", "today"),
       task("e", "today"),
-    ]).map((item) => item.id)).toEqual(["a", "b", "d"]);
+    ])).map((item) => item.id)).toEqual(["a", "b", "d"]);
   });
 
   it("allows only known same-origin source routes", () => {

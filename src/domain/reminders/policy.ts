@@ -1,4 +1,5 @@
 import type { KitchenAgendaTask } from "@/domain/kitchen-execution/kitchen-agenda";
+import type { DailyHousekeeperBrief } from "@/domain/kitchen-execution/daily-housekeeper-brief";
 
 export const DEFAULT_REMINDER_TIME_ZONE = "Asia/Ho_Chi_Minh";
 export const DEFAULT_REMINDER_HOUR = 7;
@@ -68,9 +69,9 @@ export function safeReminderHref(raw: string): string {
 }
 
 export function reminderTasks(
-  tasks: readonly KitchenAgendaTask[],
+  brief: DailyHousekeeperBrief,
 ): KitchenAgendaTask[] {
-  return tasks
+  return brief.tasks
     .filter((task) => task.priority === "now" || task.priority === "today")
     .slice(0, MAX_REMINDERS_PER_DISPATCH);
 }

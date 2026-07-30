@@ -72,6 +72,12 @@ test("a failed save keeps the draft unsynced until an explicit retry", async ({ 
   await slotRow(page, "Rau").getByRole("button", { name: "lock" }).click();
   await expect(syncState(page)).toHaveText("Chưa đồng bộ");
   await expect(page.getByText(/chưa được xác nhận trên máy chủ/)).toBeVisible();
+  await page.locator('a[href="/overview"]').first().click();
+  const staleBrief = page.getByTestId("kitchen-agenda-card");
+  await expect(staleBrief).toHaveAttribute("data-brief-status", "stale");
+  await expect(staleBrief.getByText("Bản tin đang tạm dừng")).toBeVisible();
+  await expect(staleBrief.locator("[data-brief-station]")).toHaveCount(0);
+  await page.locator('a[href="/week"]').first().click();
   await page.unroute("**/week");
   await page.getByRole("button", { name: "Thử lại" }).first().click();
   await expect(syncState(page)).toHaveText("Đã lưu");
@@ -93,6 +99,12 @@ test("two stale clients surface conflict and never overwrite automatically", asy
   await slotRow(pageB, "Tráng miệng").getByRole("button", { name: "lock" }).click();
   await expect(syncState(pageB)).toHaveText("Có thay đổi ở nơi khác");
   await expect(pageB.getByText("Thực đơn đã đổi ở nơi khác")).toBeVisible();
+  await pageB.locator('a[href="/overview"]').first().click();
+  const conflictBrief = pageB.getByTestId("kitchen-agenda-card");
+  await expect(conflictBrief).toHaveAttribute("data-brief-status", "conflict");
+  await expect(conflictBrief.getByText("Cần chọn lại bản thực đơn")).toBeVisible();
+  await expect(conflictBrief.locator("[data-brief-station]")).toHaveCount(0);
+  await pageB.locator('a[href="/week"]').first().click();
   await pageB.getByRole("button", { name: "Tải bản mới từ máy chủ" }).click();
   await expect(syncState(pageB)).toHaveText("Đã lưu");
   await expect(slotRow(pageB, "Canh").getByRole("button", { name: "lock" })).toHaveText("🔒");

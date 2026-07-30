@@ -72,7 +72,11 @@ export async function createAssistantWeekPlanProposal(): Promise<
 export async function verifyAssistantWeekPlanProposal(
   input: ConfirmAssistantWeekPlanProposalInput,
 ): Promise<
-  | { ok: true; slots: ConfirmAssistantWeekPlanProposalInput["slots"] }
+  | {
+      ok: true;
+      slots: ConfirmAssistantWeekPlanProposalInput["slots"];
+      changeCount: number;
+    }
   | Extract<SaveWeekPlanResult, { ok: false }>
 > {
   const [{ household }, envelope] = await Promise.all([
@@ -100,5 +104,9 @@ export async function verifyAssistantWeekPlanProposal(
   ) {
     throw new Error("PROPOSAL_CANDIDATE_MISMATCH");
   }
-  return { ok: true, slots: generated.plan.slots };
+  return {
+    ok: true,
+    slots: generated.plan.slots,
+    changeCount: changes.length,
+  };
 }

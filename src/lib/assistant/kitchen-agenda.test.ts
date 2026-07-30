@@ -48,6 +48,7 @@ vi.mock("@/data/repo/week-plan", () => ({
 
 import {
   buildAssistantKitchenAgenda,
+  getDailyHousekeeperBriefSnapshot,
   getKitchenAgendaSnapshot,
 } from "./kitchen-agenda";
 
@@ -78,5 +79,18 @@ describe("assistant kitchen agenda adapter", () => {
       && task.actionHref.startsWith("/")
       && !("householdId" in task.evidence)
     )).toBe(true);
+  });
+
+  it("projects the same authenticated evidence into the three daily stations", async () => {
+    loadHouseholdState.mockClear();
+    loadHouseholdState.mockResolvedValue(emptyState());
+    const brief = await getDailyHousekeeperBriefSnapshot();
+    expect(brief.stations.map((station) => station.key)).toEqual([
+      "prepare",
+      "shop",
+      "use-soon",
+    ]);
+    expect(brief.tasks).toEqual([]);
+    expect(JSON.stringify(brief)).not.toContain("household-scoped");
   });
 });

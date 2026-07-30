@@ -42,6 +42,10 @@ import {
   evaluateCoolingWindow,
   LEFTOVER_POLICY_VERSION,
 } from "@/domain/kitchen-execution/leftover-safety";
+import type {
+  OnboardingInput,
+  OnboardingResult,
+} from "@/domain/onboarding";
 
 const HH_ID = DEFAULT_HOUSEHOLD.id;
 
@@ -91,8 +95,20 @@ export interface HouseholdState {
   leftoverMovements: LeftoverMovement[];
 }
 
+const initialE2EHousehold = () => {
+  if (process.env.E2E_EMPTY_HOUSEHOLD !== "1") {
+    return structuredClone(DEFAULT_HOUSEHOLD);
+  }
+  return {
+    ...structuredClone(DEFAULT_HOUSEHOLD),
+    size: 0,
+    members: [],
+    restrictions: [],
+  };
+};
+
 const e2eState: HouseholdState = {
-  household: structuredClone(DEFAULT_HOUSEHOLD),
+  household: initialE2EHousehold(),
   favorites: [],
   notes: [],
   pantry: [],
@@ -1223,6 +1239,107 @@ export async function saveHouseholdState(patch: StatePatch): Promise<void> {
   }
   if (Object.keys(data).length === 0) return;
   await db.household.update({ where: { id }, data: data as never });
+}
+
+/**
+ * Complete the minimum household declaration in one transaction. A household
+ * with members is already activated and is never overwritten by a retry.
+ */
+export async function completeHouseholdOnboarding(
+  input: OnboardingInput,
+): Promise<OnboardingResult> {
+  await requireUserId();
+  const memberCount = input.adults + input.children;
+
+  if (isE2EMode()) {
+    if (e2eState.household.members.length > 0) {
+      return {
+        status: "already-complete",
+        memberCount: e2eState.household.members.length,
+      };
+    }
+    const adults = Array.from({ length: input.adults }, (_, index) => ({
+      id: e2eId(`adult_${index}`),
+      role: "adult" as const,
+      activity: "moderate" as const,
+    }));
+    const children = Array.from({ length: input.children }, (_, index) => ({
+      id: e2eId(`child_${index}`),
+      role: "child" as const,
+      activity: "moderate" as const,
+    }));
+    e2eState.household = {
+      ...e2eState.household,
+      size: memberCount,
+      members: [...adults, ...children],
+      restrictions: [...input.restrictions],
+      busyDays: [...input.busyDays],
+      marketMode: input.marketMode,
+    };
+    return { status: "completed", memberCount };
+  }
+
+  const db = getDb();
+  const householdId = await currentHouseholdId();
+  return db.$transaction(async (tx) => {
+    const household = await tx.household.findUniqueOrThrow({
+      where: { id: householdId },
+      select: { _count: { select: { members: true } } },
+    });
+    if (household._count.members > 0) {
+      return {
+        status: "already-complete" as const,
+        memberCount: household._count.members,
+      };
+    }
+
+    await tx.member.createMany({
+      data: [
+        ...Array.from({ length: input.adults }, () => ({
+          householdId,
+          role: "adult" as const,
+          activity: "moderate" as const,
+          allergies: [] as string[],
+          habits: [] as string[],
+          conditions: [] as string[],
+          dislikes: [] as string[],
+        })),
+        ...Array.from({ length: input.children }, () => ({
+          householdId,
+          role: "child" as const,
+          activity: "moderate" as const,
+          allergies: [] as string[],
+          habits: [] as string[],
+          conditions: [] as string[],
+          dislikes: [] as string[],
+        })),
+      ],
+    });
+    await tx.household.update({
+      where: { id: householdId },
+      data: {
+        size: memberCount,
+        restrictions: input.restrictions,
+        busyDays: input.busyDays,
+        marketMode: input.marketMode,
+      },
+    });
+    await tx.productEvent.create({
+      data: {
+        householdId,
+        name: "onboarding_completed",
+        dedupeKey: `onboarding_completed:${input.requestId}`,
+        properties: {
+          adults: input.adults,
+          children: input.children,
+          hasRestrictions: input.restrictions.length > 0,
+          busyDayCount: input.busyDays.length,
+          marketMode: input.marketMode,
+        },
+      },
+    });
+    return { status: "completed" as const, memberCount };
+  });
 }
 
 /** Persist a member's health profile (T1). Scoped to the current household so a

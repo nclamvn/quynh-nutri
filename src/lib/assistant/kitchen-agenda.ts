@@ -10,6 +10,10 @@ import {
   buildKitchenAgenda,
   type KitchenAgenda,
 } from "@/domain/kitchen-execution/kitchen-agenda";
+import {
+  buildDailyHousekeeperBrief,
+  type DailyHousekeeperBrief,
+} from "@/domain/kitchen-execution/daily-housekeeper-brief";
 import type { WeekPlan } from "@/domain/types";
 import type { Dish } from "@/domain/types";
 import { loadOrCreateCurrentWeekPlan } from "@/data/repo/week-plan";
@@ -58,4 +62,8 @@ export async function getKitchenAgendaSnapshot(): Promise<KitchenAgenda> {
   const now = new Date();
   const { plan } = await loadOrCreateCurrentWeekPlan();
   return buildAssistantKitchenAgenda({ state, plan, now });
+}
+
+export async function getDailyHousekeeperBriefSnapshot(): Promise<DailyHousekeeperBrief> {
+  return buildDailyHousekeeperBrief(await getKitchenAgendaSnapshot());
 }

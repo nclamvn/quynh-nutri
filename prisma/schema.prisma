@@ -205,6 +205,24 @@ model Household {
   shoppingReceiveRequests ShoppingReceiveRequest[]
   pushSubscriptions       PushSubscription[]
   kitchenSessions         KitchenSession[]
+  productEvents           ProductEvent[]
+}
+
+// Privacy-minimal product measurement. Events explain adoption of the canonical
+// household loop but never become task state or a second source of truth.
+model ProductEvent {
+  id            String    @id @default(cuid())
+  householdId   String
+  household     Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name          String
+  schemaVersion Int       @default(1)
+  dedupeKey     String
+  properties    Json      @default("{}")
+  occurredAt    DateTime  @default(now())
+
+  @@unique([householdId, dedupeKey])
+  @@index([name, occurredAt])
+  @@index([householdId, occurredAt])
 }
 
 // Active, manually-driven kitchen execution only. Completion deletes the row;

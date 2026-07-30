@@ -15,7 +15,7 @@ import { normalizeVn } from "@/lib/claude";
 import { dayDishes, dayNutrition } from "@/ui/derive";
 import type { Household, Slot } from "@/domain/types";
 import { currentWeekStartIso } from "@/lib/week";
-import { getKitchenAgendaSnapshot } from "@/lib/assistant/kitchen-agenda";
+import { getDailyHousekeeperBriefSnapshot } from "@/lib/assistant/kitchen-agenda";
 import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
 
 // Tools wrap the DETERMINISTIC engines – the LLM orchestrates + explains, the
@@ -47,9 +47,9 @@ export const tools = {
   }),
 
   kitchen_agenda: tool({
-    description: "Đọc agenda bếp tất định hiện tại để trả lời 'tôi nên làm gì tiếp'. Đây là projection read-only theo dữ liệu hộ đã ghi nhận. Nếu mảng rỗng, phải nói chưa có việc nào đủ căn cứ và không tự nghĩ thêm.",
+    description: "Đọc bản tin bà quản gia tất định theo ba trạm chuẩn bị, đi chợ và dùng sớm. Đây là projection read-only theo dữ liệu hộ đã ghi nhận. Nếu các trạm rỗng, phải nói chưa có việc nào đủ căn cứ và không tự nghĩ thêm.",
     inputSchema: z.object({}),
-    execute: async () => (await getKitchenAgendaSnapshot()).tasks,
+    execute: async () => getDailyHousekeeperBriefSnapshot(),
   }),
 
   nutrition_report: tool({

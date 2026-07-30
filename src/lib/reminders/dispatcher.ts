@@ -10,6 +10,7 @@ import {
 import { loadHouseholdStateForSystem } from "@/data/repo/household";
 import { loadWeekPlanForSystem } from "@/data/repo/week-plan";
 import { buildAssistantKitchenAgenda } from "@/lib/assistant/kitchen-agenda";
+import { buildDailyHousekeeperBrief } from "@/domain/kitchen-execution/daily-housekeeper-brief";
 import { weekStartIsoInTimeZone } from "@/lib/week";
 import {
   isReminderWindow,
@@ -96,9 +97,10 @@ export async function dispatchHousekeeperReminders(input: {
       now,
       timeZone: target.timeZone,
     });
+    const brief = buildDailyHousekeeperBrief(agenda);
 
     for (const subscription of target.subscriptions) {
-      for (const task of reminderTasks(agenda.tasks)) {
+      for (const task of reminderTasks(brief)) {
         const claimed = await claimReminderDelivery({
           subscriptionId: subscription.id,
           taskId: task.id,

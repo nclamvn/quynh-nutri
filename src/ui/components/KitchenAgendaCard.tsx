@@ -7,6 +7,12 @@ import type {
   KitchenAgendaPriority,
   KitchenAgendaTask,
 } from "@/domain/kitchen-execution/kitchen-agenda";
+import type {
+  DailyBriefStation,
+  DailyBriefStationKey,
+  DailyHousekeeperBrief,
+} from "@/domain/kitchen-execution/daily-housekeeper-brief";
+import type { DailyBriefViewStatus } from "@/ui/hooks/useKitchenAgenda";
 import { useI18n } from "@/i18n/context";
 import { useStore } from "@/ui/store";
 import { BottomSheet } from "@/ui/components/BottomSheet";
@@ -23,8 +29,41 @@ const priorityStyle: Record<KitchenAgendaPriority, string> = {
   next: "bg-brand-weak text-brand",
 };
 
-export function KitchenAgendaCard({ agenda }: { agenda: KitchenAgenda }) {
-  const { t } = useI18n();
+const stationConfig: Record<
+  DailyBriefStationKey,
+  { titleKey: string; emptyKey: string; emptyHref: string; icon: string }
+> = {
+  prepare: {
+    titleKey: "brief.prepare.title",
+    emptyKey: "brief.prepare.empty",
+    emptyHref: "/week",
+    icon: "01",
+  },
+  shop: {
+    titleKey: "brief.shop.title",
+    emptyKey: "brief.shop.empty",
+    emptyHref: "/shopping",
+    icon: "02",
+  },
+  "use-soon": {
+    titleKey: "brief.useSoon.title",
+    emptyKey: "brief.useSoon.empty",
+    emptyHref: "/pantry",
+    icon: "03",
+  },
+};
+
+export function KitchenAgendaCard({
+  agenda,
+  brief,
+  status,
+}: {
+  agenda: KitchenAgenda;
+  brief: DailyHousekeeperBrief;
+  status: DailyBriefViewStatus;
+}) {
+  const { t, lang } = useI18n();
+  const { commodity } = useStore();
   const [open, setOpen] = useState(false);
   const counts = Object.fromEntries(
     groups.map(({ priority }) => [
@@ -38,53 +77,70 @@ export function KitchenAgendaCard({ agenda }: { agenda: KitchenAgenda }) {
       <section
         aria-labelledby="kitchen-agenda-card-title"
         data-testid="kitchen-agenda-card"
+        data-brief-status={status}
         className="card mb-5 overflow-hidden"
       >
         <div className="flex items-start justify-between gap-4 border-b border-hairline bg-gradient-to-r from-brand-weak/65 to-accent-weak/35 px-4 py-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand">
-              {t("agenda.eyebrow")}
+              {t("brief.eyebrow")}
             </p>
             <h2 id="kitchen-agenda-card-title" className="mt-0.5 text-base font-semibold">
-              {t("agenda.title")}
+              {t("brief.title")}
             </h2>
           </div>
-          <div className="flex gap-1 text-[10px]">
+          {status === "ready" && (
+            <div className="hidden gap-1 text-[10px] sm:flex">
             {groups.map(({ priority, key }) => counts[priority] > 0 && (
               <span key={priority} className={`rounded-full px-2 py-1 ${priorityStyle[priority]}`}>
                 {t(key)} · {counts[priority]}
               </span>
             ))}
-          </div>
+            </div>
+          )}
         </div>
 
-        {agenda.tasks.length === 0 ? (
-          <div className="px-4 py-5">
-            <p className="text-sm font-medium">{t("agenda.empty")}</p>
-            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted">
-              {t("agenda.emptyBody")}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
+        {status === "loading" ? (
+          <div className="grid gap-2 px-4 py-4 sm:grid-cols-3" aria-live="polite">
+            {brief.stations.map((station) => (
+              <div
+                key={station.key}
+                className="min-h-28 animate-pulse rounded-[16px] border border-hairline bg-surface/35 p-3"
+              >
+                <div className="h-3 w-20 rounded-full bg-hairline" />
+                <div className="mt-4 h-4 w-3/4 rounded-full bg-hairline" />
+                <div className="mt-2 h-3 w-full rounded-full bg-hairline" />
+              </div>
+            ))}
+            <p className="sr-only">{t("brief.loading")}</p>
+          </div>
+        ) : status === "stale" || status === "conflict" ? (
+          <div className="px-4 py-4" role="status">
+            <div className="rounded-[16px] border border-amber/35 bg-amber/10 p-4">
+              <p className="text-sm font-semibold text-amber-700">
+                {t(status === "conflict" ? "brief.conflictTitle" : "brief.staleTitle")}
+              </p>
+              <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted">
+                {t(status === "conflict" ? "brief.conflict" : "brief.stale")}
+              </p>
               <Link
                 href="/week"
-                className="rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="mt-3 inline-flex min-h-9 items-center rounded-full border border-amber/35 px-3 text-xs font-semibold text-amber-700"
               >
-                {t("agenda.emptyWeekAction")} →
-              </Link>
-              <Link
-                href="/pantry"
-                className="rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              >
-                {t("agenda.emptyPantryAction")} →
+                {t("brief.resolve")} →
               </Link>
             </div>
           </div>
         ) : (
-          <ol className="divide-y divide-hairline px-4">
-            {agenda.tasks.slice(0, 3).map((task) => (
-              <AgendaRow key={task.id} task={task} compact />
+          <div className="grid gap-2 px-4 py-4 sm:grid-cols-3">
+            {brief.stations.map((station) => (
+              <BriefStation
+                key={station.key}
+                station={station}
+                resolveEvidence={(task) => resolveEvidence(task, commodity, lang)}
+              />
             ))}
-          </ol>
+          </div>
         )}
 
         <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -94,7 +150,8 @@ export function KitchenAgendaCard({ agenda }: { agenda: KitchenAgenda }) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="shrink-0 rounded-full bg-brand-weak px-3 py-1.5 text-xs font-semibold text-brand"
+            disabled={status !== "ready"}
+            className="shrink-0 rounded-full bg-brand-weak px-3 py-1.5 text-xs font-semibold text-brand disabled:cursor-not-allowed disabled:opacity-45"
           >
             {t("agenda.viewAll")}
           </button>
@@ -107,6 +164,67 @@ export function KitchenAgendaCard({ agenda }: { agenda: KitchenAgenda }) {
         onClose={() => setOpen(false)}
       />
     </>
+  );
+}
+
+function BriefStation({
+  station,
+  resolveEvidence,
+}: {
+  station: DailyBriefStation;
+  resolveEvidence: (task: KitchenAgendaTask) => Record<string, string | number>;
+}) {
+  const { t } = useI18n();
+  const config = stationConfig[station.key];
+  const task = station.tasks[0];
+  return (
+    <article
+      data-brief-station={station.key}
+      className="flex min-h-32 min-w-0 flex-col rounded-[16px] border border-hairline bg-surface/45 p-3"
+    >
+      <div className="flex items-center gap-2">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-hairline bg-card text-[9px] font-bold tracking-wider text-brand">
+          {config.icon}
+        </span>
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+          {t(config.titleKey)}
+        </h3>
+      </div>
+      {task ? (
+        <>
+          <p className="mt-3 line-clamp-1 text-sm font-semibold">
+            {t(task.titleKey, resolveEvidence(task))}
+          </p>
+          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">
+            {t(task.reasonKey, resolveEvidence(task))}
+          </p>
+          <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+            <span className="min-w-0 text-[10px] text-tertiary">
+              {station.tasks.length > 1
+                ? t("brief.more", { n: station.tasks.length - 1 })
+                : t(task.sourceKey)}
+            </span>
+            <Link
+              href={task.actionHref}
+              aria-label={t(task.actionKey)}
+              className="shrink-0 text-xs font-semibold text-brand"
+            >
+              {t(task.actionKey)} →
+            </Link>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="mt-3 text-xs leading-relaxed text-muted">{t(config.emptyKey)}</p>
+          <Link
+            href={config.emptyHref}
+            className="mt-auto pt-3 text-xs font-semibold text-brand"
+          >
+            {t("brief.checkSource")} →
+          </Link>
+        </>
+      )}
+    </article>
   );
 }
 
@@ -186,15 +304,7 @@ function AgendaRow({
 }) {
   const { t, lang } = useI18n();
   const { commodity } = useStore();
-  const evidence = { ...task.evidence };
-  if (typeof evidence.commodityId === "string") {
-    const item = commodity(evidence.commodityId);
-    evidence.name = item
-      ? lang === "en" && item.labelEn
-        ? item.labelEn
-        : item.canonicalVn
-      : evidence.commodityId;
-  }
+  const evidence = resolveEvidence(task, commodity, lang);
   return (
     <li className="py-3">
       <div className="flex items-start gap-3">
@@ -225,4 +335,21 @@ function AgendaRow({
       </div>
     </li>
   );
+}
+
+function resolveEvidence(
+  task: KitchenAgendaTask,
+  commodity: ReturnType<typeof useStore>["commodity"],
+  lang: string,
+): Record<string, string | number> {
+  const evidence = { ...task.evidence };
+  if (typeof evidence.commodityId === "string") {
+    const item = commodity(evidence.commodityId);
+    evidence.name = item
+      ? lang === "en" && item.labelEn
+        ? item.labelEn
+        : item.canonicalVn
+      : evidence.commodityId;
+  }
+  return evidence;
 }

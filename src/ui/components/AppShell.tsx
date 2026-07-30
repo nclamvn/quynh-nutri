@@ -7,6 +7,7 @@ import { AssistantSheet } from "./AssistantSheet";
 import { AmbientBackground } from "./AmbientBackground";
 import { Toaster } from "./Toaster";
 import { CaptureHub } from "./CaptureHub";
+import { HouseholdOnboarding } from "./HouseholdOnboarding";
 
 /**
  * Responsive app shell (Blueprint §4–5).
@@ -34,6 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
       <AssistantSheet />
       <CaptureHub />
+      <HouseholdOnboarding />
       <Toaster />
     </div>
   );

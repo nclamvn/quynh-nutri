@@ -1,6 +1,6 @@
 "use server";
 
-import { loadHouseholdState, saveHouseholdState, saveMemberHealthProfile, saveMemberAllergies, saveMember, deleteMember, addMemberState, deleteMemberState, saveSupplier, deleteSupplier, saveOrder, savePurchase, receiveShoppingItemRecord, createManualInventoryLotRecord, deleteInventoryLotRecord, recordInventoryMovementRecord, createLeftoverLotRecord, recordLeftoverMovementRecord, type StatePatch, type HouseholdState } from "@/data/repo/household";
+import { loadHouseholdState, saveHouseholdState, saveMemberHealthProfile, saveMemberAllergies, saveMember, deleteMember, addMemberState, deleteMemberState, saveSupplier, deleteSupplier, saveOrder, savePurchase, receiveShoppingItemRecord, createManualInventoryLotRecord, deleteInventoryLotRecord, recordInventoryMovementRecord, createLeftoverLotRecord, recordLeftoverMovementRecord, completeHouseholdOnboarding, type StatePatch, type HouseholdState } from "@/data/repo/household";
 import { semanticSearch } from "@/lib/search";
 import { requireUserId } from "@/lib/auth";
 import type { HealthProfile, Allergen, Member, MemberState, Supplier, Order, PurchaseRecord, ReceiveShoppingItemInput, ReceiveShoppingItemResult, RecordInventoryMovementInput, RecordInventoryMovementResult, CreateLeftoverLotInput, LeftoverLot, RecordLeftoverMovementInput, RecordLeftoverMovementResult } from "@/domain/types";
@@ -50,6 +50,11 @@ import type {
   PersistedKitchenSession,
   SaveKitchenSessionResult,
 } from "@/domain/kitchen-execution/persisted-session";
+import {
+  onboardingInputSchema,
+  type OnboardingResult,
+} from "@/domain/onboarding";
+import { recordProductEventSafely } from "@/data/repo/product-events";
 
 const id = z.string().trim().min(1).max(128);
 const shortText = z.string().trim().max(500);
@@ -382,12 +387,20 @@ export async function persistCookingSession(
 ): Promise<SaveKitchenSessionResult<CookingSession>> {
   await requireUserId();
   const input = validateCookingPayload(raw);
-  return saveKitchenSession(
+  const result = await saveKitchenSession(
     "cooking",
     input.dishId,
     input,
     sessionVersionSchema.parse(expectedVersion),
   );
+  if (result.ok && expectedVersion === null) {
+    await recordProductEventSafely({
+      name: "cooking_started",
+      dedupeKey: `cooking_started:${result.session.id}`,
+      properties: {},
+    });
+  }
+  return result;
 }
 
 export async function clearCookingSession(
@@ -435,12 +448,20 @@ export async function persistMealRunSession(
   const safeWeek = z.iso.date().parse(weekStart);
   const safeDay = z.number().int().min(0).max(6).parse(day);
   const input = await validateMealRunPayload(safeWeek, safeDay, raw);
-  return saveKitchenSession(
+  const result = await saveKitchenSession(
     "meal-run",
     `${safeWeek}:${safeDay}`,
     input,
     sessionVersionSchema.parse(expectedVersion),
   );
+  if (result.ok && expectedVersion === null) {
+    await recordProductEventSafely({
+      name: "meal_run_started",
+      dedupeKey: `meal_run_started:${result.session.id}`,
+      properties: { dishCount: input.tasks.length },
+    });
+  }
+  return result;
 }
 
 export async function clearMealRunSession(
@@ -493,6 +514,13 @@ export async function confirmAssistantWeekPlanProposal(
     expectedVersion: input.baseVersion,
     slots: verified.slots,
   });
+  if (result.ok) {
+    await recordProductEventSafely({
+      name: "week_proposal_confirmed",
+      dedupeKey: `week_proposal_confirmed:${input.proposalId}`,
+      properties: { changedSlotCount: verified.changeCount },
+    });
+  }
   revalidatePath("/week");
   revalidatePath("/overview");
   revalidatePath("/shopping");
@@ -502,6 +530,22 @@ export async function confirmAssistantWeekPlanProposal(
 export async function persistState(patch: StatePatch): Promise<void> {
   await requireUserId();
   await saveHouseholdState(statePatchSchema.parse(patch) as StatePatch);
+}
+
+export async function startHouseholdOnboarding(): Promise<void> {
+  await requireUserId();
+  await recordProductEventSafely({
+    name: "onboarding_started",
+    dedupeKey: "onboarding_started:v1",
+    properties: {},
+  });
+}
+
+export async function finishHouseholdOnboarding(
+  raw: unknown,
+): Promise<OnboardingResult> {
+  await requireUserId();
+  return completeHouseholdOnboarding(onboardingInputSchema.parse(raw));
 }
 
 export async function loadReminderSettings() {
@@ -581,9 +625,16 @@ export async function receiveShoppingItem(
   input: ReceiveShoppingItemInput,
 ): Promise<ReceiveShoppingItemResult> {
   await requireUserId();
-  return receiveShoppingItemRecord(
-    receiveShoppingItemSchema.parse(input) as ReceiveShoppingItemInput,
+  const parsed = receiveShoppingItemSchema.parse(input) as ReceiveShoppingItemInput;
+  const result = await receiveShoppingItemRecord(
+    parsed,
   );
+  await recordProductEventSafely({
+    name: "shopping_item_received",
+    dedupeKey: `shopping_item_received:${parsed.idempotencyKey}`,
+    properties: { addedToPantry: parsed.addToPantry },
+  });
+  return result;
 }
 
 export async function createManualInventoryLot(
@@ -617,6 +668,11 @@ export async function createLeftoverLot(
   const lot = await createLeftoverLotRecord({
     ...parsed,
     dishLabelSnapshot: dish.vnName,
+  });
+  await recordProductEventSafely({
+    name: "leftover_recorded",
+    dedupeKey: `leftover_recorded:${parsed.idempotencyKey}`,
+    properties: { storageLocation: parsed.storageLocation },
   });
   revalidatePath("/pantry");
   return lot;
