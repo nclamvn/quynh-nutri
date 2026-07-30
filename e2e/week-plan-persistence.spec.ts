@@ -106,7 +106,9 @@ test("a selected B1 dish resolves after local storage is cleared and the page re
   const firstDish = page.locator(".card-interactive").first();
   const dishName = (await firstDish.locator("h2").innerText()).trim();
   await firstDish.click();
+  await expect(page.locator("[data-recipe-detail]")).toBeVisible();
   await page.getByRole("button", { name: "Lưu vào Nhà mình" }).click();
+  await expect(page.getByRole("button", { name: /Đã lưu · Nhà mình/ })).toBeDisabled();
 
   await page.goto("/week");
   await expect(syncState(page)).toHaveText("Đã lưu");

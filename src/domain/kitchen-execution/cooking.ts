@@ -31,6 +31,8 @@ export interface CookingSession {
   guideId: string;
   completedStepIds: string[];
   startedAt: string;
+  /** Page-selected serving count. Optional keeps pre-KE-023 sessions valid. */
+  targetServings?: number;
 }
 
 export function resolveCookingGuide(
@@ -49,8 +51,8 @@ export function resolveCookingGuide(
   };
 }
 
-export function scaleDishLines(dish: Dish, householdSize: number): DishLine[] {
-  const targetServings = householdSize > 0 ? householdSize : dish.baseServings;
+export function scaleDishLines(dish: Dish, servingCount: number): DishLine[] {
+  const targetServings = servingCount > 0 ? servingCount : dish.baseServings;
   const scale = dish.baseServings > 0 ? targetServings / dish.baseServings : 1;
   return dish.lines.map((line) => ({
     ...line,
@@ -69,7 +71,15 @@ export function parseCookingSession(
       value.dishId !== guide.dishId ||
       value.guideId !== guide.id ||
       typeof value.startedAt !== "string" ||
-      !Array.isArray(value.completedStepIds)
+      !Array.isArray(value.completedStepIds) ||
+      (
+        value.targetServings !== undefined &&
+        (
+          !Number.isInteger(value.targetServings) ||
+          value.targetServings < 1 ||
+          value.targetServings > 12
+        )
+      )
     ) {
       return undefined;
     }
@@ -86,6 +96,7 @@ export function parseCookingSession(
       guideId: value.guideId,
       completedStepIds: [...new Set(value.completedStepIds)],
       startedAt: value.startedAt,
+      targetServings: value.targetServings,
     };
   } catch {
     return undefined;

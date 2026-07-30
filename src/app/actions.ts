@@ -292,6 +292,7 @@ const cookingSessionSchema = z.object({
   guideId: id,
   completedStepIds: z.array(id).max(100),
   startedAt: z.string().datetime(),
+  targetServings: z.number().int().min(1).max(12).optional(),
 }).strict();
 const mealRunSessionSchema = z.object({
   day: z.number().int().min(0).max(6),

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
@@ -126,6 +127,13 @@ export function DishDetailSheet({ dishId, onClose }: { dishId: string | null; on
               >
                 {t("cooking.start")}
               </button>
+              <Link
+                href={`/dishes/${encodeURIComponent(d.id)}`}
+                onClick={onClose}
+                className="mt-2 flex min-h-11 w-full items-center justify-center rounded-full border border-hairline text-sm font-medium text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                {t("recipe.viewFull")} →
+              </Link>
             </section>
           ) : (
             <section className="rounded-[18px] border border-hairline bg-surface/45 p-3">

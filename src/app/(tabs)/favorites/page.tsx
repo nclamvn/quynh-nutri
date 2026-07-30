@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import type { Lang } from "@/i18n/context";
@@ -9,7 +9,6 @@ import { dishDisplay } from "@/ui/derive";
 import { DishThumb } from "@/ui/components/DishThumb";
 import { HeartButton } from "@/ui/components/HeartButton";
 import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
-import { DishDetailSheet } from "@/ui/components/DishDetailSheet";
 import { HeartIcon } from "@/ui/components/icons";
 import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
@@ -20,7 +19,6 @@ const dishName = (d: Dish, lang: Lang) => (lang === "en" && d.enLabel ? d.enLabe
 export default function FavoritesPage() {
   const { favoriteDishes, household, commodity } = useStore();
   const { t, lang } = useI18n();
-  const [detailId, setDetailId] = useState<string | null>(null);
 
   return (
     <PageContainer>
@@ -42,28 +40,24 @@ export default function FavoritesPage() {
         <ul data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {favoriteDishes.map((d, i) => (
             <li key={d.id} style={{ "--i": Math.min(i, 12) } as React.CSSProperties}>
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => setDetailId(d.sourceRepertoireId ?? d.id)}
-                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDetailId(d.sourceRepertoireId ?? d.id)}
-                className="group card card-interactive flex h-full cursor-pointer items-center gap-3 p-3"
-              >
-                <DishThumb dish={d} size={72} shape="rounded" />
-                <div className="min-w-0 flex-1">
-                  <h2 className="mb-1 truncate text-sm font-semibold">{dishName(d, lang)}</h2>
-                  <div className="flex items-center justify-between gap-2">
+              <div className="group card card-interactive flex h-full items-center gap-3 p-3">
+                <Link
+                  href={`/dishes/${encodeURIComponent(d.id)}`}
+                  aria-label={t("recipe.openNamed", { name: dishName(d, lang) })}
+                  className="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  <DishThumb dish={d} size={72} shape="rounded" />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="mb-1 truncate text-sm font-semibold">{dishName(d, lang)}</h2>
                     <ProvenanceChip display={dishDisplay(d, household, commodity)} field="kcal" unit="kcal" />
-                    <HeartButton dishId={d.id} />
                   </div>
-                </div>
+                </Link>
+                <HeartButton dishId={d.id} />
               </div>
             </li>
           ))}
         </ul>
       )}
-
-      <DishDetailSheet dishId={detailId} onClose={() => setDetailId(null)} />
     </PageContainer>
   );
 }

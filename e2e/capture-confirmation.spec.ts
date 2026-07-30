@@ -57,7 +57,10 @@ test.describe("KE-020 capture stays a proposal until confirmation", () => {
   test("unsupported image type fails closed without a proposal", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/overview");
-    await page.getByRole("button", { name: "Ghi nhanh hóa đơn, nhãn hoặc giọng nói" }).click();
+    await expect(async () => {
+      await page.getByRole("button", { name: "Ghi nhanh hóa đơn, nhãn hoặc giọng nói" }).click();
+      await expect(page.getByRole("heading", { name: "Ghi nhanh cho bà quản gia" })).toBeVisible();
+    }).toPass();
     await page.locator('input[type="file"]').setInputFiles({
       name: "receipt.txt",
       mimeType: "text/plain",

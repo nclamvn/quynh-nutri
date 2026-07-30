@@ -26,10 +26,12 @@ export function CookingMode({
   dish,
   resolved,
   onClose,
+  targetServings,
 }: {
   dish: Dish;
   resolved: ResolvedCookingGuide;
   onClose: () => void;
+  targetServings?: number;
 }) {
   const { household, commodity } = useStore();
   const { t, lang } = useI18n();
@@ -52,6 +54,10 @@ export function CookingMode({
       guideId: guide.id,
       completedStepIds: [],
       startedAt: new Date().toISOString(),
+      targetServings:
+        targetServings && targetServings >= 1 && targetServings <= 12
+          ? targetServings
+          : undefined,
     };
   });
   const initialStep = nextIncompleteStep(guide, session.completedStepIds);
@@ -73,9 +79,12 @@ export function CookingMode({
   const completed = new Set(session.completedStepIds);
   const current = guide.steps[stepIndex];
   const allDone = session.completedStepIds.length === guide.steps.length;
+  const activeServings =
+    session.targetServings ??
+    (targetServings && targetServings > 0 ? targetServings : household.size);
   const scaledLines = useMemo(
-    () => scaleDishLines(dish, household.size),
-    [dish, household.size],
+    () => scaleDishLines(dish, activeServings),
+    [activeServings, dish],
   );
 
   useEffect(() => {
@@ -262,7 +271,7 @@ export function CookingMode({
           <section className="rounded-[18px] border border-hairline bg-surface/55 p-4">
             <h2 className="text-sm font-semibold">
               {t("cooking.ingredientsFor", {
-                n: household.size > 0 ? household.size : dish.baseServings,
+                n: activeServings > 0 ? activeServings : dish.baseServings,
               })}
             </h2>
             <ul className="mt-2 space-y-1.5">

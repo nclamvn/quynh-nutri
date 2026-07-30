@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
@@ -10,7 +11,6 @@ import { ProvenanceChip } from "@/ui/components/ProvenanceChip";
 import { AddDishSheet } from "@/ui/components/AddDishSheet";
 import { DishThumb } from "@/ui/components/DishThumb";
 import { HeartButton } from "@/ui/components/HeartButton";
-import { DishDetailSheet } from "@/ui/components/DishDetailSheet";
 import { Blossom } from "@/ui/components/Blossom";
 import { PageContainer } from "@/ui/components/PageContainer";
 import { PageHeader } from "@/ui/components/PageHeader";
@@ -24,7 +24,6 @@ export default function DishesPage() {
   const [slotFilter, setSlotFilter] = useState<Slot | "ALL">("ALL");
   const [quickOnly, setQuickOnly] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [detailId, setDetailId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchIds, setSearchIds] = useState<string[] | null>(null);
   const [searching, setSearching] = useState(false);
@@ -94,31 +93,29 @@ export default function DishesPage() {
         <ul data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {list.map((d, i) => (
             <li key={d.id} style={{ "--i": Math.min(i, 12) } as React.CSSProperties}>
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => setDetailId(d.id)}
-                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDetailId(d.id)}
-                className="group card card-interactive flex h-full cursor-pointer items-center gap-3 p-3"
-              >
-                <DishThumb dish={d} size={72} shape="rounded" />
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex items-start justify-between gap-2">
-                    <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{dishName(d, lang)}</h2>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] ${isForked(d.id) ? "bg-brand-weak text-brand-ink" : "bg-surface text-muted"}`}>
-                      {isForked(d.id) ? t("origin.b1") : t("dishes.sample")}
-                    </span>
-                  </div>
-                  <p className="mb-1.5 truncate text-[11px] text-muted">
-                    {d.proteinType} · {d.method}
-                    {d.cookTimeMin ? ` · ${d.cookTimeMin}′` : ""}
-                    {d.quick ? ` · ${t("common.quick")}` : ""}
-                  </p>
-                  <div className="flex items-center justify-between gap-2">
+              <div className="group card card-interactive flex h-full items-center gap-3 p-3">
+                <Link
+                  href={`/dishes/${encodeURIComponent(d.id)}`}
+                  aria-label={t("recipe.openNamed", { name: dishName(d, lang) })}
+                  className="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  <DishThumb dish={d} size={72} shape="rounded" />
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex items-start justify-between gap-2">
+                      <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{dishName(d, lang)}</h2>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] ${isForked(d.id) ? "bg-brand-weak text-brand-ink" : "bg-surface text-muted"}`}>
+                        {isForked(d.id) ? t("origin.b1") : t("dishes.sample")}
+                      </span>
+                    </div>
+                    <p className="mb-1.5 truncate text-[11px] text-muted">
+                      {d.proteinType} · {d.method}
+                      {d.cookTimeMin ? ` · ${d.cookTimeMin}′` : ""}
+                      {d.quick ? ` · ${t("common.quick")}` : ""}
+                    </p>
                     <ProvenanceChip display={dishDisplay(d, household, commodity)} field="kcal" unit="kcal" />
-                    <HeartButton dishId={d.id} />
                   </div>
-                </div>
+                </Link>
+                <HeartButton dishId={d.id} />
               </div>
             </li>
           ))}
@@ -134,7 +131,6 @@ export default function DishesPage() {
       </button>
 
       <AddDishSheet open={addOpen} onClose={() => setAddOpen(false)} />
-      <DishDetailSheet dishId={detailId} onClose={() => setDetailId(null)} />
     </PageContainer>
   );
 }
