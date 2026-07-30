@@ -1,6 +1,6 @@
 # COMPLETION REPORT — TIP-KE-021
 
-**STATUS:** RELEASE CANDIDATE VERIFIED
+**STATUS:** PRODUCTION RELEASED
 
 ## OUTCOME
 
@@ -71,6 +71,17 @@ mutation, task state, completion flag or AI action.
 - Prisma generate: passed.
 - Next.js 16 production build and TypeScript: passed.
 - `git diff --check`: passed.
+- Vercel production build: passed.
+- GitHub CI run `30522914049`: quality and E2E jobs passed.
+
+## PRODUCTION RELEASE
+
+- Application commit: `9eaa403b031f06b034cbbb2974ad6b1ec6987a7e`.
+- Vercel deployment: `dpl_2mXT2t8ML9dvtLaKut95dE9cZE7C`.
+- Production alias: `https://anngon.io`.
+- GitHub CI run: `30522914049`.
+- Smoke: landing returned HTTP 200; protected `/reports` returned the expected
+  Clerk HTTP 307 redirect to sign-in while signed out.
 
 ## DATA AND PROVENANCE REVIEW
 
@@ -95,7 +106,11 @@ surface change exposes already-hydrated fulfillments to the read-only report.
 
 None.
 
+GitHub emitted one non-blocking infrastructure annotation that
+`actions/checkout@v4` and `actions/setup-node@v4` still target the deprecated
+Node.js 20 action runtime and were forced onto Node.js 24. Both jobs completed
+successfully; the workflow already requests Node.js 24 for application steps.
+
 ## RELEASE NOTE
 
-Production release evidence will be appended after the verified commit is
-pushed and the Vercel deployment is ready.
+KE-021 is live on `anngon.io`.

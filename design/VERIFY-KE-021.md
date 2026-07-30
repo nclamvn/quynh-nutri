@@ -42,8 +42,10 @@ Prisma generate               PASS
 Next build + TypeScript        PASS
 git diff --check               PASS
 Database migration             NOT REQUIRED
-Vercel production              PENDING RELEASE
-GitHub CI                      PENDING RELEASE
+Vercel production              READY (dpl_2mXT2t8ML9dvtLaKut95dE9cZE7C)
+anngon.io landing smoke        HTTP 200
+Protected report auth smoke    HTTP 307 → Clerk sign-in
+GitHub CI                      PASS (quality + E2E)
 ```
 
 ## TRUST BOUNDARIES
@@ -61,5 +63,5 @@ GitHub CI                      PENDING RELEASE
 
 ## OVERALL STATUS
 
-READY FOR RELEASE — implementation and all local automated evidence are
-verified; production deployment and CI evidence remain to be recorded.
+READY — implementation, automated evidence, CI and the `anngon.io` production
+release are verified.
