@@ -34,6 +34,10 @@ Next build + TypeScript        PASS
 git diff --check               PASS
 Neon migration                 APPLIED
 Neon migration status          UP TO DATE
+Vercel production              READY
+anngon.io landing smoke        HTTP 200
+Protected-route auth smoke     HTTP 307 → Clerk sign-in
+GitHub CI                      PASS (quality + E2E)
 ```
 
 ## TRUST BOUNDARIES
@@ -52,6 +56,5 @@ Neon migration status          UP TO DATE
 
 ## OVERALL STATUS
 
-READY FOR RELEASE — implementation and Neon main are verified. Production
-deployment verification remains the release step recorded in the Completion
-Report.
+READY — implementation, Neon main and the `anngon.io` production release are
+verified.

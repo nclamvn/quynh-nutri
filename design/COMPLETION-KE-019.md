@@ -1,6 +1,6 @@
 # COMPLETION REPORT — TIP-KE-019
 
-**STATUS:** IMPLEMENTED AND VERIFIED — production code release pending commit
+**STATUS:** PRODUCTION RELEASED
 
 ## OUTCOME
 
@@ -26,6 +26,15 @@ household-owned server state instead of depending on one browser.
 - Post-apply `prisma migrate status`: database schema is up to date.
 - The new table stores active user execution payloads only and is removed on
   finish/cancel.
+
+## PRODUCTION RELEASE
+
+- Application commit: `6615d7ea8291b13dd53a423d61a26482d8b891ad`.
+- Vercel deployment: `dpl_Bz9SCknMetgJH3MoykG59q3RXbFf`.
+- Production alias: `https://anngon.io`.
+- GitHub CI run `30519225828`: quality and E2E jobs passed.
+- Smoke: landing returned HTTP 200; the protected `/overview` route returned
+  the expected Clerk 307 redirect to `/sign-in` while signed out.
 
 ## IMPLEMENTATION
 
@@ -97,8 +106,10 @@ None. The implementation stays inside the approved KE-019 blueprint. Realtime
 subscriptions and polling remain intentionally out of scope; continuity occurs
 on load/resume with safe conflict handling on write.
 
+The first GitHub E2E job had one timeout in the pre-existing assistant proposal
+test while the other 62 scenarios passed. The failed job was rerun unchanged
+and passed all 63 scenarios; local full E2E had already passed 63/63.
+
 ## RELEASE NOTE
 
-Neon main is ready. The application commit still needs to be pushed and its
-Vercel production deployment verified before KE-019 is marked production
-released.
+KE-019 is live on Neon main and `anngon.io`.
