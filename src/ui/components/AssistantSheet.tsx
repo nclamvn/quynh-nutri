@@ -295,6 +295,22 @@ export function AssistantSheet() {
                         : "Bỏ món"}
                     </span>
                   </div>
+                  {change.memoryReasons && change.memoryReasons.length > 0 && (
+                    <p className="mt-2 text-[11px] leading-relaxed text-muted">
+                      {change.memoryReasons.map((reason) => {
+                        if (reason === "explicit_repeat") {
+                          return "Gia đình từng chọn muốn ăn lại";
+                        }
+                        if (reason === "explicit_avoid") {
+                          return "Có phản hồi không hợp nhà, nhưng ràng buộc tuần được ưu tiên";
+                        }
+                        return "Cân nhắc công chuẩn bị vào ngày bận";
+                      }).join(" · ")}
+                      {change.memoryEvidenceCount
+                        ? ` · ${change.memoryEvidenceCount} phản hồi đã xác nhận`
+                        : ""}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

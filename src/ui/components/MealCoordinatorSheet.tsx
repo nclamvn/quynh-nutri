@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Dish } from "@/domain/types";
+import type { Dish, MealCompletion } from "@/domain/types";
 import {
   COOKING_GUIDES,
   cookingGuideFor,
@@ -15,6 +15,7 @@ import { BottomSheet } from "@/ui/components/BottomSheet";
 import { MealRunMode } from "@/ui/components/MealRunMode";
 import { LeftoverCaptureSheet } from "@/ui/components/LeftoverCaptureSheet";
 import { MealCloseoutSheet } from "@/ui/components/MealCloseoutSheet";
+import { MealReflectionSheet } from "@/ui/components/MealReflectionSheet";
 import { useI18n } from "@/i18n/context";
 import { useStore } from "@/ui/store";
 import {
@@ -79,7 +80,8 @@ export function MealCoordinatorSheet({
   const [runOpen, setRunOpen] = useState(Boolean(session));
   const [finishedSession, setFinishedSession] = useState<MealRunSession>();
   const [closeoutVersion, setCloseoutVersion] = useState<number>();
-  const [mealCompletionId, setMealCompletionId] = useState<string>();
+  const [mealCompletion, setMealCompletion] = useState<MealCompletion>();
+  const [postMealStep, setPostMealStep] = useState<"leftovers" | "reflection">("leftovers");
   const targetMs = target ? new Date(target).getTime() : Number.NaN;
   const validTarget = Number.isFinite(targetMs) && targetMs > openedAt;
   const validDurations = supported.every((dish) => {
@@ -255,12 +257,13 @@ export function MealCoordinatorSheet({
     setRunOpen(true);
   };
 
-  const confirmedCloseout = (completionId: string) => {
+  const confirmedCloseout = (completion: MealCompletion) => {
     sessionStorage.removeItem(storageKey);
     versionRef.current = null;
     sessionRef.current = undefined;
     setSession(undefined);
-    setMealCompletionId(completionId);
+    setMealCompletion(completion);
+    setPostMealStep("leftovers");
     setCloseoutVersion(undefined);
   };
 
@@ -354,25 +357,32 @@ export function MealCoordinatorSheet({
           onCancel={clearSession}
         />
       )}
-      {finishedSession && !mealCompletionId && closeoutVersion !== undefined && (
+      {finishedSession && !mealCompletion && closeoutVersion !== undefined && (
         <MealCloseoutSheet
           day={day}
           session={finishedSession}
           dishes={supported}
           expectedSessionVersion={closeoutVersion}
           onCancel={cancelCloseout}
-          onConfirmed={(completion) => confirmedCloseout(completion.id)}
+          onConfirmed={confirmedCloseout}
         />
       )}
-      {finishedSession && mealCompletionId && (
+      {finishedSession && mealCompletion && postMealStep === "leftovers" && (
         <LeftoverCaptureSheet
           session={finishedSession}
           dishes={supported}
           sourceMealRunRef={`${household.id}:${plan.weekStart}:${day}:${finishedSession.createdAt}`}
-          mealCompletionId={mealCompletionId}
+          mealCompletionId={mealCompletion.id}
+          onClose={() => setPostMealStep("reflection")}
+        />
+      )}
+      {finishedSession && mealCompletion && postMealStep === "reflection" && (
+        <MealReflectionSheet
+          completion={mealCompletion}
+          dishes={supported}
           onClose={() => {
             setFinishedSession(undefined);
-            setMealCompletionId(undefined);
+            setMealCompletion(undefined);
             onClose();
           }}
         />

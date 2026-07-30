@@ -206,6 +206,7 @@ model Household {
   pushSubscriptions       PushSubscription[]
   kitchenSessions         KitchenSession[]
   mealCompletions         MealCompletion[]
+  mealFeedbacks           MealFeedback[]
   productEvents           ProductEvent[]
 }
 
@@ -259,6 +260,7 @@ model MealCompletion {
   createdByUserId        String
   inventoryMovements     InventoryMovement[]
   leftoverLots           LeftoverLot[]
+  feedback               MealFeedback[]
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
 
@@ -266,6 +268,31 @@ model MealCompletion {
   @@unique([householdId, weekRef, day, sourceSessionCreatedAt])
   @@index([householdId, weekRef, day])
   @@index([householdId, completedAt])
+}
+
+// Direct household feedback for one dish in one confirmed meal. This is never
+// inferred from leftovers, inventory, clicks, favorites or model output.
+model MealFeedback {
+  id               String         @id @default(cuid())
+  householdId      String
+  household        Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  mealCompletionId String
+  mealCompletion   MealCompletion @relation(fields: [mealCompletionId], references: [id], onDelete: Cascade)
+  dishRef          String
+  idempotencyKey   String
+  repeatIntent     String?
+  portionFit       String?
+  effortFit        String?
+  version          Int            @default(1)
+  createdByUserId  String
+  updatedByUserId  String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([householdId, idempotencyKey])
+  @@unique([mealCompletionId, dishRef])
+  @@index([householdId, updatedAt])
+  @@index([householdId, dishRef])
 }
 
 // Web Push is an explicitly enabled delivery channel around the derived

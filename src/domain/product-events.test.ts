@@ -66,4 +66,34 @@ describe("product event privacy contract", () => {
       },
     })).toThrow();
   });
+
+  it("allows only aggregate meal-memory measurement", () => {
+    expect(parseProductEvent({
+      name: "meal_feedback_saved",
+      dedupeKey: "meal_feedback_saved:1",
+      properties: {
+        dimensionsAnswered: 2,
+        isEdit: false,
+      },
+    })).toMatchObject({ name: "meal_feedback_saved" });
+    expect(parseProductEvent({
+      name: "memory_guided_proposal_created",
+      dedupeKey: "memory_proposal:1",
+      properties: {
+        changedSlotCount: 3,
+        reasonCategoryCount: 1,
+        evidenceState: "emerging",
+      },
+    })).toMatchObject({ name: "memory_guided_proposal_created" });
+    expect(() => parseProductEvent({
+      name: "meal_feedback_saved",
+      dedupeKey: "meal_feedback_saved:2",
+      properties: {
+        dimensionsAnswered: 1,
+        isEdit: true,
+        dishId: "ca-kho",
+        repeatIntent: "repeat",
+      },
+    })).toThrow();
+  });
 });

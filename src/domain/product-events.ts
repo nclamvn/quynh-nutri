@@ -9,6 +9,9 @@ export const PRODUCT_EVENT_NAMES = [
   "meal_run_started",
   "meal_completed",
   "leftover_recorded",
+  "meal_feedback_saved",
+  "meal_feedback_deleted",
+  "memory_guided_proposal_created",
 ] as const;
 
 export type ProductEventName = (typeof PRODUCT_EVENT_NAMES)[number];
@@ -41,6 +44,18 @@ const schemas = {
   }).strict(),
   leftover_recorded: z.object({
     storageLocation: z.enum(["fridge", "freezer"]),
+  }).strict(),
+  meal_feedback_saved: z.object({
+    dimensionsAnswered: z.number().int().min(1).max(3),
+    isEdit: z.boolean(),
+  }).strict(),
+  meal_feedback_deleted: z.object({
+    hadAllDimensions: z.boolean(),
+  }).strict(),
+  memory_guided_proposal_created: z.object({
+    changedSlotCount: z.number().int().min(0).max(35),
+    reasonCategoryCount: z.number().int().min(0).max(6),
+    evidenceState: z.enum(["none", "single", "emerging", "established", "mixed"]),
   }).strict(),
 } satisfies Record<ProductEventName, z.ZodType>;
 

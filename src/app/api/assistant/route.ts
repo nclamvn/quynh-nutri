@@ -8,6 +8,7 @@ import { loadOrCreateCurrentWeekPlan } from "@/data/repo/week-plan";
 import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { isWeekPlanProposalRequest } from "@/domain/assistant/week-plan-proposal";
 import { createAssistantWeekPlanProposal } from "@/lib/assistant/week-plan-proposal";
+import { getHouseholdMealMemorySnapshot } from "@/lib/assistant/meal-memory";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -86,6 +87,19 @@ export async function POST(req: Request) {
         const summary = brief.tasks.length
           ? `Theo dữ liệu bạn đã ghi nhận, hiện có ${brief.tasks.length} việc bếp tại ${activeStations.length} trạm đủ căn cứ. Tôi chỉ đọc bản tin và không tự đánh dấu hoàn tất.`
           : "Theo dữ liệu bạn đã ghi nhận, chưa có việc bếp nào đủ căn cứ để nhắc. Tôi không tự nghĩ thêm việc.";
+        return new Response(summary, {
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      }
+      if (
+        latest?.includes("nhà mình thích")
+        || latest?.includes("món nào nên lặp")
+        || latest?.includes("phản hồi sau bữa")
+      ) {
+        const memory = await getHouseholdMealMemorySnapshot();
+        const summary = memory.totalFeedbackCount > 0
+          ? `Theo ${memory.totalFeedbackCount} phản hồi gia đình đã xác nhận, tôi chỉ đọc số đếm trong trí nhớ bữa cơm và không tự tạo, sửa hoặc xoá phản hồi.`
+          : "Gia đình chưa có phản hồi bữa cơm đã xác nhận. Tôi không suy đoán sở thích từ lượt xem, món thừa hoặc thực đơn.";
         return new Response(summary, {
           headers: { "Content-Type": "text/plain; charset=utf-8" },
         });

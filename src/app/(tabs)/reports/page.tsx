@@ -11,6 +11,7 @@ import { PageHeader } from "@/ui/components/PageHeader";
 import { useCountUp } from "@/ui/hooks/useCountUp";
 import { useLocalStorageValue } from "@/ui/hooks/useLocalStorageValue";
 import { useStore } from "@/ui/store";
+import { HouseholdMealMemoryCard } from "@/ui/components/HouseholdMealMemoryCard";
 
 const BUDGET_KEY = "qk-budget-weekly";
 const GROUP_LABEL: Record<string, { vn: string; en: string }> = {
@@ -540,6 +541,7 @@ export default function ReportsPage() {
           <p className="text-[11px] leading-relaxed text-tertiary">{t("reports.footer")}</p>
         </div>
       )}
+      <HouseholdMealMemoryCard />
     </PageContainer>
   );
 }

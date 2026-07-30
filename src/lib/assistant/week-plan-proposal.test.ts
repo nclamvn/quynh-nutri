@@ -11,12 +11,16 @@ const refs = vi.hoisted(() => ({
   envelope: { current: undefined as WeekPlanEnvelope | undefined },
   loadState: vi.fn(),
   loadPlan: vi.fn(),
+  recordEvent: vi.fn(),
 }));
 vi.mock("@/data/repo/household", () => ({
   loadHouseholdState: refs.loadState,
 }));
 vi.mock("@/data/repo/week-plan", () => ({
   loadOrCreateCurrentWeekPlan: refs.loadPlan,
+}));
+vi.mock("@/data/repo/product-events", () => ({
+  recordProductEventSafely: refs.recordEvent,
 }));
 
 import {
@@ -52,6 +56,7 @@ describe("server assistant week plan proposal", () => {
       leftoverLots: [],
     leftoverMovements: [],
     mealCompletions: [],
+    mealFeedback: [],
     };
     refs.envelope.current = {
       plan: {
@@ -65,6 +70,7 @@ describe("server assistant week plan proposal", () => {
     };
     refs.loadState.mockReset();
     refs.loadPlan.mockReset();
+    refs.recordEvent.mockReset();
     refs.loadState.mockImplementation(async () =>
       structuredClone(refs.state.current!)
     );
@@ -103,6 +109,50 @@ describe("server assistant week plan proposal", () => {
     }
     expect(refs.loadState).toHaveBeenCalledTimes(1);
     expect(refs.loadPlan).toHaveBeenCalledTimes(1);
+    expect(refs.recordEvent).toHaveBeenCalledWith(expect.objectContaining({
+      name: "memory_guided_proposal_created",
+      properties: expect.objectContaining({
+        changedSlotCount: proposal!.changes.length,
+      }),
+    }));
+  });
+
+  it("adds exact, explicit memory evidence to a proposal reason", async () => {
+    const rememberedDish = refs.envelope.current!.plan.slots.find(
+      (item) => !item.locked && item.slot === "RAU",
+    )!.dishId;
+    refs.state.current!.mealCompletions = [{
+      id: "completion-memory",
+      idempotencyKey: "completion-key",
+      weekRef: "2026-07-20",
+      day: 1,
+      dishRefs: [rememberedDish],
+      sourceSessionCreatedAt: "2026-07-20T10:00:00.000Z",
+      completedAt: "2026-07-20T11:00:00.000Z",
+      createdAt: "2026-07-20T11:00:00.000Z",
+      updatedAt: "2026-07-20T11:00:00.000Z",
+    }];
+    refs.state.current!.mealFeedback = [{
+      id: "feedback-memory",
+      mealCompletionId: "completion-memory",
+      dishRef: rememberedDish,
+      idempotencyKey: "feedback-key",
+      repeatIntent: "repeat",
+      version: 1,
+      createdAt: "2026-07-20T11:05:00.000Z",
+      updatedAt: "2026-07-20T11:05:00.000Z",
+    }];
+
+    const proposal = await createAssistantWeekPlanProposal();
+    const reason = proposal?.changes.find(
+      (change) =>
+        change.afterDishId === rememberedDish
+        && change.memoryReasons?.includes("explicit_repeat"),
+    );
+    expect(reason).toMatchObject({
+      memoryEvidenceCount: 1,
+      memoryEvidenceState: "single",
+    });
   });
 
   it("recomputes the candidate and rejects a client-tampered payload", async () => {

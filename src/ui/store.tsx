@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord, ShoppingFulfillment, ReceiveShoppingItemInput, ReceiveShoppingItemResult, InventoryMovement, RecordInventoryMovementInput, RecordInventoryMovementResult, LeftoverLot, LeftoverMovement, CreateLeftoverLotInput, RecordLeftoverMovementInput, RecordLeftoverMovementResult, MealCompletion, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord, ShoppingFulfillment, ReceiveShoppingItemInput, ReceiveShoppingItemResult, InventoryMovement, RecordInventoryMovementInput, RecordInventoryMovementResult, LeftoverLot, LeftoverMovement, CreateLeftoverLotInput, RecordLeftoverMovementInput, RecordLeftoverMovementResult, MealCompletion, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult, MealFeedback, SaveMealFeedbackInput, SaveMealFeedbackResult, DeleteMealFeedbackInput, DeleteMealFeedbackResult } from "@/domain/types";
 import { splitOrders, type OrderSplit } from "@/domain/order";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -10,7 +10,7 @@ import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
 import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
 import { dishSafety, safetyReason } from "@/domain/constraints";
-import { getHouseholdState, getCanonicalWeekPlan, syncHouseholdDishLibrary, persistCanonicalWeekPlan, confirmAssistantWeekPlanProposal, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction, confirmMealCloseout as confirmMealCloseoutAction } from "@/app/actions";
+import { getHouseholdState, getCanonicalWeekPlan, syncHouseholdDishLibrary, persistCanonicalWeekPlan, confirmAssistantWeekPlanProposal, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction, confirmMealCloseout as confirmMealCloseoutAction, saveMealFeedback as saveMealFeedbackAction, deleteMealFeedback as deleteMealFeedbackAction } from "@/app/actions";
 import { toast } from "@/ui/toast";
 import { currentWeekStartIso } from "@/lib/week";
 import type {
@@ -81,7 +81,10 @@ interface StoreValue {
   pantry: PantryItem[];
   inventoryMovements: InventoryMovement[];
   mealCompletions: MealCompletion[];
+  mealFeedback: MealFeedback[];
   confirmMealCloseout: (input: ConfirmMealCloseoutInput) => Promise<ConfirmMealCloseoutResult>;
+  saveMealFeedback: (input: SaveMealFeedbackInput) => Promise<SaveMealFeedbackResult>;
+  deleteMealFeedback: (input: DeleteMealFeedbackInput) => Promise<DeleteMealFeedbackResult>;
   addPantry: (commodityId: string, qty: number, unit: string) => void;
   removePantry: (lotId: string) => void;
   recordInventoryMovement: (input: RecordInventoryMovementInput) => Promise<RecordInventoryMovementResult>;
@@ -114,7 +117,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [household, setHousehold] = useState<Household>(DEFAULT_HOUSEHOLD);
   // Per-piece "touched" flags so late-arriving DB hydration never clobbers an
   // optimistic edit the user made before it resolved.
-  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, inventoryMovements: false, mealCompletions: false, leftoverLots: false, leftoverMovements: false, suppliers: false, orders: false, purchases: false, fulfillments: false, b1: false });
+  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, inventoryMovements: false, mealCompletions: false, mealFeedback: false, leftoverLots: false, leftoverMovements: false, suppliers: false, orders: false, purchases: false, fulfillments: false, b1: false });
   const [hydrated, setHydrated] = useState(false);
   const [plan, setPlan] = useState<PersistedWeekPlan>(() => ({
     id: "",
@@ -135,6 +138,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [pantry, setPantry] = useState<PantryItem[]>([]);
   const [inventoryMovements, setInventoryMovements] = useState<InventoryMovement[]>([]);
   const [mealCompletions, setMealCompletions] = useState<MealCompletion[]>([]);
+  const [mealFeedback, setMealFeedback] = useState<MealFeedback[]>([]);
   const [leftoverLots, setLeftoverLots] = useState<LeftoverLot[]>([]);
   const [leftoverMovements, setLeftoverMovements] = useState<LeftoverMovement[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -164,6 +168,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (!tp.pantry) setPantry(s.pantry);
         if (!tp.inventoryMovements) setInventoryMovements(s.inventoryMovements);
         if (!tp.mealCompletions) setMealCompletions(s.mealCompletions);
+        if (!tp.mealFeedback) setMealFeedback(s.mealFeedback);
         if (!tp.leftoverLots) setLeftoverLots(s.leftoverLots);
         if (!tp.leftoverMovements) setLeftoverMovements(s.leftoverMovements);
         if (!tp.suppliers) setSuppliers(s.suppliers);
@@ -477,6 +482,45 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ...previous.filter(
         (movement) => !result.movements.some((item) => item.id === movement.id),
       ),
+    ]);
+    return result;
+  }, []);
+
+  const saveMealFeedback = useCallback(async (
+    input: SaveMealFeedbackInput,
+  ): Promise<SaveMealFeedbackResult> => {
+    const result = await saveMealFeedbackAction(input);
+    touched.current.mealFeedback = true;
+    if (result.ok) {
+      setMealFeedback((previous) => [
+        result.feedback,
+        ...previous.filter((item) => item.id !== result.feedback.id),
+      ]);
+      toast("Đã ghi nhận cảm nhận của gia đình.");
+      return result;
+    }
+    setMealFeedback((previous) => [
+      result.canonical,
+      ...previous.filter((item) => item.id !== result.canonical.id),
+    ]);
+    return result;
+  }, []);
+
+  const deleteMealFeedback = useCallback(async (
+    input: DeleteMealFeedbackInput,
+  ): Promise<DeleteMealFeedbackResult> => {
+    const result = await deleteMealFeedbackAction(input);
+    touched.current.mealFeedback = true;
+    if (result.ok) {
+      setMealFeedback((previous) =>
+        previous.filter((item) => item.id !== result.feedbackId),
+      );
+      toast("Đã xoá phản hồi bữa ăn.");
+      return result;
+    }
+    setMealFeedback((previous) => [
+      result.canonical,
+      ...previous.filter((item) => item.id !== result.canonical.id),
     ]);
     return result;
   }, []);
@@ -841,7 +885,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     pantry,
     inventoryMovements,
     mealCompletions,
+    mealFeedback,
     confirmMealCloseout,
+    saveMealFeedback,
+    deleteMealFeedback,
     addPantry,
     removePantry,
     recordInventoryMovement,

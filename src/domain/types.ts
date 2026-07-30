@@ -274,6 +274,46 @@ export interface MealCompletion {
   updatedAt: string;
 }
 
+export type MealRepeatIntent = "repeat" | "neutral" | "avoid";
+export type MealPortionFit = "too_little" | "right" | "too_much";
+export type MealEffortFit = "easy" | "manageable" | "too_much";
+
+export interface MealFeedback {
+  id: string;
+  mealCompletionId: string;
+  dishRef: string;
+  idempotencyKey: string;
+  repeatIntent?: MealRepeatIntent;
+  portionFit?: MealPortionFit;
+  effortFit?: MealEffortFit;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SaveMealFeedbackInput {
+  idempotencyKey: string;
+  mealCompletionId: string;
+  dishRef: string;
+  repeatIntent?: MealRepeatIntent;
+  portionFit?: MealPortionFit;
+  effortFit?: MealEffortFit;
+  expectedVersion: number | null;
+}
+
+export type SaveMealFeedbackResult =
+  | { ok: true; feedback: MealFeedback }
+  | { ok: false; kind: "conflict"; canonical: MealFeedback };
+
+export interface DeleteMealFeedbackInput {
+  feedbackId: string;
+  expectedVersion: number;
+}
+
+export type DeleteMealFeedbackResult =
+  | { ok: true; feedbackId: string }
+  | { ok: false; kind: "conflict"; canonical: MealFeedback };
+
 export interface InventoryMovement {
   id: string;
   idempotencyKey: string;

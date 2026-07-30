@@ -52,5 +52,17 @@ Environment: local, `Asia/Ho_Chi_Minh`
 
 ## Result
 
-KE-028 meets the corrected TIP locally. Release still requires separate
-authorization to apply the migration, commit, push, and deploy.
+KE-028 meets the corrected TIP and is production released.
+
+## Production verification
+
+- Commit: `2b498037c015fb58b18c8b8c0c3b804eb6242fc0`.
+- GitHub CI: run `30547302239`, passed in 6 minutes 17 seconds.
+- Neon main: all 8 migrations applied; schema up to date.
+- Vercel: deployment `dpl_89zLpXEQHmacAR4CpvbzKqfKsUQQ`, target production,
+  ready.
+- Alias: `https://anngon.io`.
+- Smoke:
+  - `/` returned HTTP 200.
+  - `/overview` returned the expected unauthenticated HTTP 307 redirect.
+- Local and `origin/main` resolved to the same commit after release.

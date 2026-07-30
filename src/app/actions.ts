@@ -3,7 +3,7 @@
 import { currentHouseholdId, loadHouseholdState, saveHouseholdState, saveMemberHealthProfile, saveMemberAllergies, saveMember, deleteMember, addMemberState, deleteMemberState, saveSupplier, deleteSupplier, saveOrder, savePurchase, receiveShoppingItemRecord, createManualInventoryLotRecord, deleteInventoryLotRecord, recordInventoryMovementRecord, createLeftoverLotRecord, recordLeftoverMovementRecord, completeHouseholdOnboarding, type StatePatch, type HouseholdState } from "@/data/repo/household";
 import { semanticSearch } from "@/lib/search";
 import { isE2EMode, requireUserId } from "@/lib/auth";
-import type { HealthProfile, Allergen, Member, MemberState, Supplier, Order, PurchaseRecord, ReceiveShoppingItemInput, ReceiveShoppingItemResult, RecordInventoryMovementInput, RecordInventoryMovementResult, CreateLeftoverLotInput, LeftoverLot, RecordLeftoverMovementInput, RecordLeftoverMovementResult, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult } from "@/domain/types";
+import type { HealthProfile, Allergen, Member, MemberState, Supplier, Order, PurchaseRecord, ReceiveShoppingItemInput, ReceiveShoppingItemResult, RecordInventoryMovementInput, RecordInventoryMovementResult, CreateLeftoverLotInput, LeftoverLot, RecordLeftoverMovementInput, RecordLeftoverMovementResult, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult, SaveMealFeedbackInput, SaveMealFeedbackResult, DeleteMealFeedbackInput, DeleteMealFeedbackResult } from "@/domain/types";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { validateReceiptBusinessRules } from "@/domain/kitchen-execution/receipt";
@@ -56,6 +56,10 @@ import {
 } from "@/domain/onboarding";
 import { recordProductEventSafely } from "@/data/repo/product-events";
 import { confirmMealCloseoutRecord } from "@/data/repo/meal-completion";
+import {
+  deleteMealFeedbackRecord,
+  saveMealFeedbackRecord,
+} from "@/data/repo/meal-feedback";
 
 const id = z.string().trim().min(1).max(128);
 const shortText = z.string().trim().max(500);
@@ -270,6 +274,27 @@ const leftoverMovementSchema = z.object({
     ctx.addIssue({ code: "custom", path: ["occurredAt"], message: "OCCURRED_AT_IN_FUTURE" });
   }
 });
+const saveMealFeedbackSchema = z.object({
+  idempotencyKey: z.string().uuid(),
+  mealCompletionId: id,
+  dishRef: id,
+  repeatIntent: z.enum(["repeat", "neutral", "avoid"]).optional(),
+  portionFit: z.enum(["too_little", "right", "too_much"]).optional(),
+  effortFit: z.enum(["easy", "manageable", "too_much"]).optional(),
+  expectedVersion: z.number().int().positive().nullable(),
+}).strict().superRefine((value, ctx) => {
+  if (!value.repeatIntent && !value.portionFit && !value.effortFit) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["repeatIntent"],
+      message: "MEAL_FEEDBACK_ANSWER_REQUIRED",
+    });
+  }
+});
+const deleteMealFeedbackSchema = z.object({
+  feedbackId: id,
+  expectedVersion: z.number().int().positive(),
+}).strict();
 const plannedSlotSchema = z.object({
   day: z.number().int().min(0).max(6),
   slot: z.enum(["COM", "MAN", "RAU", "CANH", "TRANGMIENG"]),
@@ -547,6 +572,68 @@ export async function confirmMealCloseout(
   revalidatePath("/overview");
   revalidatePath("/week");
   revalidatePath("/pantry");
+  return result;
+}
+
+export async function saveMealFeedback(
+  raw: SaveMealFeedbackInput,
+): Promise<SaveMealFeedbackResult> {
+  const userId = await requireUserId();
+  const input = saveMealFeedbackSchema.parse(raw) as SaveMealFeedbackInput;
+  const householdId = await currentHouseholdId();
+  const e2eState = isE2EMode() ? await loadHouseholdState() : undefined;
+  const result = await saveMealFeedbackRecord(
+    { ...input, householdId, userId },
+    e2eState?.mealCompletions.find(
+      (completion) => completion.id === input.mealCompletionId,
+    ),
+  );
+  if (result.ok) {
+    const dimensionsAnswered = [
+      input.repeatIntent,
+      input.portionFit,
+      input.effortFit,
+    ].filter(Boolean).length;
+    await recordProductEventSafely({
+      name: "meal_feedback_saved",
+      dedupeKey: `meal_feedback_saved:${input.idempotencyKey}`,
+      properties: {
+        dimensionsAnswered,
+        isEdit: input.expectedVersion !== null,
+      },
+    });
+  }
+  revalidatePath("/reports");
+  revalidatePath("/overview");
+  return result;
+}
+
+export async function deleteMealFeedback(
+  raw: DeleteMealFeedbackInput,
+): Promise<DeleteMealFeedbackResult> {
+  await requireUserId();
+  const input = deleteMealFeedbackSchema.parse(raw) as DeleteMealFeedbackInput;
+  const householdId = await currentHouseholdId();
+  const stateBeforeDelete = await loadHouseholdState();
+  const existing = stateBeforeDelete.mealFeedback.find(
+    (feedback) => feedback.id === input.feedbackId,
+  );
+  const result = await deleteMealFeedbackRecord({ ...input, householdId });
+  if (result.ok) {
+    await recordProductEventSafely({
+      name: "meal_feedback_deleted",
+      dedupeKey: `meal_feedback_deleted:${input.feedbackId}:${input.expectedVersion}`,
+      properties: {
+        hadAllDimensions: Boolean(
+          existing?.repeatIntent
+          && existing.portionFit
+          && existing.effortFit,
+        ),
+      },
+    });
+  }
+  revalidatePath("/reports");
+  revalidatePath("/overview");
   return result;
 }
 

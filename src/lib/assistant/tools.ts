@@ -17,6 +17,7 @@ import type { Household, Slot } from "@/domain/types";
 import { currentWeekStartIso } from "@/lib/week";
 import { getDailyHousekeeperBriefSnapshot, getTodayMealReadinessSnapshot } from "@/lib/assistant/kitchen-agenda";
 import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
+import { getHouseholdMealMemorySnapshot } from "@/lib/assistant/meal-memory";
 
 // Tools wrap the DETERMINISTIC engines – the LLM orchestrates + explains, the
 // engines compute the numbers (with provenance). This is the honesty moat: no
@@ -38,6 +39,12 @@ function matchCommodity(q: string): string | undefined {
 }
 
 export const tools = {
+  household_meal_memory: tool({
+    description: "Đọc trí nhớ món ăn tất định từ phản hồi theo từng món mà gia đình đã xác nhận. Trả số đếm và độ chín bằng chứng. Chỉ đọc, không suy diễn từ hành vi, không tạo hoặc sửa phản hồi.",
+    inputSchema: z.object({}),
+    execute: async () => getHouseholdMealMemorySnapshot(),
+  }),
+
   prep_ahead_guide: tool({
     description: "Đọc hướng dẫn chuẩn bị trước đã rà soát cho một dishId trong catalog, hoặc tự đọc các món ngày mai khi không truyền dishId. Chỉ trả registry read-only; nếu unsupported=false thì không được tự viết bước thay thế.",
     inputSchema: z.object({

@@ -1,5 +1,7 @@
 # COMPLETION-KE-028 – Today Meal Stewardship
 
+**STATUS:** PRODUCTION RELEASED
+
 ## Scope delivered
 
 KE-028 closes the daily meal execution loop without introducing a generic task
@@ -61,8 +63,22 @@ with only the inventory movements the household explicitly selected.
 - `src/lib/assistant/kitchen-agenda.ts`
 - `e2e/meal-closeout.spec.ts`
 
-## Delivery boundary
+## Production release
 
-Implementation and local verification are complete. The migration has not been
-applied to Neon. No commit, push, or production deployment was performed in
-this delivery.
+- Application commit: `2b498037c015fb58b18c8b8c0c3b804eb6242fc0`.
+- GitHub CI run: `30547302239`, completed successfully.
+- Neon main: all 8 migrations applied and Prisma reported the schema up to
+  date.
+- `20260730180000_product_events` already existed with the expected structure;
+  its failed migration record was reconciled as applied without recreating or
+  deleting the table.
+- `20260730203000_meal_completion` applied successfully.
+- Vercel deployment: `dpl_89zLpXEQHmacAR4CpvbzKqfKsUQQ`, status `READY`.
+- Production aliases: `https://anngon.io` and `https://www.anngon.io`.
+- Production smoke: landing returned HTTP 200; protected `/overview` returned
+  the expected Clerk HTTP 307 redirect while signed out.
+
+## Delivery result
+
+KE-028 is committed, migrated, deployed, verified by CI, and live on
+`anngon.io`.

@@ -5,6 +5,11 @@ export interface WeekPlanProposalChange {
   slot: Slot;
   beforeDishId: string | null;
   afterDishId: string | null;
+  memoryReasons?: Array<
+    "explicit_repeat" | "explicit_avoid" | "busy_day_effort"
+  >;
+  memoryEvidenceCount?: number;
+  memoryEvidenceState?: "single" | "emerging" | "established" | "mixed";
 }
 
 export interface AssistantWeekPlanProposal {

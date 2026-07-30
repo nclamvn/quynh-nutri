@@ -38,8 +38,13 @@ import type {
   PurchaseLine,
   OnTime,
   MealCompletion,
+  MealFeedback,
 } from "@/domain/types";
 import { mergeE2EMealCompletionState } from "@/data/repo/meal-completion";
+import {
+  mergeE2EMealFeedbackState,
+  toMealFeedback,
+} from "@/data/repo/meal-feedback";
 import {
   evaluateCoolingWindow,
   LEFTOVER_POLICY_VERSION,
@@ -96,6 +101,7 @@ export interface HouseholdState {
   leftoverLots: LeftoverLot[];
   leftoverMovements: LeftoverMovement[];
   mealCompletions: MealCompletion[];
+  mealFeedback: MealFeedback[];
 }
 
 const initialE2EHousehold = () => {
@@ -123,10 +129,14 @@ const e2eState: HouseholdState = {
   leftoverLots: [],
   leftoverMovements: [],
   mealCompletions: [],
+  mealFeedback: [],
 };
 const e2eReceiveResults = new Map<string, ReceiveShoppingItemResult>();
 const cloneE2EState = (): HouseholdState =>
-  mergeE2EMealCompletionState(HH_ID, structuredClone(e2eState));
+  mergeE2EMealFeedbackState(
+    HH_ID,
+    mergeE2EMealCompletionState(HH_ID, structuredClone(e2eState)),
+  );
 const e2eId = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 
 export async function loadHouseholdState(): Promise<HouseholdState> {
@@ -146,6 +156,7 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
     leftoverLots: [],
     leftoverMovements: [],
     mealCompletions: [],
+    mealFeedback: [],
   };
 }
 
@@ -178,6 +189,7 @@ export async function loadHouseholdStateForSystem(
         take: 50,
       },
       mealCompletions: { orderBy: { completedAt: "asc" } },
+      mealFeedbacks: { orderBy: { updatedAt: "desc" } },
       shoppingFulfillments: { include: { inventoryLot: true } },
     },
   });
@@ -229,6 +241,7 @@ export async function loadHouseholdStateForSystem(
     leftoverLots: row.leftoverLots.map(rowToLeftoverLot),
     leftoverMovements: row.leftoverMovements.map(rowToLeftoverMovement),
     mealCompletions: row.mealCompletions.map(rowToMealCompletion),
+    mealFeedback: row.mealFeedbacks.map(toMealFeedback),
   };
 }
 

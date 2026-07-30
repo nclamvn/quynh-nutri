@@ -18,6 +18,8 @@ export interface RotationInput {
   weekStart: string;
   /** Re-roll seed – same seed ⇒ same plan. */
   seed?: number;
+  /** Optional soft household preference. Hard safety and rotation filters run first. */
+  dishScore?: (dish: Dish, context: { day: number; busy: boolean }) => number;
 }
 
 export interface RotationResult {
@@ -64,8 +66,18 @@ export function generateWeek(input: RotationInput): RotationResult {
   let usedRauRecent: string | undefined;
   let usedCanhRecent: string | undefined;
 
-  const pick = (pool: Dish[], predicate: (d: Dish) => boolean): Dish | undefined => {
+  const pick = (
+    pool: Dish[],
+    predicate: (d: Dish) => boolean,
+    context: { day: number; busy: boolean },
+  ): Dish | undefined => {
     const candidates = shuffled(pool, rand).filter(predicate);
+    if (input.dishScore) {
+      candidates.sort(
+        (left, right) =>
+          input.dishScore!(right, context) - input.dishScore!(left, context),
+      );
+    }
     return candidates[0];
   };
 
@@ -83,10 +95,10 @@ export function generateWeek(input: RotationInput): RotationResult {
       man = dishById.get(lockedMan.dishId);
     } else {
       man =
-        pick(manPool, (d) => d.proteinType !== prevProtein && (!busy || d.quick)) ??
+        pick(manPool, (d) => d.proteinType !== prevProtein && (!busy || d.quick), { day, busy }) ??
         // fallback: relax anti-repeat before serving a busy-day non-quick dish
-        pick(manPool, (d) => !busy || d.quick) ??
-        pick(manPool, () => true);
+        pick(manPool, (d) => !busy || d.quick, { day, busy }) ??
+        pick(manPool, () => true, { day, busy });
     }
     if (man) {
       slots.push(lockedMan ?? plain(day, "MAN", man.id));
@@ -99,11 +111,11 @@ export function generateWeek(input: RotationInput): RotationResult {
     if (lockedRau) {
       rau = dishById.get(lockedRau.dishId);
     } else if (man && HEAVY_METHODS.has(man.method)) {
-      rau = pick(rauPool, (d) => d.method === "luoc" && d.id !== usedRauRecent) ?? pick(rauPool, (d) => d.id !== usedRauRecent);
+      rau = pick(rauPool, (d) => d.method === "luoc" && d.id !== usedRauRecent, { day, busy }) ?? pick(rauPool, (d) => d.id !== usedRauRecent, { day, busy });
     } else if (man && LIGHT_METHODS.has(man.method)) {
-      rau = pick(rauPool, (d) => d.method === "xao" && d.id !== usedRauRecent) ?? pick(rauPool, (d) => d.id !== usedRauRecent);
+      rau = pick(rauPool, (d) => d.method === "xao" && d.id !== usedRauRecent, { day, busy }) ?? pick(rauPool, (d) => d.id !== usedRauRecent, { day, busy });
     } else {
-      rau = pick(rauPool, (d) => d.id !== usedRauRecent) ?? pick(rauPool, () => true);
+      rau = pick(rauPool, (d) => d.id !== usedRauRecent, { day, busy }) ?? pick(rauPool, () => true, { day, busy });
     }
     if (rau) {
       slots.push(lockedRau ?? plain(day, "RAU", rau.id));
@@ -117,10 +129,10 @@ export function generateWeek(input: RotationInput): RotationResult {
       canh = dishById.get(lockedCanh.dishId);
     } else if (man && HEAVY_METHODS.has(man.method)) {
       canh =
-        pick(canhPool, (d) => d.tags?.includes("thanh") === true && d.id !== usedCanhRecent) ??
-        pick(canhPool, (d) => d.id !== usedCanhRecent);
+        pick(canhPool, (d) => d.tags?.includes("thanh") === true && d.id !== usedCanhRecent, { day, busy }) ??
+        pick(canhPool, (d) => d.id !== usedCanhRecent, { day, busy });
     } else {
-      canh = pick(canhPool, (d) => d.id !== usedCanhRecent) ?? pick(canhPool, () => true);
+      canh = pick(canhPool, (d) => d.id !== usedCanhRecent, { day, busy }) ?? pick(canhPool, () => true, { day, busy });
     }
     if (canh) {
       slots.push(lockedCanh ?? plain(day, "CANH", canh.id));
