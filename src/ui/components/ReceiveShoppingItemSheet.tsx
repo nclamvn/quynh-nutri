@@ -21,22 +21,42 @@ export function ReceiveShoppingItemSheet({
   item,
   weekRef,
   commodity,
+  initialDraft,
+  captureSource,
   onClose,
   onReceive,
 }: {
   item: ShoppingItem;
   weekRef: string;
   commodity: Commodity | undefined;
+  initialDraft?: {
+    actualQty?: number;
+    pricePaid?: number;
+    bestBefore?: string;
+  };
+  captureSource?: {
+    kind: "receipt" | "label" | "voice";
+    rawName: string;
+    capturedUnit?: string;
+  };
   onClose: () => void;
   onReceive: (input: ReceiveShoppingItemInput) => Promise<unknown>;
 }) {
   const { t, lang } = useI18n();
-  const [actualQty, setActualQty] = useState(String(item.fulfillment?.actualQty ?? item.qtyTotal));
+  const [actualQty, setActualQty] = useState(String(
+    initialDraft?.actualQty ?? item.fulfillment?.actualQty ?? item.qtyTotal,
+  ));
   const [boughtAt, setBoughtAt] = useState(toLocalDateTime(item.fulfillment?.boughtAt));
-  const [pricePaid, setPricePaid] = useState(item.fulfillment?.pricePaid ? String(item.fulfillment.pricePaid) : "");
+  const [pricePaid, setPricePaid] = useState(
+    initialDraft?.pricePaid
+      ? String(initialDraft.pricePaid)
+      : item.fulfillment?.pricePaid
+        ? String(item.fulfillment.pricePaid)
+        : "",
+  );
   const [addToPantry, setAddToPantry] = useState(true);
   const [storageLocation, setStorageLocation] = useState<StorageLocation>(item.kind === "dry" ? "pantry" : "fridge");
-  const [bestBefore, setBestBefore] = useState("");
+  const [bestBefore, setBestBefore] = useState(initialDraft?.bestBefore ?? "");
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -108,6 +128,39 @@ export function ReceiveShoppingItemSheet({
               <p className="mt-1 text-xs font-medium text-accent">{t("receive.existing")}</p>
             )}
           </div>
+
+          {captureSource && (
+            <section
+              aria-label="Thay đổi được đề xuất"
+              className="rounded-[16px] border border-amber/35 bg-amber/8 p-3"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-amber">
+                Đề xuất từ {captureSource.kind === "receipt" ? "hóa đơn" : captureSource.kind === "label" ? "nhãn hàng" : "giọng nói"} · cần bạn kiểm tra
+              </p>
+              <p className="mt-1.5 text-sm">
+                “{captureSource.rawName}” → <strong>{name}</strong>
+              </p>
+              <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs">
+                <span className="rounded-lg bg-surface/65 px-2.5 py-2 text-muted">
+                  {fmt(item.qtyTotal)} {item.unit} theo kế hoạch
+                </span>
+                <span aria-hidden className="text-brand">→</span>
+                <span className="rounded-lg border border-brand/20 bg-brand-weak/45 px-2.5 py-2 font-medium text-brand-ink">
+                  {initialDraft?.actualQty
+                    ? `${fmt(initialDraft.actualQty)} ${item.unit}`
+                    : "Bạn nhập lượng thực mua"}
+                </span>
+              </div>
+              {captureSource.capturedUnit && captureSource.capturedUnit !== item.unit && (
+                <p className="mt-2 text-[11px] leading-relaxed text-amber">
+                  Đơn vị đọc được là “{captureSource.capturedUnit}”, khác “{item.unit}” trong kế hoạch nên ứng dụng không tự quy đổi.
+                </p>
+              )}
+              <p className="mt-2 text-[11px] leading-relaxed text-muted">
+                Chưa có dữ liệu nào được lưu. Bạn có thể sửa toàn bộ trường bên dưới trước khi xác nhận.
+              </p>
+            </section>
+          )}
 
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-sm">

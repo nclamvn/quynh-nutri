@@ -78,6 +78,18 @@ export function Sidebar() {
           collapsed ? "px-3" : "px-4"
         }`}
       >
+        <button
+          type="button"
+          title={collapsed ? "Ghi nhanh" : undefined}
+          aria-label="Ghi nhanh hóa đơn, nhãn hoặc giọng nói"
+          onClick={() => window.dispatchEvent(new Event("open-capture"))}
+          className={`mb-5 flex min-h-11 items-center justify-center rounded-full border border-brand/25 bg-brand-weak/55 text-sm font-semibold text-brand-ink transition hover:border-brand/40 hover:bg-brand-weak focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+            collapsed ? "mx-auto w-11 px-0" : "w-full gap-2 px-4"
+          }`}
+        >
+          <span aria-hidden>＋</span>
+          {!collapsed && "Ghi nhanh"}
+        </button>
         {GROUPS.map(({ group, items }) => (
           <div key={group} className="mb-5 last:mb-0">
             {!collapsed && (

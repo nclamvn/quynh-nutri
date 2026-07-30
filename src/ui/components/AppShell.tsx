@@ -6,6 +6,7 @@ import { MobileTopBar } from "./MobileTopBar";
 import { AssistantSheet } from "./AssistantSheet";
 import { AmbientBackground } from "./AmbientBackground";
 import { Toaster } from "./Toaster";
+import { CaptureHub } from "./CaptureHub";
 
 /**
  * Responsive app shell (Blueprint §4–5).
@@ -32,6 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <TabBar />
       </div>
       <AssistantSheet />
+      <CaptureHub />
       <Toaster />
     </div>
   );
