@@ -2,7 +2,7 @@ import type { Slot } from "@/domain/types";
 
 /**
  * A decorative identity colour per meal slot, reusing the chart tokens. Used ONLY
- * as a label/edge accent on the slot tag to help scan the mâm — deliberately kept
+ * as a label/edge accent on the slot tag to help scan the mâm – deliberately kept
  * away from any nutrition number so it never reads as a provenance/confidence
  * signal (those stay green/amber/gray on the ProvenanceChip).
  */

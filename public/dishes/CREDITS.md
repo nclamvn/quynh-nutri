@@ -1,6 +1,6 @@
-# Dish photos — credits
+# Dish photos – credits
 
-Source: TheMealDB (https://www.themealdb.com) — free food-photo database.
+Source: TheMealDB (https://www.themealdb.com) – free food-photo database.
 Self-hosted (no runtime hotlink). Mapped by category; consistency-of-tone > exact match.
 
 | file | search term | source meal |

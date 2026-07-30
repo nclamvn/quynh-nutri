@@ -6,7 +6,7 @@ const rec = (date: string, over: Partial<PurchaseRecord> = {}): PurchaseRecord =
   id: date, date, lines: [], ...over,
 });
 
-describe("lineUnitPriceVndPerKg — mass units only", () => {
+describe("lineUnitPriceVndPerKg – mass units only", () => {
   it("converts g/kg to VND/kg", () => {
     expect(lineUnitPriceVndPerKg({ commodityId: "c", qty: 500, unit: "g", pricePaid: 40000 })).toBe(80000);
     expect(lineUnitPriceVndPerKg({ commodityId: "c", qty: 2, unit: "kg", pricePaid: 160000 })).toBe(80000);
@@ -17,7 +17,7 @@ describe("lineUnitPriceVndPerKg — mass units only", () => {
   });
 });
 
-describe("loggedPrice — latest B1", () => {
+describe("loggedPrice – latest B1", () => {
   const records = [
     rec("2026-07-01", { supplierId: "s1", lines: [{ commodityId: "ghe", qty: 1000, unit: "g", pricePaid: 300000 }] }),
     rec("2026-07-20", { supplierId: "s1", lines: [{ commodityId: "ghe", qty: 500, unit: "g", pricePaid: 170000 }] }),
@@ -34,7 +34,7 @@ describe("loggedPrice — latest B1", () => {
   });
 });
 
-describe("resolvePrice — B1 overrides B0", () => {
+describe("resolvePrice – B1 overrides B0", () => {
   const records = [rec("2026-07-20", { lines: [{ commodityId: "ghe", qty: 1000, unit: "g", pricePaid: 320000 }] })];
   it("prefers the real logged price (B1) over the reference (B0)", () => {
     expect(resolvePrice("ghe", records, 300000)).toEqual({ vndPerKg: 320000, source: "B1" });
@@ -58,7 +58,7 @@ describe("priceCoverage", () => {
   });
 });
 
-describe("supplierReady — sparse data is not ranked", () => {
+describe("supplierReady – sparse data is not ranked", () => {
   const two = [rec("d1", { supplierId: "s1" }), rec("d2", { supplierId: "s1" })];
   const three = [...two, rec("d3", { supplierId: "s1" })];
   it("false below MIN_SAMPLES (→ chưa đủ dữ liệu)", () => {

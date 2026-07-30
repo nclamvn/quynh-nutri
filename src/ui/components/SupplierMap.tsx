@@ -6,14 +6,14 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { GeoPoint } from "@/domain/types";
 
-// Free OpenStreetMap tiles — no API key. Attribution is required by the OSM
+// Free OpenStreetMap tiles – no API key. Attribution is required by the OSM
 // tile-usage policy and shown by default via TileLayer's `attribution`.
 const OSM_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 // Neutral fallback centre (TP.HCM) when a household hasn't placed a pin yet.
 const DEFAULT_CENTER: GeoPoint = { lat: 10.7769, lng: 106.7009 };
 
-// On-brand pin as a divIcon — avoids Leaflet's default marker PNGs, whose bundler
+// On-brand pin as a divIcon – avoids Leaflet's default marker PNGs, whose bundler
 // asset paths break under Next/Turbopack. Amber = machine-suggested (B0, unconfirmed);
 // rose = confirmed ground truth (B1).
 function makePin(color: string) {
@@ -48,7 +48,7 @@ export default function SupplierMap({
   suggested?: boolean; // amber machine-suggestion (B0) vs rose confirmed (B1)
 }) {
   const center = location ?? DEFAULT_CENTER;
-  // Stable initial center/zoom — react-leaflet ignores prop changes after mount,
+  // Stable initial center/zoom – react-leaflet ignores prop changes after mount,
   // which is exactly what we want (the marker moves, the viewport stays put).
   const initial = useMemo(() => ({ center: [center.lat, center.lng] as [number, number], zoom: location ? 16 : 12 }), []); // eslint-disable-line react-hooks/exhaustive-deps
 

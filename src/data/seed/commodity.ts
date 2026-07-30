@@ -1,6 +1,6 @@
 import type { Commodity, Allergen } from "@/domain/types";
 
-// A — commodity registry. Macros are per 100g edible portion.
+// A – commodity registry. Macros are per 100g edible portion.
 // Provenance/confidence are seeded to reflect the arbitration order (INTAKE-SEED §5):
 // staples & common proteins → P1/corroborated; regional/variable cuts → disputed;
 // hard-to-pin items (field crab, some herbs) → honest_null. This spread lets the
@@ -251,7 +251,7 @@ export const COMMODITIES: Commodity[] = [
 ];
 
 // Edible yield: fraction of purchased weight that ends up eaten (bone, shell,
-// peel, trimming). Refinery R1 — the "mua ≠ ăn" distinction. Nutrition uses the
+// peel, trimming). Refinery R1 – the "mua ≠ ăn" distinction. Nutrition uses the
 // edible grams in each dish line; the shopping list grosses up by this. Anything
 // not listed defaults to 1.0 (boneless meat, fish fillet, dry goods, seasonings).
 const EDIBLE_YIELD: Record<string, number> = {
@@ -285,7 +285,7 @@ const EDIBLE_YIELD: Record<string, number> = {
 
 for (const c of COMMODITIES) c.edibleYield = EDIBLE_YIELD[c.id] ?? 1;
 
-// Allergen tags (Phase A dietary). Kept minimal — the common Vietnamese-kitchen
+// Allergen tags (Phase A dietary). Kept minimal – the common Vietnamese-kitchen
 // allergens present in the seed. Fish sauce carries fish.
 const ALLERGENS: Record<string, Allergen[]> = {
   tom: ["shellfish"],
@@ -302,7 +302,7 @@ const ALLERGENS: Record<string, Allergen[]> = {
 for (const c of COMMODITIES) c.allergens = ALLERGENS[c.id];
 
 // Reference retail prices, VND per kg of PURCHASED weight (Phase D). Representative
-// 2026 HN/HCM market/supermarket levels — a market estimate, never precise, so the
+// 2026 HN/HCM market/supermarket levels – a market estimate, never precise, so the
 // UI shows them as "~ · giá tham khảo". Condiments are intentionally UNPRICED (sold
 // per bottle, negligible per-meal) → they lower price-coverage honestly instead of
 // being faked, so the basket total reads as an explicit lower bound.
@@ -322,7 +322,7 @@ for (const c of COMMODITIES) {
   if (PRICES[c.id] != null) { c.priceVndPerKg = PRICES[c.id]; c.priceSource = PRICE_SOURCE; }
 }
 
-// Micronutrients per 100g EDIBLE — read directly from the Vietnamese Food
+// Micronutrients per 100g EDIBLE – read directly from the Vietnamese Food
 // Composition Table (Viện Dinh dưỡng, Bộ Y tế / FAO), the canonical P1 source.
 // iron/calcium/zinc in mg, folate in µg. Only nutrients present in the FCT are
 // listed; absent ones stay honest_null (never guessed). iodine is not reliably in

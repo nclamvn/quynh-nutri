@@ -25,5 +25,5 @@ export function coverageTone(coverage: number, gateNumber = 0.85, gateRange = 0.
 export function confidenceTone(c: Confidence): ProvTone {
   if (c === "corroborated") return "accent";
   if (c === "disputed") return "amber";
-  return "muted"; // honest_null — missing data is not an error, so never red
+  return "muted"; // honest_null – missing data is not an error, so never red
 }

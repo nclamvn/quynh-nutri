@@ -1,5 +1,5 @@
 /**
- * Ambient aurora — soft colour blobs drifting slowly behind the whole app for a
+ * Ambient aurora – soft colour blobs drifting slowly behind the whole app for a
  * premium "đắt tiền" depth. Fixed, non-interactive, behind everything. Opacity is
  * low so card/body text keeps WCAG-AA contrast in both themes. The drift keyframes
  * are frozen by the global prefers-reduced-motion rule.

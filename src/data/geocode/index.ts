@@ -30,7 +30,7 @@ function goongProvider(key: string): GeocodeProvider {
   };
 }
 
-// Deterministic mock for E2E/CI — never calls Nominatim (rate limit 1 req/s). Keeps
+// Deterministic mock for E2E/CI – never calls Nominatim (rate limit 1 req/s). Keeps
 // the "Bến Thành → confidence ~0" case so the honesty test sees an imprecise suggestion.
 const MockProvider: GeocodeProvider = {
   name: "nominatim",

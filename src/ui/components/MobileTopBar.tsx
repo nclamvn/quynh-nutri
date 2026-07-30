@@ -11,7 +11,7 @@ import { MobileMenu } from "./MobileMenu";
 /**
  * Mobile-only top bar (lg:hidden). Hamburger opens the "More" menu (every area),
  * plus brand + theme toggle. In normal flow (not sticky) so each page's own
- * sticky header takes over on scroll — no stacked sticky bars.
+ * sticky header takes over on scroll – no stacked sticky bars.
  */
 export function MobileTopBar() {
   const { t } = useI18n();

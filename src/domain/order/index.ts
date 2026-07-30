@@ -4,7 +4,7 @@ import type { ShoppingItem } from "@/domain/shopping";
 // ── Channel capability (the L-1 honesty invariant) ──────────────────────────
 // The 5 channel kinds are NOT equal. The app can compose the order text and
 // hand it to the first three ("carry"); `their_*` only launches the shop's own
-// surface (their cart/app) — the app can NOT push an order there and must never
+// surface (their cart/app) – the app can NOT push an order there and must never
 // claim it sent one. `channelCarriesOrder` is the single gate the UI reads.
 export type ChannelCapability = "push" | "call" | "open";
 
@@ -17,7 +17,7 @@ export function channelCapability(kind: ChannelKind): ChannelCapability {
       return "call"; // dialer opens; the text is shown on screen to read aloud
     case "their_zalo_oa":
     case "their_app_web":
-      return "open"; // only opens their cart — no order text goes with it
+      return "open"; // only opens their cart – no order text goes with it
   }
 }
 
@@ -42,7 +42,7 @@ export interface SupplierOrder {
 
 export interface OrderSplit {
   orders: SupplierOrder[];
-  /** Items no active supplier handles — surfaced, never silently dropped. */
+  /** Items no active supplier handles – surfaced, never silently dropped. */
   unmatched: OrderLine[];
 }
 
@@ -53,12 +53,12 @@ function supplierHandles(s: Supplier, item: ShoppingItem, group: string | undefi
 
 /**
  * Split a week's shopping items into per-supplier orders. Each item goes to the
- * FIRST supplier (in the given order) that handles its commodity group — a
+ * FIRST supplier (in the given order) that handles its commodity group – a
  * deterministic assignment. Items nobody handles land in `unmatched` so the UI
  * can show them rather than lose them.
  *
  * qtyGross carries through the ShoppingItem's already-grossed-up qtyTotal
- * (PURCHASED grams, edibleYield applied upstream) — the order layer never
+ * (PURCHASED grams, edibleYield applied upstream) – the order layer never
  * re-derives mass, so it can't drift from the shopping list.
  */
 export function splitOrders(
@@ -90,7 +90,7 @@ function fmtQty(q: number, unit: string): string {
 }
 
 /**
- * Compose the human-readable order text for a supplier — the message the user
+ * Compose the human-readable order text for a supplier – the message the user
  * pastes/reads via a push/call channel. Lines are gram MUA. NO prices: we don't
  * fabricate market prices into a message, so it states only what and how much.
  */

@@ -36,7 +36,7 @@ const GRID_SLOTS: { slot: Slot; key: string }[] = [
   { slot: "COM", key: "grid.com" },
   { slot: "TRANGMIENG", key: "grid.tm" },
 ];
-const dishName = (d: Dish | undefined, lang: Lang) => (!d ? "—" : lang === "en" && d.enLabel ? d.enLabel : d.vnName);
+const dishName = (d: Dish | undefined, lang: Lang) => (!d ? "–" : lang === "en" && d.enLabel ? d.enLabel : d.vnName);
 const dayShort = (d: number) => (d === 6 ? "CN" : `T${d + 2}`);
 const TODAY = 0; // representative "today" = first day of the plan
 
@@ -149,7 +149,7 @@ export default function OverviewPage() {
                       );
                     })}
                   </div>
-                  {/* Real day macros with provenance — no misleading meal-vs-day % */}
+                  {/* Real day macros with provenance – no misleading meal-vs-day % */}
                   <div className="flex flex-wrap gap-1.5">
                     <ProvenanceChip display={nut.display} field="kcal" unit="kcal" showCoverage={false} />
                     <ProvenanceChip display={nut.display} field="proteinG" unit="g đạm" showCoverage={false} />
@@ -189,7 +189,7 @@ export default function OverviewPage() {
             </div>
           </section>
 
-          {/* Headline suggestion card — hero: gradient + blossom motif (§2.3 zone) */}
+          {/* Headline suggestion card – hero: gradient + blossom motif (§2.3 zone) */}
           <section className="grain group relative overflow-hidden rounded-[24px] border border-hairline bg-gradient-to-br from-brand-weak/70 via-bg to-accent-weak/60 shadow-[var(--shadow-sm)]">
             {/* Soft blossom accent, tucked bottom-left so it never sits under the dish. */}
             <Blossom size={190} className="pointer-events-none absolute -bottom-14 -left-12 -rotate-12 text-brand/10" />

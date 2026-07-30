@@ -16,7 +16,7 @@ describe("dietary filter", () => {
     expect(dietaryRepertoire(REPERTOIRE, DEFAULT_HOUSEHOLD, src).length).toBe(REPERTOIRE.length);
   });
 
-  it("shellfish allergy excludes shrimp/crab dishes — even a soup whose proteinType is 'rau'", () => {
+  it("shellfish allergy excludes shrimp/crab dishes – even a soup whose proteinType is 'rau'", () => {
     const hh = withDiet({ members: [{ id: "m", role: "adult", activity: "moderate", allergies: ["shellfish"] }] });
     expect(householdAllergens(hh).has("shellfish")).toBe(true);
     expect(dishAllowed(dish("tom_rang"), hh, src)).toBe(false); // MẶN shrimp

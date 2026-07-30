@@ -2,7 +2,7 @@ import "server-only";
 import { embed } from "ai";
 import store from "@/data/seed/dish-embeddings.json";
 
-// Semantic dish search — query embedded at request time (gateway), cosine
+// Semantic dish search – query embedded at request time (gateway), cosine
 // against the committed dish vectors, ranked in-memory. Genuinely semantic:
 // "món chua" finds canh chua, "dùng hết cá" ranks fish dishes. pgvector is the
 // scale path once the SOT grows (Phase C).

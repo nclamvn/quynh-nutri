@@ -1,19 +1,19 @@
 import type { Dish, DishLine, ProteinType, CookMethod, Slot } from "@/domain/types";
 import { slotTarget, CONDIMENT } from "./portions";
 
-// B0 — repertoire phổ dụng (system seed), REFINED (R3).
+// B0 – repertoire phổ dụng (system seed), REFINED (R3).
 // Quantities are EDIBLE grams for baseServings=4 (default 2 adults + 2 children
 // = 3.2 adult-equivalents), DERIVED from the portion model (portions.ts) rather
 // than hand-picked. The shopping list grosses these up by each commodity's
 // edibleYield (bone/shell/peel). Condiments season the pot and are not AE-scaled.
 
 const AE = 3.2; // 2 adults (1.0) + 2 children (0.6)
-const MAN = slotTarget("MAN", AE); // 352 — primary protein, edible
-const RAU = slotTarget("RAU", AE); // 352 — veg side, edible
-const CANH_V = slotTarget("CANH", AE); // 208 — soup veg
+const MAN = slotTarget("MAN", AE); // 352 – primary protein, edible
+const RAU = slotTarget("RAU", AE); // 352 – veg side, edible
+const CANH_V = slotTarget("CANH", AE); // 208 – soup veg
 const CANH_P = 96; // soup protein (30/AE)
-const COM = slotTarget("COM", AE); // 640 — cooked rice
-const TM = slotTarget("TRANGMIENG", AE); // 576 — fruit
+const COM = slotTarget("COM", AE); // 640 – cooked rice
+const TM = slotTarget("TRANGMIENG", AE); // 576 – fruit
 const r = Math.round;
 
 type L = [commodityId: string, qtyBase: number, unit?: string];
@@ -51,7 +51,7 @@ export const REPERTOIRE: Dish[] = [
     quick: true, lines: [["com_trang", COM]],
   }),
 
-  // ─────────────── MẶN (24) — main protein = MAN edible ───────────────
+  // ─────────────── MẶN (24) – main protein = MAN edible ───────────────
   dish("thit_kho_trung", "Thịt kho trứng", "Braised pork & eggs", "heo", "kho", "MAN", {
     cookTimeMin: 45, lines: [["thit_ba_chi", r(MAN * 0.7)], ["trung_ga", 150], ["nuoc_dua", nuoc_dua], ["nuoc_mam", nuoc_mam], ["duong", duong]],
   }),
@@ -125,7 +125,7 @@ export const REPERTOIRE: Dish[] = [
     cookTimeMin: 30, lines: [["dau_hu", r(MAN * 0.8)], ["thit_heo_nac", 100], ["ca_chua", ca_chua], ["dau_an", dau_an]],
   }),
 
-  // ─────────────── RAU (10) — veg = RAU edible ───────────────
+  // ─────────────── RAU (10) – veg = RAU edible ───────────────
   dish("rau_muong_xao_toi", "Rau muống xào tỏi", "Garlic water spinach", "rau", "xao", "RAU", {
     quick: true, cookTimeMin: 12, lines: [["rau_muong", RAU], ["dau_an", dau_an]],
   }),
@@ -157,7 +157,7 @@ export const REPERTOIRE: Dish[] = [
     quick: true, cookTimeMin: 12, lines: [["cai_ngot", RAU], ["dau_an", dau_an]],
   }),
 
-  // ─────────────── CANH (10) — veg = CANH_V, protein = CANH_P ───────────────
+  // ─────────────── CANH (10) – veg = CANH_V, protein = CANH_P ───────────────
   dish("canh_rau_ngot_thit", "Canh rau ngót thịt băm", "Katuk & pork soup", "rau", "luoc", "CANH", {
     quick: true, cookTimeMin: 15, tags: ["thanh"], lines: [["rau_ngot", CANH_V], ["thit_heo_nac", CANH_P]],
   }),
@@ -189,7 +189,7 @@ export const REPERTOIRE: Dish[] = [
     cookTimeMin: 40, tags: ["thanh"], lines: [["bi_xanh", CANH_V], ["suon_heo", r(CANH_P * 1.6)]],
   }),
 
-  // ─────────────── TRÁNG MIỆNG (4) — fruit = TM edible ───────────────
+  // ─────────────── TRÁNG MIỆNG (4) – fruit = TM edible ───────────────
   dish("tm_chuoi", "Chuối", "Banana", "rau", "song", "TRANGMIENG", { quick: true, lines: [["chuoi", TM]] }),
   dish("tm_cam", "Cam", "Orange", "rau", "song", "TRANGMIENG", { quick: true, lines: [["cam", TM]] }),
   dish("tm_dua_hau", "Dưa hấu", "Watermelon", "rau", "song", "TRANGMIENG", { quick: true, lines: [["dua_hau", TM]] }),

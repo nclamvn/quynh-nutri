@@ -26,7 +26,7 @@ const DISHES: Dish[] = [
 ];
 const allowAll = () => true;
 
-describe("detectCrisis — deterministic safety gate", () => {
+describe("detectCrisis – deterministic safety gate", () => {
   it("flags self-harm / suicide intent as severity=crisis (with or without dấu)", () => {
     for (const t of ["mình muốn chết", "muon chet qua", "tôi muốn tự tử", "I want to die", "kill myself"]) {
       expect(detectCrisis(t)).toEqual({ crisis: true, severity: "crisis" });
@@ -41,7 +41,7 @@ describe("detectCrisis — deterministic safety gate", () => {
   });
 
   it("catches INDIRECT despair / self-as-burden (how depression actually speaks)", () => {
-    // These carry no direct "muốn chết" — the earlier narrow matcher would miss them.
+    // These carry no direct "muốn chết" – the earlier narrow matcher would miss them.
     expect(detectCrisis("con sẽ tốt hơn nếu không có tôi").crisis).toBe(true);
     expect(detectCrisis("mọi người sẽ tốt hơn nếu không có tôi").crisis).toBe(true);
     expect(detectCrisis("tôi không trụ nổi nữa").crisis).toBe(true);
@@ -63,7 +63,7 @@ describe("detectCrisis — deterministic safety gate", () => {
   });
 });
 
-describe("moodSuggestions — real dishes, tiered", () => {
+describe("moodSuggestions – real dishes, tiered", () => {
   it("stress → only quick/fast dishes, tier practical", () => {
     const s = moodSuggestions("stress", DISHES, allowAll);
     expect(s.length).toBeGreaterThan(0);
@@ -90,7 +90,7 @@ describe("moodSuggestions — real dishes, tiered", () => {
   });
 });
 
-describe("advise — gate FIRST", () => {
+describe("advise – gate FIRST", () => {
   it("a crisis input never yields a food suggestion", () => {
     const r = advise({ text: "tôi muốn chết", mood: "stress" }, DISHES, allowAll);
     expect(r.mode).toBe("crisis");

@@ -11,7 +11,7 @@ import { D3_CONFIG } from "./config";
 const src: CommoditySource = (id) => COMMODITY_BY_ID[id];
 const dish = (id: string) => REPERTOIRE_BY_ID[id];
 
-describe("dishMacro — derived from commodity A", () => {
+describe("dishMacro – derived from commodity A", () => {
   it("computes gà luộc from a single commodity", () => {
     const m = dishMacro(dish("ga_luoc"), src); // 352g edible thịt gà @ 199kcal/100g
     expect(m.kcal).toBeCloseTo(700.48, 1);
@@ -30,7 +30,7 @@ describe("dishMacro — derived from commodity A", () => {
   });
 });
 
-describe("dishCoverage — mass-weighted corroboration", () => {
+describe("dishCoverage – mass-weighted corroboration", () => {
   it("is 1.0 when every ingredient is corroborated", () => {
     expect(dishCoverage(dish("ga_luoc"), src)).toBe(1);
   });
@@ -50,7 +50,7 @@ describe("dishCoverage — mass-weighted corroboration", () => {
   });
 });
 
-describe("D3 gate — 3 tiers, honest about certainty", () => {
+describe("D3 gate – 3 tiers, honest about certainty", () => {
   it("maps coverage to the right mode at the configured thresholds", () => {
     expect(displayModeFor(0.95)).toBe("number");
     expect(displayModeFor(D3_CONFIG.number)).toBe("number");
@@ -86,7 +86,7 @@ describe("D3 gate — 3 tiers, honest about certainty", () => {
   });
 });
 
-describe("adequacy — đủ/thiếu vs Nhu cầu 2016 (no restriction framing)", () => {
+describe("adequacy – đủ/thiếu vs Nhu cầu 2016 (no restriction framing)", () => {
   const hh = DEFAULT_HOUSEHOLD;
 
   it("sums household need across members", () => {
@@ -101,11 +101,11 @@ describe("adequacy — đủ/thiếu vs Nhu cầu 2016 (no restriction framing)"
     expect(a.kcalLabel).toBe("đủ");
   });
 
-  it("labels a thin day as thiếu — never as vượt", () => {
+  it("labels a thin day as thiếu – never as vượt", () => {
     const day = { kcal: 3000, proteinG: 80, carbG: 400, fatG: 60, fiberG: 15 };
     const a = householdAdequacy(day, hh);
     expect(a.kcalLabel).toBe("thiếu");
-    // adequacy vocabulary has no "vượt" — only đủ | thiếu
+    // adequacy vocabulary has no "vượt" – only đủ | thiếu
     expect(["đủ", "thiếu"]).toContain(a.kcalLabel);
   });
 
@@ -117,7 +117,7 @@ describe("adequacy — đủ/thiếu vs Nhu cầu 2016 (no restriction framing)"
   });
 });
 
-describe("groupsCheck — 4 nhóm + trái cây", () => {
+describe("groupsCheck – 4 nhóm + trái cây", () => {
   it("flags a rice+protein+veg+fruit day as complete", () => {
     const dishes = [dish("ga_kho_gung"), dish("rau_muong_xao_toi"), dish("tm_chuoi")];
     const check = groupsCheck(dishes, src);

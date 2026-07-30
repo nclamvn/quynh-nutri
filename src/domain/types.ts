@@ -1,4 +1,4 @@
-// Plain domain types — the shared vocabulary for seed data, domain services,
+// Plain domain types – the shared vocabulary for seed data, domain services,
 // and UI. Deliberately NOT Prisma types: domain stays pure & testable, and the
 // repo layer maps Prisma rows → these when a real DB is wired.
 
@@ -29,7 +29,7 @@ export interface Macro {
   fiberG: number;
 }
 
-/** A — commodity ingredient. macro is per 100g. */
+/** A – commodity ingredient. macro is per 100g. */
 export interface Commodity extends Macro {
   id: string;
   canonicalVn: string;
@@ -49,7 +49,7 @@ export interface Commodity extends Macro {
   edibleYield?: number;
   /** Allergen tags this ingredient carries (e.g. "shellfish", "fish", "egg"). */
   allergens?: Allergen[];
-  /** Pregnancy hazard tags — only set with a sourceRef (soft warnings, T1). */
+  /** Pregnancy hazard tags – only set with a sourceRef (soft warnings, T1). */
   pregnancyHazards?: { hazard: PregnancyHazard; source: ProvenanceLevel }[];
   /** Micronutrients per 100g edible (iron/calcium/zinc mg, folate µg). Sourced from
    *  the VN Food Composition Table (P1); absent nutrients stay honest_null. */
@@ -57,8 +57,8 @@ export interface Commodity extends Macro {
   microSource?: ProvenanceLevel;
   /**
    * Reference retail price in VND per kg of PURCHASED weight (same basis as the
-   * shopping list's grossed-up qty). Price is inherently a market estimate — it
-   * varies by region/season/vendor — so it NEVER claims corroborated precision:
+   * shopping list's grossed-up qty). Price is inherently a market estimate – it
+   * varies by region/season/vendor – so it NEVER claims corroborated precision:
    * the UI always renders it as "~ · giá tham khảo". Omitted when we have no
    * reference, which lowers the basket's price coverage rather than being faked.
    */
@@ -69,7 +69,7 @@ export interface Commodity extends Macro {
 export type Allergen = "shellfish" | "fish" | "egg" | "soy" | "dairy" | "gluten" | "peanut";
 export type DietRestriction = "vegetarian" | "pescatarian" | "no_pork" | "no_beef";
 
-// ─── Special diets (T1) — see design/VISION-special-diets.md ───
+// ─── Special diets (T1) – see design/VISION-special-diets.md ───
 // App EXECUTES, does not PRESCRIBE. Clinical constraints (T2/T3) are modelled but
 // ship dormant (no UI); T1 uses `wellness` only.
 export type LifeStage =
@@ -77,7 +77,7 @@ export type LifeStage =
   | "pregnant_t1" | "pregnant_t2" | "pregnant_t3"
   | "lactating_0_6" | "lactating_7_12";
 
-/** Pregnancy hazard tags on a commodity — soft, sourced warnings (never a hard
+/** Pregnancy hazard tags on a commodity – soft, sourced warnings (never a hard
  *  exclusion for T1). Only set when a sourceRef backs it. */
 export type PregnancyHazard =
   | "high_mercury" | "raw_undercooked" | "unpasteurized" | "liver_vit_a" | "alcohol" | "high_caffeine";
@@ -89,7 +89,7 @@ export type Micronutrient = "iron" | "folate" | "calcium" | "zinc" | "iodine" | 
 export interface HealthProfile {
   lifeStage: LifeStage;
   mode: "wellness" | "clinical";
-  // ── T2/T3 seam — dormant, no UI in T1. clinical mode is only valid with expertSet. ──
+  // ── T2/T3 seam – dormant, no UI in T1. clinical mode is only valid with expertSet. ──
   constraints?: unknown[];
   expertSet?: { by: string; at: string; ref: string };
 }
@@ -124,12 +124,12 @@ export interface Dish {
 
 // ─── "Không gian gia đình sống" (Phase: family space) ───
 // A member has TWO layers: a static BASE (declared once, edited rarely) and a
-// dynamic STATE layer that OVERRIDES the base while in effect and SELF-EXPIRES —
+// dynamic STATE layer that OVERRIDES the base while in effect and SELF-EXPIRES –
 // "hôm nay ốm" carries a valid_until and simply stops mattering after, so no
 // transient mood ever becomes a permanent label stuck on a person.
 export type MemberStateKind = "illness" | "mood" | "context";
 
-// Tiered constraint (TIP-B). Derived from a Member — never hardcoded — so the
+// Tiered constraint (TIP-B). Derived from a Member – never hardcoded – so the
 // engine solves by rank: hard_safety (allergy) is absolute; the rest are softer.
 export type ConstraintTier = "hard_safety" | "medical" | "preference" | "state";
 export interface Constraint {
@@ -138,7 +138,7 @@ export interface Constraint {
   tier: ConstraintTier;
   /** The concrete rule value: an allergen / condition / disliked term / state. */
   rule: string;
-  /** Provenance — a human reason ("dị ứng của bé Na"). Shown on a suggestion. */
+  /** Provenance – a human reason ("dị ứng của bé Na"). Shown on a suggestion. */
   source: string;
 }
 
@@ -162,14 +162,14 @@ export interface Member {
   ageBand?: string;
   activity: Activity;
   // ── BASE layer (static) ──
-  /** Allergens this member must avoid — the HARD-SAFETY tier (dinner is shared →
+  /** Allergens this member must avoid – the HARD-SAFETY tier (dinner is shared →
    *  household-wide effect). Never soft-penalised; see domain/family. */
   allergies?: Allergen[];
   /** Everyday eating habits ("ăn chay thứ 2", "ít cay"). Free tags. */
   habits?: string[];
-  /** Standing conditions ("tiểu đường") — the MEDICAL tier (execute-not-prescribe). */
+  /** Standing conditions ("tiểu đường") – the MEDICAL tier (execute-not-prescribe). */
   conditions?: string[];
-  /** Dishes/ingredients disliked — the PREFERENCE tier (soft-avoid, never banned). */
+  /** Dishes/ingredients disliked – the PREFERENCE tier (soft-avoid, never banned). */
   dislikes?: string[];
   /** Life-stage / health profile (T1: pregnancy & postpartum, wellness mode). */
   healthProfile?: HealthProfile;
@@ -360,10 +360,10 @@ export interface WeekPlan {
   slots: PlannedSlot[];
 }
 
-// ─── Phase 2 — Supplier & Order (see BLUEPRINT §3 amend + dataset) ───
+// ─── Phase 2 – Supplier & Order (see BLUEPRINT §3 amend + dataset) ───
 // The 5 channel kinds are NOT equal in capability: the app can only push its own
 // order TEXT into the first three; `their_*` only opens the chain's own channel
-// (their cart) — the app never claims to have sent an order there.
+// (their cart) – the app never claims to have sent an order there.
 export type ChannelKind = "zalo_chat" | "hotline" | "phone_sms" | "their_zalo_oa" | "their_app_web";
 export type SupplierType = "cho" | "sieu_thi" | "tiem" | "online";
 /** app auto-advances ONLY to `sent` ("channel opened"); confirmed/delivered are human-set. */
@@ -374,9 +374,9 @@ export interface SupplierChannel {
   value: string; // phone / zalo id / url, by kind
   label?: string;
 }
-/** A map pin — real coordinates. Only household-added local shops carry one (the
+/** A map pin – real coordinates. Only household-added local shops carry one (the
  *  household sets it themselves, so it's ground truth). Multi-branch chains never
- *  get a fabricated pin — they use `storeLocatorUrl` instead. */
+ *  get a fabricated pin – they use `storeLocatorUrl` instead. */
 export interface GeoPoint {
   lat: number;
   lng: number;
@@ -391,11 +391,11 @@ export interface Supplier {
   shipFee?: string;
   shipArea?: string;
   handles?: string[]; // commodity ids / groups they sell
-  /** Freeform address (household shop). Chains omit it — they span many branches. */
+  /** Freeform address (household shop). Chains omit it – they span many branches. */
   address?: string;
   /** Map pin (household shop only). Set by the user via pin-drop; never invented. */
   location?: GeoPoint;
-  /** Chain branch-finder URL — the honest stand-in for a single address on a
+  /** Chain branch-finder URL – the honest stand-in for a single address on a
    *  multi-branch chain (the app can't claim one specific branch). */
   storeLocatorUrl?: string;
   note?: string;
@@ -419,11 +419,11 @@ export interface Order {
   note?: string;
 }
 
-// ─── Purchase log (Lane 2 — the real-data catch-bucket) ───
+// ─── Purchase log (Lane 2 – the real-data catch-bucket) ───
 // The household's record of an actual purchase. `pricePaid` is the REAL price paid
 // = B1 ground truth (overrides the B0 reference price in cost). Missing price =
 // honest-null (never fabricated). `onTime` is the household's SUBJECTIVE observation,
-// not an objective rating. This TIP only CAPTURES — analytics/optimization is Lane 3.
+// not an objective rating. This TIP only CAPTURES – analytics/optimization is Lane 3.
 export type OnTime = "on_time" | "late" | "no_show";
 export interface PurchaseLine {
   commodityId: string;

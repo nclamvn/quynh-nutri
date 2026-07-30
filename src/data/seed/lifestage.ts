@@ -11,14 +11,14 @@ import { isLactating } from "@/domain/health";
  * Pregnancy increments = Nhu cầu Dinh dưỡng Khuyến nghị VN 2016 (Viện Dinh dưỡng,
  * P2), corroborated across VN clinical sources (Vinmec, BV Mỹ Đức, BV Tâm Anh…);
  * the energy magnitudes also align with FAO/WHO/UNU 2004 (P6). Protein per-trimester
- * has some variance between sources — verify against the primary QĐ before any
+ * has some variance between sources – verify against the primary QĐ before any
  * clinical reliance. Displayed as an adequacy denominator only (kcal/protein are
  * the only macros the intake side tracks) with a disclaimer; not a prescription. */
 export const LIFESTAGE_UPLIFT: Partial<Record<LifeStage, { kcal: number; proteinG: number; source: ProvenanceLevel }>> = {
   pregnant_t1: { kcal: 50, proteinG: 1, source: "P2" },
   pregnant_t2: { kcal: 250, proteinG: 10, source: "P2" },
   pregnant_t3: { kcal: 450, proteinG: 31, source: "P2" },
-  // Lactation 0–6 months — HD 776 (P3), already in the codebase.
+  // Lactation 0–6 months – HD 776 (P3), already in the codebase.
   lactating_0_6: { kcal: 505, proteinG: 19, source: "P3" },
   // lactating_7_12: kept UNSOURCED (honest_null) until the VN 7–12mo figure is verified.
 };
@@ -28,7 +28,7 @@ export const LIFESTAGE_UPLIFT: Partial<Record<LifeStage, { kcal: number; protein
 export const PREGNANCY_MICRONUTRIENTS = ["iron", "folate", "calcium", "iodine"] as const;
 export type Micronutrient = (typeof PREGNANCY_MICRONUTRIENTS)[number];
 
-// Sourced RNI per stage — empty until INTAKE fills it from P2/P3. All null for now.
+// Sourced RNI per stage – empty until INTAKE fills it from P2/P3. All null for now.
 const MICRO_RNI: Partial<Record<LifeStage, Partial<Record<Micronutrient, { need: number; source: ProvenanceLevel }>>>> = {};
 
 /** The member's effective life stage: per-member profile wins; legacy household
@@ -47,7 +47,7 @@ export function lifeStageUplift(member: Member, householdLactating = false) {
   return { lifeStage: ls, applied: Boolean(u), kcal: u?.kcal ?? 0, proteinG: u?.proteinG ?? 0, source: u?.source ?? null };
 }
 
-/** Micronutrient rows for the UI — need is null (honest_null) until sourced. */
+/** Micronutrient rows for the UI – need is null (honest_null) until sourced. */
 export function lifeStageMicros(member: Member): { nutrient: Micronutrient; need: number | null; source: ProvenanceLevel | null }[] {
   const ls = effectiveLifeStage(member);
   if (ls === "none") return [];

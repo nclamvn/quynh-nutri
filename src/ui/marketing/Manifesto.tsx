@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Blossom } from "@/ui/components/Blossom";
 import { useInView } from "./useInView";
 
-// Enriched (owner: 02 was too plain) — an editorial framed dish print + a low-opacity
+// Enriched (owner: 02 was too plain) – an editorial framed dish print + a low-opacity
 // botanical line-art + a scroll reveal. Kept editorial: no cards, no icon-per-line.
 export function Manifesto() {
   const { ref, inView } = useInView<HTMLElement>();

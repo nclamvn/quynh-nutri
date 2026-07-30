@@ -16,7 +16,7 @@ export interface RotationInput {
   /** Previous week (day 6 MẶN) to avoid a Sun→Mon protein repeat. */
   previousWeek?: WeekPlan;
   weekStart: string;
-  /** Re-roll seed — same seed ⇒ same plan. */
+  /** Re-roll seed – same seed ⇒ same plan. */
   seed?: number;
 }
 
@@ -32,8 +32,8 @@ function bySlot(dishes: Dish[], slot: Slot): Dish[] {
 
 /**
  * Rotation engine (Blueprint §4.1). Rule precedence when infeasible (T4 add):
- * HARD — no-repeat-protein (day-to-day) and quick-on-busy-days (experience).
- * SOFT — weekly seafood quota (nutrition) is relaxed FIRST, and the relaxation
+ * HARD – no-repeat-protein (day-to-day) and quick-on-busy-days (experience).
+ * SOFT – weekly seafood quota (nutrition) is relaxed FIRST, and the relaxation
  * is recorded in `notes` rather than silently dropped.
  */
 export function generateWeek(input: RotationInput): RotationResult {
@@ -73,10 +73,10 @@ export function generateWeek(input: RotationInput): RotationResult {
     const dayName = DAY_NAMES[day];
     const busy = household.busyDays.includes(dayName);
 
-    // COM — fixed rice base.
+    // COM – fixed rice base.
     if (com) slots.push(lockedSlot(day, "COM", com.id, lockedByKey) ?? plain(day, "COM", com.id));
 
-    // MẶN — protein rotation + quick-on-busy (both HARD).
+    // MẶN – protein rotation + quick-on-busy (both HARD).
     const lockedMan = lockedByKey.get(`${day}:MAN`);
     let man: Dish | undefined;
     if (lockedMan) {
@@ -93,7 +93,7 @@ export function generateWeek(input: RotationInput): RotationResult {
       prevProtein = man.proteinType;
     }
 
-    // RAU — balance vs MẶN method (rule 4), avoid repeating yesterday's RAU (rule 5).
+    // RAU – balance vs MẶN method (rule 4), avoid repeating yesterday's RAU (rule 5).
     const lockedRau = lockedByKey.get(`${day}:RAU`);
     let rau: Dish | undefined;
     if (lockedRau) {
@@ -110,7 +110,7 @@ export function generateWeek(input: RotationInput): RotationResult {
       usedRauRecent = rau.id;
     }
 
-    // CANH — prefer 'thanh' when MẶN is heavy; avoid repeating yesterday's canh.
+    // CANH – prefer 'thanh' when MẶN is heavy; avoid repeating yesterday's canh.
     const lockedCanh = lockedByKey.get(`${day}:CANH`);
     let canh: Dish | undefined;
     if (lockedCanh) {
@@ -127,7 +127,7 @@ export function generateWeek(input: RotationInput): RotationResult {
       usedCanhRecent = canh.id;
     }
 
-    // TRÁNG MIỆNG — rotate fruit by day.
+    // TRÁNG MIỆNG – rotate fruit by day.
     if (dessertPool.length) {
       const lockedTm = lockedByKey.get(`${day}:TRANGMIENG`);
       const tm = lockedTm ? dishById.get(lockedTm.dishId) : dessertPool[day % dessertPool.length];

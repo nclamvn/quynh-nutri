@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { isE2EMode } from "@/lib/auth";
 
-// Household state lives here (not root) — only the authenticated app needs it, so
+// Household state lives here (not root) – only the authenticated app needs it, so
 // the public landing/sign-in never mount it.
 export default async function TabsLayout({ children }: { children: React.ReactNode }) {
   const e2e = isE2EMode();

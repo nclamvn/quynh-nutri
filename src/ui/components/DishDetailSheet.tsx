@@ -30,7 +30,7 @@ export function DishDetailSheet({ dishId, onClose }: { dishId: string | null; on
   const d = dishId ? dish(dishId) : undefined;
 
   const name = d ? (lang === "en" && d.enLabel ? d.enLabel : d.vnName) : "";
-  // Per-dish macros (absolute, with coverage) — NOT adequacy %, so the meal-vs-day
+  // Per-dish macros (absolute, with coverage) – NOT adequacy %, so the meal-vs-day
   // denominator never enters here. Fork copies lines verbatim → these are stable.
   const display = d ? dishDisplay(d, household, commodity) : null;
   const forked = dishId ? isForked(dishId) : false;

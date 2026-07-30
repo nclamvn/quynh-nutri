@@ -1,4 +1,4 @@
-// Mental-health support resources shown on the crisis branch — VERIFIED ONLY.
+// Mental-health support resources shown on the crisis branch – VERIFIED ONLY.
 // §3.4 of TIP-MOOD: never fabricate a number. Every entry is either verified from
 // a primary/corroborated source (with sourceUrl) or is universally-known guidance.
 // If a resource can't be verified current, it does NOT go here.
@@ -14,7 +14,7 @@ export const SUPPORT_RESOURCES: SupportResource[] = [
   {
     name: "Đường dây nóng Ngày Mai",
     detail: "096 306 1414",
-    // SAFETY: list the exact days — Wed/Fri/Sat/Sun, NO Thursday. A dash-range
+    // SAFETY: list the exact days – Wed/Fri/Sat/Sun, NO Thursday. A dash-range
     // "T4–CN" reads as continuous (incl. Thursday) → someone in crisis could call
     // on a day no one answers. Do NOT collapse to a range.
     hours: "13:00–20:30 · Thứ 4, Thứ 6, Thứ 7, Chủ Nhật",
@@ -42,17 +42,17 @@ export const SUPPORT_RESOURCES: SupportResource[] = [
     name: "Cấp cứu y tế",
     detail: "115",
     hours: "24/7",
-    // Vietnam national emergency medical number — use if there is immediate danger.
+    // Vietnam national emergency medical number – use if there is immediate danger.
     sources: ["Số cấp cứu y tế quốc gia Việt Nam (115)"],
   },
 ];
 
-// General guidance shown alongside the resources — always valid, no number to verify.
+// General guidance shown alongside the resources – always valid, no number to verify.
 export const SUPPORT_GUIDANCE = [
-  "Nói với một người bạn tin tưởng — người nhà, bạn thân.",
+  "Nói với một người bạn tin tưởng – người nhà, bạn thân.",
   "Gặp bác sĩ, hoặc tới cơ sở y tế gần nhất nếu thấy không ổn.",
 ];
 
 // Extra line for postpartum context (emotional difficulty after birth is real + common).
 export const POSTPARTUM_SUPPORT_NOTE =
-  "Khó khăn cảm xúc sau sinh là điều có thật và phổ biến — không phải lỗi của bạn. Hãy nói với bác sĩ sản/khoa của mình.";
+  "Khó khăn cảm xúc sau sinh là điều có thật và phổ biến – không phải lỗi của bạn. Hãy nói với bác sĩ sản/khoa của mình.";

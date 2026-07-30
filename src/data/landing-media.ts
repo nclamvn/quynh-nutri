@@ -1,4 +1,4 @@
-// Landing media manifest — provenance for every marketing image (blueprint §25).
+// Landing media manifest – provenance for every marketing image (blueprint §25).
 // Real, licensed Unsplash photos, DOWNLOADED into /public/landing (never hotlinked).
 // The owner may swap the art later; keep author + sourceUrl + alt accurate and
 // never fabricate a credit. Unsplash License: free for commercial use, attribution

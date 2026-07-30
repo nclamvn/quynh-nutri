@@ -2,7 +2,7 @@ import type { Dish, Household, Allergen } from "@/domain/types";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
 
 // Dietary filter (Phase A). Allergen + restriction checked at the INGREDIENT
-// level via commodity groups/allergens — so a "canh" whose proteinType is "rau"
+// level via commodity groups/allergens – so a "canh" whose proteinType is "rau"
 // but which contains tôm is still caught (a bug a proteinType-only check misses).
 
 const MEAT_GROUPS = new Set(["thịt"]);

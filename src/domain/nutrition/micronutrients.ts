@@ -5,14 +5,14 @@ import { householdNeed } from "./adequacy";
 
 // Micronutrient intake from real food-composition data (P1). Micronutrient content
 // varies a lot in nature, so the result is presented as an ESTIMATE with a COVERAGE
-// (% of the day's food mass that actually has data for that nutrient) — same honesty
+// (% of the day's food mass that actually has data for that nutrient) – same honesty
 // discipline as the macro D3 gate. iodine is excluded: the FCT lacks reliable food
 // iodine, so it stays honest_null rather than being guessed.
 export const PREG_MICROS = ["iron", "folate", "calcium", "zinc", "vitA", "vitC"] as const;
 export type PregMicro = (typeof PREG_MICROS)[number];
 
 /** Pregnancy Recommended Nutrient Intake / day. DRI/WHO reference values, which the
- *  VN Nhu cầu 2016 broadly matches — a professional should confirm against the
+ *  VN Nhu cầu 2016 broadly matches – a professional should confirm against the
  *  primary source. Displayed with a disclaimer; never a prescription. */
 export const MICRO_RNI: Record<PregMicro, { need: number; unit: string }> = {
   iron: { need: 27, unit: "mg" },

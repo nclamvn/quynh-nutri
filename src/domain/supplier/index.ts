@@ -1,13 +1,13 @@
 import type { Supplier } from "@/domain/types";
 
-/** Provenance/confidence tone — same triple the ProvenanceChip renders
+/** Provenance/confidence tone – same triple the ProvenanceChip renders
  *  (green corroborated · amber estimate/verify · gray null). Kept in the domain
  *  so this module stays UI-free; the UI maps it to colours. */
 export type SupplierTone = "accent" | "amber" | "muted";
 
 // Supplier geo/location helpers. The honesty rule: a map pin is only ever a real,
 // user-set coordinate (household shop). Multi-branch chains never get a fabricated
-// pin — they carry a `storeLocatorUrl` instead. These helpers encode that split.
+// pin – they carry a `storeLocatorUrl` instead. These helpers encode that split.
 
 /** True when the supplier has a real map pin (household shop the user located). */
 export function hasMapPin(s: Pick<Supplier, "location">): boolean {
@@ -15,7 +15,7 @@ export function hasMapPin(s: Pick<Supplier, "location">): boolean {
 }
 
 /**
- * A Google Maps *directions* deep-link to the shop — opens the device's maps app
+ * A Google Maps *directions* deep-link to the shop – opens the device's maps app
  * for real turn-by-turn. Privacy: only the SHOP destination goes in the URL; the
  * user's own location is supplied by the maps app, never by us.
  * - pinned  → destination = "lat,lng"

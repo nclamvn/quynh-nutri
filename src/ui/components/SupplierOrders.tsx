@@ -16,7 +16,7 @@ const TYPE_LABEL: Record<string, string> = { cho: "Chợ", sieu_thi: "Siêu th�
 const CHANNEL_LABEL: Record<ChannelKind, string> = {
   zalo_chat: "Zalo", phone_sms: "SMS", hotline: "Gọi", their_zalo_oa: "Zalo OA", their_app_web: "App/Web",
 };
-// Honest status ladder — the app only ever asserts up to "đã mở kênh".
+// Honest status ladder – the app only ever asserts up to "đã mở kênh".
 const STATUS: Record<OrderStatus, { label: string; cls: string }> = {
   draft: { label: "Chưa gửi", cls: "border-hairline text-muted" },
   sent: { label: "Đã mở kênh", cls: "border-brand/40 bg-brand-weak text-brand-ink" },
@@ -33,11 +33,11 @@ function zaloUrl(v: string): string {
   return /^https?:\/\//i.test(v) ? v : `https://zalo.me/${v.replace(/[^\d]/g, "") || v}`;
 }
 
-// P2-4 — push the order via the OS share sheet (where the user picks Zalo and the
+// P2-4 – push the order via the OS share sheet (where the user picks Zalo and the
 // text lands in the chat). Robust either way the P2-0 spike lands: on a device
 // where share works the text goes straight in; where it's absent/refused we
 // return a signal so the caller can fall back to copy→zalo.me. Never asserts the
-// order was delivered — only that the sheet was opened.
+// order was delivered – only that the sheet was opened.
 type ShareResult = "shared" | "cancelled" | "unsupported";
 async function shareOrderText(text: string): Promise<ShareResult> {
   if (typeof navigator === "undefined" || typeof navigator.share !== "function") return "unsupported";
@@ -70,7 +70,7 @@ export function SupplierOrders() {
   const copyThenOpenZalo = async (text: string, value: string) => {
     try {
       await navigator.clipboard?.writeText(text);
-      toast("Đã copy đơn — dán vào khung chat Zalo.", "info");
+      toast("Đã copy đơn – dán vào khung chat Zalo.", "info");
     } catch { /* clipboard may be blocked; opening Zalo is still useful */ }
     window.open(zaloUrl(value), "_blank");
   };
@@ -81,7 +81,7 @@ export function SupplierOrders() {
     if (cap === "open") {
       const url = toUrl(ch.value);
       if (url) window.open(url, "_blank");
-      else toast("Điểm mua này chỉ có tên kênh — mở app của họ và tự chọn hàng.", "info");
+      else toast("Điểm mua này chỉ có tên kênh – mở app của họ và tự chọn hàng.", "info");
       // NOT marked sent: the app didn't send anything, the user picks in their cart.
       return;
     }
@@ -92,7 +92,7 @@ export function SupplierOrders() {
     } else if (ch.kind === "zalo_chat") {
       // Share-sheet first (P2-4); fall back to copy→zalo.me where share is absent.
       const r = await shareOrderText(text);
-      if (r === "cancelled") return; // user backed out — nothing opened, don't mark
+      if (r === "cancelled") return; // user backed out – nothing opened, don't mark
       if (r === "unsupported") await copyThenOpenZalo(text, ch.value);
     }
     markChannelOpened(so.supplier.id, ch.kind);
@@ -154,7 +154,7 @@ export function SupplierOrders() {
                 <div className="border-t border-hairline px-4 py-3">
                   {!so.canCarry && (
                     <p className="mb-2 text-[11px] text-amber">
-                      App không gửi đơn hộ nơi này — bấm để mở app/web của họ, bạn tự chọn hàng.
+                      App không gửi đơn hộ nơi này – bấm để mở app/web của họ, bạn tự chọn hàng.
                     </p>
                   )}
                   <div className="flex flex-wrap gap-2">
@@ -174,7 +174,7 @@ export function SupplierOrders() {
                     })}
                   </div>
 
-                  {/* Manual status — the app never auto-advances past "đã mở kênh". */}
+                  {/* Manual status – the app never auto-advances past "đã mở kênh". */}
                   {status === "sent" && (
                     <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
                       <button onClick={() => setOrderStatus(s.id, "confirmed")} className="rounded-full border border-hairline px-2.5 py-1 text-muted hover:bg-surface">Shop đã xác nhận</button>
@@ -200,7 +200,7 @@ export function SupplierOrders() {
         </div>
       )}
 
-      {/* Items no supplier handles — surfaced, not dropped. */}
+      {/* Items no supplier handles – surfaced, not dropped. */}
       {orderSplit.unmatched.length > 0 && (
         <div className="card mt-4 border-amber/30 p-4">
           <p className="text-sm font-medium text-amber">Chưa có điểm mua cho {orderSplit.unmatched.length} mặt hàng</p>
@@ -227,7 +227,7 @@ export function SupplierOrders() {
         </div>
       )}
 
-      {/* Registry suggestions — chains are seed-only; adding copies into the household. */}
+      {/* Registry suggestions – chains are seed-only; adding copies into the household. */}
       {suggestions.length > 0 && (
         <div className="mt-4">
           <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-tertiary">Gợi ý thêm nhanh</p>

@@ -2,11 +2,11 @@ import type { Commodity } from "@/domain/types";
 import type { ShoppingItem } from "@/domain/shopping";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
 
-// Cost engine — turns the (already grossed-up) shopping list into a spend
+// Cost engine – turns the (already grossed-up) shopping list into a spend
 // estimate. Honesty discipline mirrors the D3 nutrition gate:
 //  · Price is a market reference, never precise → the total is always an
 //    ESTIMATE ("~"), never a claimed exact figure.
-//  · Items without a seeded price are NOT invented — they drop out and lower
+//  · Items without a seeded price are NOT invented – they drop out and lower
 //    the basket's PRICE COVERAGE, so the total is an explicit LOWER BOUND when
 //    coverage < 100%. ("adequacy-denominator-precedent": every % states its base.)
 //  · "over budget" only fires when the lower-bound total already exceeds the cap
@@ -26,7 +26,7 @@ export interface LineCost {
 }
 
 export interface CostReport {
-  totalVnd: number; // sum of PRICED lines — a lower bound when coverage < 100%
+  totalVnd: number; // sum of PRICED lines – a lower bound when coverage < 100%
   pricedCount: number;
   totalCount: number;
   coveragePct: number; // % of distinct basket items that have a reference price
@@ -85,7 +85,7 @@ export function costReport(
   return { totalVnd, pricedCount: priced.length, totalCount: lines.length, coveragePct, byGroup, byTrip, top, lines, budgetWeeklyVnd, overBudget, remainingVnd };
 }
 
-/** Compact VND formatter — "125.000đ", "1,2tr". */
+/** Compact VND formatter – "125.000đ", "1,2tr". */
 export function formatVnd(v: number): string {
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(v % 1_000_000 === 0 ? 0 : 1).replace(".", ",")}tr`;
   return `${Math.round(v).toLocaleString("vi-VN")}đ`;

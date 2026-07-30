@@ -1,10 +1,10 @@
-// TIP-B — tiered constraint engine. Sits ON TOP of the existing ingredient-level
+// TIP-B – tiered constraint engine. Sits ON TOP of the existing ingredient-level
 // allergen check (domain/dish/dietary), formalising it into ranked constraints
 // with provenance, and adding conflict/trade-off surfacing. It does NOT rewrite
-// rotation — rotation still eats a pre-filtered repertoire; this module is the
+// rotation – rotation still eats a pre-filtered repertoire; this module is the
 // safety gate + the "why" + the "the app won't pretend it has a perfect answer".
 //
-// P0 SAFETY: allergy is HARD EXCLUDE. `dishSafety` FAILS CLOSED — an ingredient it
+// P0 SAFETY: allergy is HARD EXCLUDE. `dishSafety` FAILS CLOSED – an ingredient it
 // cannot look up, while any allergen is in play, is treated as UNSAFE. A
 // false-negative here (an allergen slipping onto a shared plate) is anaphylaxis,
 // not a bad suggestion; asymmetric risk → bias hard toward exclusion.
@@ -84,7 +84,7 @@ export function safetyReason(s: DishSafety): string | null {
 
 // ─── Conflict / trade-off ───────────────────────────────────────────────────
 // The app does NOT pretend to have a perfect answer. When an allergen removes an
-// ingredient another member genuinely benefits from, surface the trade-off — the
+// ingredient another member genuinely benefits from, surface the trade-off – the
 // human decides. Only defensible, sourced benefits (no invented nutrition claims).
 export interface Conflict {
   allergen: Allergen;
@@ -95,7 +95,7 @@ export interface Conflict {
 
 const benefits = (m: Member): Allergen[] => {
   const ls = m.healthProfile?.lifeStage;
-  // Pregnancy & lactation genuinely benefit from fish (omega-3) — sourced in the
+  // Pregnancy & lactation genuinely benefit from fish (omega-3) – sourced in the
   // pregnancy model. That's the only benefit we assert; nothing invented.
   if (ls && (ls.startsWith("pregnant") || ls.startsWith("lactating"))) return ["fish"];
   return [];
@@ -111,7 +111,7 @@ export function detectConflicts(members: Member[]): Conflict[] {
       allergen,
       avoidedBy,
       wantedBy,
-      note: `Cá tốt cho ${wantedBy.join(", ")} (omega-3) nhưng ${avoidedBy.join(", ")} dị ứng — nấu riêng phần ${avoidedBy.join(", ")}?`,
+      note: `Cá tốt cho ${wantedBy.join(", ")} (omega-3) nhưng ${avoidedBy.join(", ")} dị ứng – nấu riêng phần ${avoidedBy.join(", ")}?`,
     });
   }
   return out;

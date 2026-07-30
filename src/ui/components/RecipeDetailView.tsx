@@ -171,14 +171,14 @@ export function RecipeDetailView({ dishId }: { dishId: string }) {
                     {t("recipe.totalTime")}
                   </dt>
                   <dd className="mt-1 text-sm font-medium">
-                    {guide ? `~${guide.estimatedTotalMin} ${t("recipe.minutes")}` : "—"}
+                    {guide ? `~${guide.estimatedTotalMin} ${t("recipe.minutes")}` : "–"}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-tertiary">
                     {t("recipe.steps")}
                   </dt>
-                  <dd className="mt-1 text-sm font-medium">{guide?.steps.length ?? "—"}</dd>
+                  <dd className="mt-1 text-sm font-medium">{guide?.steps.length ?? "–"}</dd>
                 </div>
               </dl>
               <div className="mt-6 flex flex-wrap items-center gap-2">

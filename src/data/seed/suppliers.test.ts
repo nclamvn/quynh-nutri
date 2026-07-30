@@ -10,7 +10,7 @@ describe("supplier registry (seed, provenance-disciplined)", () => {
       for (const c of s.channels) expect(KINDS).toContain(c.kind);
   });
 
-  it("registry is seed-only — chains are suggestions, not household-owned", () => {
+  it("registry is seed-only – chains are suggestions, not household-owned", () => {
     for (const s of SUPPLIER_REGISTRY) {
       expect(s.seed).toBe(true);
       expect(s.householdId).toBeUndefined();
@@ -33,13 +33,13 @@ describe("supplier registry (seed, provenance-disciplined)", () => {
     }
   });
 
-  it("chains are all `their_*`/hotline — the app can't push its order into a chain cart", () => {
+  it("chains are all `their_*`/hotline – the app can't push its order into a chain cart", () => {
     // No seeded chain offers zalo_chat/phone_sms (that's the household's own shop, added via CRUD).
     for (const s of SUPPLIER_REGISTRY)
       for (const c of s.channels) expect(["their_zalo_oa", "their_app_web", "hotline"]).toContain(c.kind);
   });
 
-  it("no chain carries a fabricated map pin — multi-branch chains use storeLocatorUrl, not one coordinate", () => {
+  it("no chain carries a fabricated map pin – multi-branch chains use storeLocatorUrl, not one coordinate", () => {
     for (const s of SUPPLIER_REGISTRY) expect(s.location).toBeUndefined();
   });
 

@@ -78,7 +78,7 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
     const d = dish(dishId);
     if (!d) return;
     changeSlot(0, d.slot, dishId);
-    toast("Đã thêm vào thực đơn tuần — chỉnh lại trong Thực đơn nếu cần.", "info");
+    toast("Đã thêm vào thực đơn tuần – chỉnh lại trong Thực đơn nếu cần.", "info");
   };
 
   return (
@@ -87,7 +87,7 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
         {!result && (
           <>
             <p className="text-sm leading-relaxed text-muted">
-              Chọn tâm trạng — gợi ý bữa mang tính chăm sóc, thực dụng. {DISCLAIMER}
+              Chọn tâm trạng – gợi ý bữa mang tính chăm sóc, thực dụng. {DISCLAIMER}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {MOODS.map((m) => (
@@ -130,7 +130,7 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
             <p className="text-sm leading-relaxed text-ink">{loading ? result.practicalNote : warmth ?? result.practicalNote}</p>
 
             {result.suggestions.length === 0 ? (
-              <p className="text-sm text-muted">Chưa tìm được món hợp trong kho món — thử tâm trạng khác nhé.</p>
+              <p className="text-sm text-muted">Chưa tìm được món hợp trong kho món – thử tâm trạng khác nhé.</p>
             ) : (
               <ul className="space-y-2">
                 {result.suggestions.map((s) => {
@@ -164,7 +164,7 @@ export function MoodSheet({ open, onClose }: { open: boolean; onClose: () => voi
             )}
             {result.caffeineNote && <p className="text-xs text-muted">Nếu khó ngủ, hạn chế cà phê/trà từ chiều.</p>}
             <p className="text-[11px] text-tertiary">{DISCLAIMER}</p>
-            {/* Parallel, quiet path to support — catches an indirect distress the gate
+            {/* Parallel, quiet path to support – catches an indirect distress the gate
                 may not have flagged. Never harms; a missed signal would. */}
             <button onClick={() => setShowSupport(true)} className="text-xs text-muted underline-offset-2 hover:text-ink hover:underline">
               Cần người lắng nghe? Xem nguồn hỗ trợ
@@ -212,7 +212,7 @@ function CrisisCare({ postpartum, onBack }: { postpartum: boolean; onBack: () =>
     <div className="space-y-3">
       <p className="text-[15px] font-medium text-ink">Nghe như hôm nay thật sự nặng nề. Bạn không phải đối mặt một mình.</p>
       <p className="text-sm leading-relaxed text-muted">
-        Mình xin phép không gợi ý món lúc này — điều đáng làm hơn là tìm một người để nói cùng.
+        Mình xin phép không gợi ý món lúc này – điều đáng làm hơn là tìm một người để nói cùng.
       </p>
       <ResourceList postpartum={postpartum} />
       <button onClick={onBack} className="text-xs text-muted hover:text-ink">← Quay lại</button>

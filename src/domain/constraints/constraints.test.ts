@@ -3,11 +3,11 @@ import { deriveConstraints, familyConstraints, dishSafety, safetyReason, detectC
 import type { Allergen, Commodity, Dish, Household, Member } from "@/domain/types";
 import type { CommoditySource } from "@/domain/nutrition/calculator";
 
-// Controlled commodity source — we assert exactly which ingredients carry which
+// Controlled commodity source – we assert exactly which ingredients carry which
 // allergens, and deliberately OMIT one id to exercise the fail-closed path.
 const COMS: Record<string, Allergen[]> = {
   tom: ["shellfish"],
-  nuoc_mam: ["fish"], // hidden allergen — fish sauce carries fish
+  nuoc_mam: ["fish"], // hidden allergen – fish sauce carries fish
   ga: [],
   rau: [],
   // "moi_la" (a B1 fork's new ingredient) intentionally NOT listed → src returns undefined
@@ -27,7 +27,7 @@ const hh = (members: Member[]): Household => ({
 });
 const member = (over: Partial<Member>): Member => ({ id: "m", name: "Na", role: "adult", activity: "moderate", ...over });
 
-describe("dishSafety — HARD EXCLUDE allergen (P0 safety)", () => {
+describe("dishSafety – HARD EXCLUDE allergen (P0 safety)", () => {
   const shellfishHome = hh([member({ id: "kid", name: "bé Na", role: "child", allergies: ["shellfish"] })]);
 
   it("blocks a dish that directly contains the allergen", () => {
@@ -44,7 +44,7 @@ describe("dishSafety — HARD EXCLUDE allergen (P0 safety)", () => {
   });
 
   it("blocks a B1 fork that ADDS an allergen ingredient", () => {
-    // a safe base dish forked to add tôm — must still be caught
+    // a safe base dish forked to add tôm – must still be caught
     const fork = dish("canh_forked", ["rau", "tom"]);
     expect(dishSafety(fork, shellfishHome, src).safe).toBe(false);
   });
@@ -79,7 +79,7 @@ describe("dishSafety — HARD EXCLUDE allergen (P0 safety)", () => {
   });
 });
 
-describe("deriveConstraints — tiers", () => {
+describe("deriveConstraints – tiers", () => {
   it("maps allergy→hard_safety, condition→medical, dislike→preference, state→state", () => {
     const now = "2026-07-10";
     const m = member({
@@ -96,7 +96,7 @@ describe("deriveConstraints — tiers", () => {
   });
 });
 
-describe("detectConflicts — trade-off, human decides", () => {
+describe("detectConflicts – trade-off, human decides", () => {
   it("surfaces fish-allergy vs pregnancy omega-3 as a trade-off (nấu riêng)", () => {
     const home = [
       member({ id: "kid", name: "bé", role: "child", allergies: ["fish"] }),

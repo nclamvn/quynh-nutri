@@ -9,7 +9,7 @@ import { canSetMaternalStage } from "@/domain/health";
 import type { Member, LifeStage, Allergen } from "@/domain/types";
 
 // Member editor: allergies (everyone) + life stage (adult females, T1 wellness).
-// NO clinical fields — that seam ships dormant.
+// NO clinical fields – that seam ships dormant.
 const MATERNAL_STAGES: LifeStage[] = ["pregnant_t1", "pregnant_t2", "pregnant_t3", "lactating_0_6", "lactating_7_12"];
 const ALLERGENS: Allergen[] = ["shellfish", "fish", "egg", "soy", "dairy", "gluten", "peanut"];
 
@@ -42,7 +42,7 @@ export function HealthProfileSheet({ member, onClose }: { member: Member | null;
       <div className="space-y-5">
         <p className="text-sm font-medium">{memberName}</p>
 
-        {/* Allergies — for everyone (hard exclusion) */}
+        {/* Allergies – for everyone (hard exclusion) */}
         <div>
           <p className="mb-2 text-sm font-medium">{t("health.allergies")}</p>
           <div className="flex flex-wrap gap-1.5">
@@ -62,7 +62,7 @@ export function HealthProfileSheet({ member, onClose }: { member: Member | null;
           </div>
         </div>
 
-        {/* Life stage — adult females only */}
+        {/* Life stage – adult females only */}
         {maternal && (
           <div>
             <p className="mb-2 text-sm font-medium">{t("health.stage")}</p>

@@ -7,7 +7,7 @@ import {
 export type NavItem = { href: string; key: string; icon: (p: { className?: string }) => React.ReactElement };
 
 /**
- * Single source of nav — Sidebar (desktop) and MobileMenu (bottom sheet) both
+ * Single source of nav – Sidebar (desktop) and MobileMenu (bottom sheet) both
  * render from this, so the two never drift. Every app area is reachable here;
  * the four-item mobile TabBar remains the compact daily-use shortcut.
  */

@@ -9,7 +9,7 @@ export interface DonutSegment {
 }
 
 /**
- * Multi-segment ring — one arc per food group, coloured by its chart token,
+ * Multi-segment ring – one arc per food group, coloured by its chart token,
  * BRIGHT if that group is present / faded if not. This gives the mock's colourful
  * donut HONESTLY: it's qualitative presence (R-NUT-4), not a fabricated per-group
  * %. Center stays "4/4 · nhóm có mặt" (denominator precedent intact).
@@ -34,7 +34,7 @@ export function Donut({
   const segDeg = 360 / n - gapDeg;
   const segLen = (segDeg / 360) * c;
   const allOn = segments.every((s) => s.on);
-  // Draw arcs in on mount (cosmetic — presence is still shown by opacity).
+  // Draw arcs in on mount (cosmetic – presence is still shown by opacity).
   const [drawn, setDrawn] = useState(false);
   useEffect(() => {
     const id = requestAnimationFrame(() => setDrawn(true));

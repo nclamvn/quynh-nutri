@@ -24,7 +24,7 @@ describe("life-stage needs (honest when unsourced)", () => {
     expect(t3.proteinG - base.proteinG).toBe(31);
   });
 
-  it("adds NO number for a still-unsourced stage (lactating 7–12) — honest, not fabricated", () => {
+  it("adds NO number for a still-unsourced stage (lactating 7–12) – honest, not fabricated", () => {
     const u = lifeStageUplift(F({ lifeStage: "lactating_7_12", mode: "wellness" }));
     expect(u).toMatchObject({ lifeStage: "lactating_7_12", applied: false, kcal: 0, proteinG: 0, source: null });
     expect(dailyNeed(F({ lifeStage: "lactating_7_12", mode: "wellness" }))).toEqual(dailyNeed(F()));

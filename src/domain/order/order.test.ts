@@ -31,7 +31,7 @@ const sieuThi: Supplier = {
   handles: ["gia vị", "ngũ cốc"],
 };
 
-describe("channel capability — the L-1 honesty gate", () => {
+describe("channel capability – the L-1 honesty gate", () => {
   it("push/call channels carry the order; their_* only open the shop's own surface", () => {
     expect(channelCapability("zalo_chat")).toBe("push");
     expect(channelCapability("phone_sms")).toBe("push");

@@ -1,12 +1,12 @@
 import React from "react";
 
-// Minimal, controlled renderer for assistant replies — premium, no exposed
+// Minimal, controlled renderer for assistant replies – premium, no exposed
 // markdown syntax, no em-dash. Handles **bold**, "- " bullets, "|" tables →
 // "·" rows, and strips "#" heading marks. The agent is told to keep it light;
 // this is the safety net so nothing ever leaks as raw `#`/`*`/`|`.
 
 function inline(s: string): React.ReactNode {
-  const clean = s.replace(/—/g, " ").replace(/[ \t]{2,}/g, " ").trim();
+  const clean = s.replace(/–/g, " ").replace(/[ \t]{2,}/g, " ").trim();
   const parts = clean.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
   return parts.map((p, i) =>
     p.startsWith("**") && p.endsWith("**") ? (

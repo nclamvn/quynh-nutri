@@ -191,7 +191,7 @@ export default function ReportsPage() {
               size={150}
               className="pointer-events-none absolute -right-8 -top-10 -rotate-6 text-brand/[0.07]"
             />
-            <div className="relative border-b border-hairline px-5 py-5 lg:flex lg:items-end lg:justify-between">
+            <div className="relative border-b border-hairline px-5 py-5 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-end lg:gap-8">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand">
                   {t("reports.feedbackEyebrow")}
@@ -200,7 +200,7 @@ export default function ReportsPage() {
                   {t("reports.feedbackTitle")}
                 </h2>
               </div>
-              <p className="mt-2 max-w-xl text-xs leading-relaxed text-muted lg:mt-0 lg:text-right">
+              <p className="mt-2 text-pretty text-xs leading-relaxed text-muted lg:mt-0 lg:text-right xl:whitespace-nowrap">
                 {t("reports.feedbackHonesty")}
               </p>
             </div>

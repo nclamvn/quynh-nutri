@@ -20,7 +20,7 @@ const CHANNEL_LABEL: Record<ChannelKind, string> = {
 };
 const capNote: Record<string, string> = {
   push: "App soạn sẵn đơn, bạn gửi qua kênh này.",
-  call: "Gọi để đặt — app hiện đơn cho bạn đọc.",
+  call: "Gọi để đặt – app hiện đơn cho bạn đọc.",
   open: "App chỉ mở app/web của họ, bạn tự chọn hàng.",
 };
 
@@ -85,7 +85,7 @@ export default function SupplierDetailPage() {
             <SupplierMapView location={s.location} height={220} className="rounded-none border-0" />
           ) : (
             <div className="grid h-[140px] place-content-center bg-surface/50 text-center text-xs text-tertiary">
-              {s.storeLocatorUrl ? "Chuỗi nhiều chi nhánh — dùng trang tìm chi nhánh bên dưới." : "Chưa đặt vị trí bản đồ."}
+              {s.storeLocatorUrl ? "Chuỗi nhiều chi nhánh – dùng trang tìm chi nhánh bên dưới." : "Chưa đặt vị trí bản đồ."}
             </div>
           )}
           <div className="space-y-1.5 px-4 py-3 text-sm">

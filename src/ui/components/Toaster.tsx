@@ -5,7 +5,7 @@ import type { ToastTone } from "@/ui/toast";
 
 interface Item { id: number; message: string; tone: ToastTone }
 
-/** Minimal toast stack — surfaces errors/info that were previously swallowed. */
+/** Minimal toast stack – surfaces errors/info that were previously swallowed. */
 export function Toaster() {
   const [items, setItems] = useState<Item[]>([]);
   const nextId = useRef(1);

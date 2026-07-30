@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useInView } from "./useInView";
 
-// Step 2 — "tương phản khổ". The most emotional line of the whole product
+// Step 2 – "tương phản khổ". The most emotional line of the whole product
 // ("Tối nay ăn gì?") gets a near-full-viewport screen of its own: giant type,
 // ~70% of the screen deliberately left EMPTY, the block anchored low-left (not
-// rigidly centered), and ONE slow reveal on enter — this is the climax, so it
+// rigidly centered), and ONE slow reveal on enter – this is the climax, so it
 // gets time. Hard rule: nothing added beyond eyebrow + question + one CTA.
 // A low threshold because the section is tall; content is visible by default
 // (the class only ADDS the entrance) so nothing hides if JS never runs.

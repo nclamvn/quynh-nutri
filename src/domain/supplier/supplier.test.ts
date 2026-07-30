@@ -23,7 +23,7 @@ describe("directionsUrl", () => {
     expect(directionsUrl({})).toBeNull();
     expect(directionsUrl({ address: "   " })).toBeNull();
   });
-  it("never carries the user's own location — only the shop destination", () => {
+  it("never carries the user's own location – only the shop destination", () => {
     const u = directionsUrl({ location: { lat: 10.76, lng: 106.66 } })!;
     expect(u).not.toContain("origin="); // maps app supplies the user's location
   });

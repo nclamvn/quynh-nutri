@@ -4,7 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { isE2EMode } from "@/lib/auth";
 
 // Prisma 7 runtime client for Neon Postgres (driver adapter, pooled URL).
-// Lazy singleton — NOT a Proxy (breaks adapter inspection per Vercel guidance).
+// Lazy singleton – NOT a Proxy (breaks adapter inspection per Vercel guidance).
 // Server-only: the repo layer runs in Server Actions / route handlers.
 let _db: PrismaClient | null = null;
 

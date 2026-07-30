@@ -3,7 +3,7 @@ import type { CommoditySource } from "@/domain/nutrition/calculator";
 import { isPregnant } from "@/domain/health";
 
 // Pregnancy avoid-list = SOFT, SOURCED warnings (decision: TIP). Unlike allergens
-// (a hard exclusion via dishAllowed), a hazard NEVER removes a dish — the app warns
+// (a hard exclusion via dishAllowed), a hazard NEVER removes a dish – the app warns
 // with a source, the person/doctor decides. A hazard is only surfaced when the
 // commodity carries a sourced tag; an untagged ingredient yields NO warning and is
 // NOT claimed "safe" (fail-safe: absence of a warning ≠ a safety assertion).

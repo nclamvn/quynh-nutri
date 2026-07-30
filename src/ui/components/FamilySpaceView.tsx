@@ -7,9 +7,9 @@ import { detectConflicts } from "@/domain/constraints";
 import { MemberSheet, type MemberSubject } from "./MemberSheet";
 import type { Member, MemberState, MemberStateKind } from "@/domain/types";
 
-// "Không gian gia đình sống" — the whole family in ONE frame the cook sees, plus
+// "Không gian gia đình sống" – the whole family in ONE frame the cook sees, plus
 // a warm way to say "hôm nay bạn ấy thế nào". No technical terms surface: the user
-// never sees "constraint / state / tier / provenance" — only "nhà mình" language.
+// never sees "constraint / state / tier / provenance" – only "nhà mình" language.
 
 const ALLERGEN_VN: Record<string, string> = {
   shellfish: "hải sản", fish: "cá", egg: "trứng", soy: "đậu nành",
@@ -36,7 +36,7 @@ const displayName = (m: Member) => m.name?.trim() || (m.role === "child" ? "Bé"
 
 export function FamilySpaceView() {
   const { household, addMemberState, removeMemberState } = useStore();
-  // Recompute "active" against now on each render — expired states just drop out.
+  // Recompute "active" against now on each render – expired states just drop out.
   const now = new Date().toISOString();
   const space = useMemo(() => familySpace(household.members, now), [household.members, now]);
   const conflicts = useMemo(() => detectConflicts(household.members), [household.members]);
@@ -51,7 +51,7 @@ export function FamilySpaceView() {
           <button onClick={() => setSubject("new")} className="cta-primary rounded-full px-5 py-2.5 text-sm font-medium text-white">
             + Thêm thành viên
           </button>
-          <p className="text-[11px] text-tertiary">Kể tôi nghe nhà mình có những ai — thực đơn sẽ theo đó.</p>
+          <p className="text-[11px] text-tertiary">Kể tôi nghe nhà mình có những ai – thực đơn sẽ theo đó.</p>
         </div>
         <MemberSheet subject={subject} onClose={() => setSubject(null)} />
       </>
@@ -73,7 +73,7 @@ export function FamilySpaceView() {
 
   return (
     <>
-      {/* Trade-off — the app doesn't pretend to have a perfect answer; the human
+      {/* Trade-off – the app doesn't pretend to have a perfect answer; the human
           decides. Honey/amber, warm, never alarming. */}
       {conflicts.map((c, i) => (
         <div key={i} className="mb-3 flex items-start gap-2 rounded-xl border border-amber/25 bg-amber-weak px-3 py-2.5">
@@ -95,7 +95,7 @@ export function FamilySpaceView() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{displayName(m)}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                    {/* Allergies — the safety layer. Honey/amber "cần tránh", never
+                    {/* Allergies – the safety layer. Honey/amber "cần tránh", never
                         alarming red (một-màu-một-nghĩa). */}
                     {need.allergies.length > 0 && (
                       <span className="rounded-full bg-amber-weak px-2 py-0.5 text-[10px] font-medium text-amber">
@@ -113,7 +113,7 @@ export function FamilySpaceView() {
                 <span aria-hidden className="shrink-0 text-[11px] font-medium text-brand">Sửa</span>
               </button>
 
-              {/* Today's states — self-expiring; each removable ("khỏi rồi"). */}
+              {/* Today's states – self-expiring; each removable ("khỏi rồi"). */}
               {need.activeStates.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-hairline pt-3">
                   <span className="text-[11px] text-tertiary">Hôm nay:</span>
@@ -122,7 +122,7 @@ export function FamilySpaceView() {
                       key={s.id}
                       onClick={() => removeMemberState(need.memberId, s.id)}
                       className="group flex items-center gap-1 rounded-full bg-brand-weak px-2 py-0.5 text-[11px] text-brand-ink"
-                      title="Khỏi rồi — bỏ trạng thái này"
+                      title="Khỏi rồi – bỏ trạng thái này"
                     >
                       {stateLabel(s)}<span aria-hidden className="opacity-50 group-hover:opacity-100">×</span>
                     </button>

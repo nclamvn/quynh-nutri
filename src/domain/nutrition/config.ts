@@ -1,5 +1,5 @@
 // D3 gate thresholds (INTAKE-SEED §6, refined to 3 tiers per Human decision).
-// Config, not hardcoded — tunable with real data via env.
+// Config, not hardcoded – tunable with real data via env.
 //
 //   coverage ≥ NUMBER            → show a point number
 //   RANGE ≤ coverage < NUMBER    → show a number anchored inside a range

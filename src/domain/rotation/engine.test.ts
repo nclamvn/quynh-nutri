@@ -10,7 +10,7 @@ const proteinOf = (dishId: string) => REPERTOIRE_BY_ID[dishId]?.proteinType;
 const manByDay = (slots: PlannedSlot[]) =>
   slots.filter((s) => s.slot === "MAN").sort((a, b) => a.day - b.day);
 
-describe("generateWeek — structure", () => {
+describe("generateWeek – structure", () => {
   it("produces 7 days each with COM/MẶN/RAU/CANH", () => {
     const { plan } = generateWeek({ ...base, seed: 1 });
     for (let day = 0; day < 7; day++) {
@@ -23,7 +23,7 @@ describe("generateWeek — structure", () => {
   });
 });
 
-describe("generateWeek — rules", () => {
+describe("generateWeek – rules", () => {
   it("never repeats protein on consecutive days (HARD)", () => {
     for (let seed = 1; seed <= 20; seed++) {
       const { plan } = generateWeek({ ...base, seed });
@@ -49,13 +49,13 @@ describe("generateWeek — rules", () => {
     const man = manByDay(plan.slots);
     const fish = man.filter((s) => proteinOf(s.dishId) === "ca").length;
     const other = man.filter((s) => ["tom", "cua"].includes(proteinOf(s.dishId)!)).length;
-    // Either quota met, or explicitly relaxed with an honest note — never silent.
+    // Either quota met, or explicitly relaxed with an honest note – never silent.
     expect(fish >= 2 && other >= 1 ? notes.length >= 0 : notes.length).toBeGreaterThanOrEqual(0);
     expect(fish + other).toBeGreaterThanOrEqual(2);
   });
 });
 
-describe("generateWeek — determinism & locking", () => {
+describe("generateWeek – determinism & locking", () => {
   it("same seed ⇒ identical plan", () => {
     const a = generateWeek({ ...base, seed: 42 });
     const b = generateWeek({ ...base, seed: 42 });

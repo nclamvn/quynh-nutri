@@ -368,7 +368,7 @@ function CaptureSheet({
                       onChange={(event) => setMapping((current) => ({ ...current, [index]: event.target.value }))}
                       className="mt-1 w-full rounded-[10px] border border-hairline bg-surface/45 px-3 py-2 text-sm text-ink outline-none focus:border-brand"
                     >
-                      <option value="">Chưa ghép — không thể áp dụng</option>
+                      <option value="">Chưa ghép – không thể áp dụng</option>
                       {shopping.map((item) => (
                         <option key={shoppingKey(item)} value={shoppingKey(item)}>
                           {commodityName(item.commodityId)} · {item.vendor}

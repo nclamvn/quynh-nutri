@@ -25,7 +25,7 @@ describe("pregnancy avoid-list (soft, sourced)", () => {
     expect(pregnancyWarnings(dish(["ca_hoi"]), preg, src)).toEqual([]); // untagged ≠ warning, ≠ "safe"
   });
 
-  it("never excludes — it only returns warnings (dish stays available)", () => {
+  it("never excludes – it only returns warnings (dish stays available)", () => {
     // pregnancyWarnings returns data, not a filter; a warned dish is still in the repertoire.
     expect(Array.isArray(pregnancyWarnings(dish(["ca_thu_vua"]), preg, src))).toBe(true);
   });

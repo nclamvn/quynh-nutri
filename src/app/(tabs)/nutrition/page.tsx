@@ -134,7 +134,7 @@ export default function NutritionPage() {
             ))}
           </ul>
 
-          {/* Key micronutrients — estimated adequacy from real VN FCT data (P1), shown
+          {/* Key micronutrients – estimated adequacy from real VN FCT data (P1), shown
               with honest coverage; never a precise claim. iodine not tracked (no data). */}
           {pregnant && microRows.length > 0 && (
             <div className="mt-4 border-t border-hairline pt-3">
@@ -166,7 +166,7 @@ export default function NutritionPage() {
             </div>
           )}
 
-          {/* Pregnancy avoid-list — soft, sourced (never excludes). */}
+          {/* Pregnancy avoid-list – soft, sourced (never excludes). */}
           {pregnant && (
             <div className="mt-4 border-t border-hairline pt-3">
               <p className="mb-2 text-xs font-medium text-muted">{t("health.avoidTitle")}</p>

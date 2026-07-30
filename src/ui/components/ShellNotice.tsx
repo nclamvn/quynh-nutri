@@ -5,7 +5,7 @@ import { Blossom } from "./Blossom";
 
 /**
  * Honest SHELL placeholder (L-6). A screen whose engine isn't wired yet shows
- * this instead of faking data — clear "sắp có" badge, states what's missing.
+ * this instead of faking data – clear "sắp có" badge, states what's missing.
  */
 export function ShellNotice({ icon, title, hint }: { icon: React.ReactNode; title: string; hint: string }) {
   const { t } = useI18n();

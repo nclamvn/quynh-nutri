@@ -10,7 +10,7 @@ const ROWS = [
   { n: "03", title: "Thành thật về dữ liệu", desc: "Dữ liệu đủ đến đâu, sản phẩm nói rõ đến đó. Ước lượng vẫn là ước lượng, không được trình bày như một con số tuyệt đối." },
 ];
 
-// Enriched (owner: 03 was too plain) — a low-opacity botanical line-art + a small
+// Enriched (owner: 03 was too plain) – a low-opacity botanical line-art + a small
 // framed dish accent + a staggered row reveal on scroll. Editorial: full-width rows,
 // no cards, no icon-per-line.
 export function Memory() {

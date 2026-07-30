@@ -341,7 +341,7 @@ const validateMealRunPayload = async (
   return parsed;
 };
 
-// Server Action boundary — client store calls these to load/persist to Neon.
+// Server Action boundary – client store calls these to load/persist to Neon.
 export async function getHouseholdState(): Promise<HouseholdState> {
   await requireUserId();
   return loadHouseholdState();
@@ -534,7 +534,7 @@ export async function persistMemberAllergies(memberId: string, allergies: Allerg
   await saveMemberAllergies(id.parse(memberId), z.array(allergenSchema).max(10).parse(allergies));
 }
 
-// ── "Không gian gia đình sống" — member base CRUD + dynamic states ──
+// ── "Không gian gia đình sống" – member base CRUD + dynamic states ──
 export async function persistMember(
   input: Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes"> & { id?: string },
 ): Promise<string> {
@@ -554,7 +554,7 @@ export async function removeMemberState(stateId: string): Promise<void> {
   await deleteMemberState(id.parse(stateId));
 }
 
-// ── Phase 2 — Supplier & Order (household-owned) ──
+// ── Phase 2 – Supplier & Order (household-owned) ──
 export async function persistSupplier(
   input: Omit<Supplier, "householdId" | "seed">,
 ): Promise<Supplier> {
@@ -633,7 +633,7 @@ export async function recordLeftoverMovement(
   return result;
 }
 
-// Semantic dish search (Phase B) — returns ranked dish ids for the query.
+// Semantic dish search (Phase B) – returns ranked dish ids for the query.
 export async function searchDishes(query: string): Promise<string[]> {
   await requireUserId();
   const hits = await semanticSearch(z.string().trim().min(1).max(300).parse(query), 12);

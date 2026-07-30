@@ -10,7 +10,7 @@ const inter = Inter({
   display: "swap",
 });
 
-// Lora = the ONLY serif — display marketing + quotes only (blueprint §19). Italic
+// Lora = the ONLY serif – display marketing + quotes only (blueprint §19). Italic
 // axis carries the landing hook/quote voice; Georgia is the fallback with dấu.
 const lora = Lora({
   variable: "--font-lora",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     default: "Ăn Ngon · Bữa cơm nhà",
     template: "%s · Ăn Ngon",
   },
-  description: "Kế hoạch bữa cơm gia đình Việt — định lượng có nguồn, đi chợ gọn.",
+  description: "Kế hoạch bữa cơm gia đình Việt – định lượng có nguồn, đi chợ gọn.",
   manifest: "/manifest.webmanifest",
   applicationName: "Ăn Ngon",
   authors: [{ name: "Q's Kitchen" }],

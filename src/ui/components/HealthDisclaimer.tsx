@@ -1,6 +1,6 @@
 import { useI18n } from "@/i18n/context";
 
-/** Real disclaimer for the T1 special-diets surfaces — neutral tone (never red).
+/** Real disclaimer for the T1 special-diets surfaces – neutral tone (never red).
  *  App executes public guidance; it does not replace a doctor. */
 export function HealthDisclaimer({ className = "" }: { className?: string }) {
   const { t } = useI18n();

@@ -31,7 +31,7 @@ describe("parseGoong", () => {
   });
 });
 
-describe("provider selection — swap without touching domain/UI", () => {
+describe("provider selection – swap without touching domain/UI", () => {
   it("defaults to Nominatim (free, policy-compliant)", () => {
     expect(providerNameForEnv({})).toBe("nominatim");
   });

@@ -4,7 +4,7 @@ import { parseJson, rateLimit, RequestError } from "@/lib/request-security";
 import { z } from "zod";
 
 // Warm framing ONLY. By design the client runs the crisis gate + picks the dishes
-// deterministically BEFORE calling this — so the raw feeling text never reaches the
+// deterministically BEFORE calling this – so the raw feeling text never reaches the
 // server (no logging/profiling), and a crisis input never hits an LLM. This route
 // receives only the mood key + already-chosen dish names and returns one warm
 // sentence. It cannot add foods, make claims, or diagnose; on any error it returns
@@ -25,7 +25,7 @@ const SYSTEM = [
   "cho một danh sách món đã được chọn sẵn theo tâm trạng người dùng.",
   "TUYỆT ĐỐI KHÔNG: chẩn đoán/nhận định tâm lý; nói món ăn chữa hay cải thiện tâm trạng;",
   "thêm bất kỳ món nào ngoài danh sách; nêu con số dinh dưỡng; dùng dấu chấm than.",
-  "Chỉ thể hiện sự quan tâm và rằng đây là món gọn/quen để đỡ gánh nặng nấu — không phải thuốc.",
+  "Chỉ thể hiện sự quan tâm và rằng đây là món gọn/quen để đỡ gánh nặng nấu – không phải thuốc.",
 ].join(" ");
 
 const bodySchema = z.object({

@@ -1,6 +1,6 @@
 import type { Dish } from "@/domain/types";
 
-// Mood-food advisory — SAFETY-FIRST. The crisis gate is deterministic and runs
+// Mood-food advisory – SAFETY-FIRST. The crisis gate is deterministic and runs
 // before any suggestion; food is retrieved from REAL dish attributes only; every
 // suggestion is tiered and never up-ranked. No pseudo-science, no diagnosis.
 
@@ -20,16 +20,16 @@ function fold(s: string): string {
     .trim();
 }
 
-// Intent phrases (NOT bare morbid words like "chết" — avoids false alarms on
+// Intent phrases (NOT bare morbid words like "chết" – avoids false alarms on
 // "đói chết được"). Stored folded. severity "crisis" = self-harm/suicide intent.
 // severity "crisis" = self-harm/suicide intent, INCLUDING indirect "self-as-burden"
-// forms (how depression — esp. postpartum — often actually speaks; no direct verb).
+// forms (how depression – esp. postpartum – often actually speaks; no direct verb).
 const CRISIS_PHRASES = [
   "muon chet", "chi muon chet", "khong muon song", "chan song", "chan khong muon song",
   "tu tu", "tu sat", "tu lam hai", "lam hai ban than", "lam dau ban than", "tu hai minh",
   "cat tay minh", "ket thuc cuoc doi", "ket thuc tat ca", "chet cho xong", "chet cho roi",
   "bien mat khoi cuoc doi", "khong thiet song", "khong con muon ton tai",
-  // indirect self-as-burden — high signal, catch for everyone
+  // indirect self-as-burden – high signal, catch for everyone
   "con se tot hon neu khong co toi", "moi nguoi se tot hon neu khong co toi",
   "the gioi tot hon khi khong co toi", "gia dinh tot hon khi khong co toi",
   "khong co toi moi nguoi se on hon",
@@ -38,7 +38,7 @@ const CRISIS_PHRASES = [
   "self-harm", "hurt myself", "dont want to live", "do not want to live", "no reason to live",
   "better off without me", "everyone better off without me",
 ];
-// severity "watch" = distress beyond "hôm nay hơi mệt" — still stop suggesting food.
+// severity "watch" = distress beyond "hôm nay hơi mệt" – still stop suggesting food.
 // Leans toward catching indirect despair (a false positive here is mild; a miss is not).
 const DISTRESS_PHRASES = [
   "tuyet vong", "vo vong", "vo gia tri", "khong con y nghia", "khong thiet an", "khong thiet gi",
@@ -76,7 +76,7 @@ interface Situation {
   dishTier: Exclude<Tier, "research">; // dishes are practical or comfort; research is a note, never a dish claim
   whyDish: string;
   practicalNote: string; // the strongest lever is usually reducing the cooking burden / eating regularly
-  researchNote?: string; // tier "research" — "một số nghiên cứu liên hệ…", never therapeutic/causal
+  researchNote?: string; // tier "research" – "một số nghiên cứu liên hệ…", never therapeutic/causal
   caffeineNote?: boolean;
 }
 
@@ -89,8 +89,8 @@ export const SITUATION_MAP: Record<MoodKey, Situation> = {
     pick: quickish,
     dishTier: "practical",
     whyDish: "dễ nấu, đỡ phải nghĩ nhiều khi đang căng",
-    practicalNote: "Cứ ăn đều và đủ nước — đừng bỏ bữa. Khi mệt, chọn món gọn còn quan trọng hơn chọn món “bổ”.",
-    researchNote: "Một số nghiên cứu liên hệ omega-3 (cá) và magie (rau lá, hạt) với tâm trạng ở mức dân số — đây không phải thuốc và không chữa được điều gì.",
+    practicalNote: "Cứ ăn đều và đủ nước – đừng bỏ bữa. Khi mệt, chọn món gọn còn quan trọng hơn chọn món “bổ”.",
+    researchNote: "Một số nghiên cứu liên hệ omega-3 (cá) và magie (rau lá, hạt) với tâm trạng ở mức dân số – đây không phải thuốc và không chữa được điều gì.",
   },
   tired: {
     pick: quickish,
@@ -108,8 +108,8 @@ export const SITUATION_MAP: Record<MoodKey, Situation> = {
   low: {
     pick: (d) => d.slot === "CANH" || d.quick,
     dishTier: "comfort",
-    whyDish: "món ấm, quen thuộc — để tự an ủi mình một chút",
-    practicalNote: "Một món quen, ăn cùng người nhà nếu được — đôi khi vậy là đủ.",
+    whyDish: "món ấm, quen thuộc – để tự an ủi mình một chút",
+    practicalNote: "Một món quen, ăn cùng người nhà nếu được – đôi khi vậy là đủ.",
   },
   normal: {
     pick: (d) => d.quick || (d.cookTimeMin ?? 99) <= 25,

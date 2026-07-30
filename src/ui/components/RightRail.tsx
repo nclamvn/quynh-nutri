@@ -12,7 +12,7 @@ import { AdequacyStrip } from "./AdequacyStrip";
 import { DishThumb } from "./DishThumb";
 import { Blossom } from "./Blossom";
 
-const dishName = (d: Dish | undefined, lang: Lang) => (!d ? "—" : lang === "en" && d.enLabel ? d.enLabel : d.vnName);
+const dishName = (d: Dish | undefined, lang: Lang) => (!d ? "–" : lang === "en" && d.enLabel ? d.enLabel : d.vnName);
 
 /**
  * Contextual rail for genuinely ultra-wide screens. It overlays the otherwise
@@ -82,7 +82,7 @@ function TodayRail() {
         </div>
       </section>
 
-      {/* Uống nước — SHELL: no water-tracking engine yet, so NO fake number (L-1) */}
+      {/* Uống nước – SHELL: no water-tracking engine yet, so NO fake number (L-1) */}
       <RailCard title={t("ov.water")}>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted">{t("ov.noData")}</span>
@@ -91,10 +91,10 @@ function TodayRail() {
         <div className="mt-2 h-1.5 rounded-full bg-surface" />
       </RailCard>
 
-      {/* Ghi chú nhanh — real notes (UI-7), honest empty state when none */}
+      {/* Ghi chú nhanh – real notes (UI-7), honest empty state when none */}
       <RailCard title={t("ov.quickNotes")}>
         {userNotes.length === 0 ? (
-          <p className="text-sm text-muted">—</p>
+          <p className="text-sm text-muted">–</p>
         ) : (
           <ul className="space-y-1.5">
             {userNotes.slice(0, 4).map((n) => (

@@ -38,7 +38,7 @@ export const KITCHEN_GUIDE_SOURCES: KitchenGuideSource[] = [
     publisher: "USDA Food Safety and Inspection Service",
     title: {
       vi: "Các bước cơ bản để giữ thực phẩm an toàn",
-      en: "Keep food safe — food safety basics",
+      en: "Keep food safe – food safety basics",
     },
     url: "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/steps-keep-food-safe",
     reviewedAt: "2026-07-29",

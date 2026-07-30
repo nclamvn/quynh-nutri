@@ -1,4 +1,4 @@
-/* Landing page styles — ported from the owner's editorial mock, scoped under
+/* Landing page styles – ported from the owner's editorial mock, scoped under
    `.lp` so nothing leaks into the app. Serif = Lora (--font-serif); background
    images are passed inline from the media manifest (local, not hotlinked).
    All motion freezes under prefers-reduced-motion (handled globally + here). */
@@ -9,7 +9,7 @@
 @keyframes lp-rail { 0%, 100% { transform: scaleX(0.35); opacity: 0.35; } 50% { transform: scaleX(1); opacity: 1; } }
 @keyframes lp-spin { to { transform: rotate(360deg); } }
 @keyframes lp-rise { from { opacity: 1; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-/* coverage-gauge keyframes — MUST live at top level (never nested inside .lp,
+/* coverage-gauge keyframes – MUST live at top level (never nested inside .lp,
    which is invalid CSS and can make strict parsers drop the whole .lp block). */
 @keyframes g-fill { from { stroke-dashoffset: 100; } }
 @keyframes g-demo {
@@ -29,7 +29,7 @@
   --muted: rgba(23, 18, 20, 0.62);
   --serif: var(--font-serif);
   --lp-gutter: max(2rem, calc((100vw - 1440px) / 2));
-  /* Data-truth tier colours — the app's "one colour one meaning" palette, kept as
+  /* Data-truth tier colours – the app's "one colour one meaning" palette, kept as
      scoped landing vars so no raw hex scatters. Green/honey/gray, never red. */
   --tier-ok: #469b75;
   --tier-mid: #c58a21;
@@ -50,7 +50,7 @@
     border-radius: 6px;
   }
 
-  /* A3 — no orphan: balance every display heading so no line ends with 1 word. */
+  /* A3 – no orphan: balance every display heading so no line ends with 1 word. */
   :is(.display, .hero h1, .quote blockquote, .stage-copy h2) { text-wrap: balance; }
 
   .grain-layer {
@@ -84,10 +84,10 @@
   .hero h1 { max-width: 1060px; margin: 0; font-size: clamp(4.5rem, 8vw, 8.5rem); line-height: 1.02; letter-spacing: -0.072em; font-weight: 820; }
   .hero h1 span { display: block; }
   /* Explicit inter-line gaps: uppercase Vietnamese caps stack marks (Ề = Ê + ◌̀)
-     that overshoot cap-height and poke into the line above at any tight leading —
+     that overshoot cap-height and poke into the line above at any tight leading –
      line-height alone can't clear it, so the strong/accent lines carry a margin. */
   .soft { display: block; font: italic 400 0.55em/1.12 var(--serif); letter-spacing: -0.055em; }
-  /* "PHẢI NGHĨ" — serif, refined weight (thanh tao) instead of the heavy blocky
+  /* "PHẢI NGHĨ" – serif, refined weight (thanh tao) instead of the heavy blocky
      sans; sits in the same serif family as the soft + accent lines. */
   .strong { display: block; margin-top: 0.08em; font-family: var(--serif); font-weight: 500; text-transform: uppercase; letter-spacing: -0.008em; }
   .accent { display: block; margin-top: 0.06em; font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--rose); letter-spacing: -0.066em; }
@@ -98,7 +98,7 @@
   .btn:hover { background: #ff6c8a; transform: translateY(-3px); }
   .text-link { font-size: 0.78rem; font-weight: 750; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.48); padding-bottom: 0.25rem; }
   .proof, .media-caption, .rail { position: absolute; z-index: 4; }
-  /* Stat strip — now an in-flow horizontal caption under the hero CTAs (was a
+  /* Stat strip – now an in-flow horizontal caption under the hero CTAs (was a
      cramped floating corner block that fought the eyebrow). */
   .orbital { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 1.15rem; margin-top: 2.4rem; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.62; }
   .orbital span { display: flex; align-items: center; }
@@ -127,7 +127,7 @@
   .ticker-group span { display: flex; align-items: center; gap: 2.5rem; }
   .ticker b { color: var(--acid); font-size: 0.55rem; }
 
-  /* manifesto — one wide editorial spread: thesis, then image + reading note. */
+  /* manifesto – one wide editorial spread: thesis, then image + reading note. */
   .manifesto { position: relative; padding: clamp(6rem, 11vw, 11rem) var(--lp-gutter); overflow: hidden; }
   .section-label { align-self: start; color: rgba(23, 18, 20, 0.58); }
   .manifesto-head { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(14rem, 0.8fr) minmax(0, 2.2fr); gap: 5vw; align-items: start; }
@@ -151,12 +151,12 @@
   /* dashed inner ring is static (never rotates → can't overlap anything) */
   .seal::after { content: ""; position: absolute; inset: 0.55rem; border: 1px dashed rgba(23, 18, 20, 0.25); border-radius: 50%; }
   /* the wordmark runs ON a circular path (SVG), so it stays on the ring and never
-     crosses the centre Q — only the ring layer spins. */
+     crosses the centre Q – only the ring layer spins. */
   .seal-ring { position: absolute; inset: 0; width: 100%; height: 100%; animation: lp-spin 22s linear infinite; }
   .seal-ring text { font-family: var(--font-sans); font-size: 8px; font-weight: 800; text-transform: uppercase; fill: rgba(23, 18, 20, 0.5); }
   .seal b { position: relative; z-index: 1; font: italic 2rem var(--serif); }
 
-  /* stage — contained grid: [media (photo + app lodged inside)] [copy].
+  /* stage – contained grid: [media (photo + app lodged inside)] [copy].
      No section-wide absolutes, so nothing can collide across the section. */
   .stage { position: relative; padding: clamp(4rem, 8vw, 7rem) var(--lp-gutter); background: #e5deda; overflow: hidden; }
   .stage:after { content: "WEEK / 01"; position: absolute; z-index: 0; left: -0.03em; bottom: -0.3em; color: rgba(255, 255, 255, 0.2); font-size: clamp(4.2rem, 12vw, 13rem); font-weight: 900; letter-spacing: -0.1em; line-height: 1; white-space: nowrap; pointer-events: none; }
@@ -194,7 +194,7 @@
   .stage-copy p { font-size: 0.97rem; line-height: 1.65; color: var(--muted); }
   .stage-copy a { display: inline-block; margin-top: 0.6rem; font-size: 0.72rem; font-weight: 800; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 0.25rem; }
 
-  /* memory — dark editorial folio: thesis, panoramic memory, then the ledger. */
+  /* memory – dark editorial folio: thesis, panoramic memory, then the ledger. */
   .memory { position: relative; overflow: hidden; padding: clamp(6rem, 10vw, 10rem) var(--lp-gutter); background:
     radial-gradient(900px 520px at 100% 0%, rgba(70, 155, 117, 0.1), transparent 58%),
     radial-gradient(800px 480px at 0% 100%, rgba(243, 93, 125, 0.1), transparent 55%),
@@ -240,7 +240,7 @@
   .trust article:last-child { border-right: 0; }
   .truth.in-view .trust article { animation: lp-rise 0.65s var(--ease-emphasized) both; animation-delay: calc(var(--i, 0) * 110ms); }
 
-  /* COVERAGE GAUGE — độ chắc = độ phủ, made visual. A ring drawn to the coverage %
+  /* COVERAGE GAUGE – độ chắc = độ phủ, made visual. A ring drawn to the coverage %
      with the kcal number in the middle; tier drives colour + a soft "lamp" glow
      (ok subtle · mid softer · low none). pathLength=100 → arc offset = 100−coverage.
      Base = the FILLED ring (visible with no JS / reduced-motion); .in-view only
@@ -261,7 +261,7 @@
   .tier-mid .g-arc { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--data-mid) 18%, transparent)); }
   .tier-low .g-arc { filter: none; }
   .tier-low .g-cov { opacity: 0.82; }
-  /* demo ring — brightens gray→honey→green as it fills */
+  /* demo ring – brightens gray→honey→green as it fills */
   .truth.in-view .gauge-demo .g-arc { animation: g-demo 2.4s var(--ease-standard) both; }
   .trust small { font-size: 0.6rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); }
   .trust h3 { margin: 0.3rem 0 0.4rem; font: italic 400 clamp(1.7rem, 2.6vw, 2.5rem)/1.1 var(--serif); letter-spacing: -0.04em; color: var(--ink); }
@@ -278,14 +278,14 @@
   .quote-meta { position: relative; z-index: 1; display: flex; justify-content: space-between; margin-top: 4rem; font-size: 0.54rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
 
   /* final */
-  /* STEP 2 — tương phản khổ. ~full-viewport, block anchored low-left so ~70% of
+  /* STEP 2 – tương phản khổ. ~full-viewport, block anchored low-left so ~70% of
      the screen is deliberately empty (the breath). Nothing added beyond eyebrow
-     + question + one CTA — the emptiness IS the design. */
+     + question + one CTA – the emptiness IS the design. */
   .final { position: relative; overflow: hidden; min-height: 100svh; display: grid; align-content: end; justify-items: start; padding: clamp(6rem, 16vh, 12rem) var(--lp-gutter) clamp(3.5rem, 9vh, 7rem); background:
     radial-gradient(900px 560px at 82% 18%, rgba(70, 155, 117, 0.11), transparent 62%),
     radial-gradient(760px 480px at 8% 100%, rgba(243, 93, 125, 0.1), transparent 58%),
     var(--ink); color: var(--ivory); text-align: left; }
-  /* a single clean plated dish floating in the top-right void — the appetite the
+  /* a single clean plated dish floating in the top-right void – the appetite the
      question asks about, made real. Circular crop reads as the plate itself. */
   .final-dish { position: absolute; z-index: 0; top: calc(min(58vw, 880px) * -0.18); right: calc(min(58vw, 880px) * -0.3); margin: 0; width: min(58vw, 880px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 1px solid rgba(255, 250, 244, 0.1); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55); pointer-events: none; }
   .final-dish img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -300,7 +300,7 @@
   .final-desc { max-width: 34rem; margin: clamp(1.6rem, 3.5vh, 2.6rem) 0 0; font-size: 0.98rem; line-height: 1.62; color: rgba(255, 250, 244, 0.62); text-wrap: pretty; }
   .final-actions { display: flex; align-items: center; gap: 2rem; margin-top: clamp(2rem, 4vh, 3rem); }
   .final-actions > a:last-child { font-size: 0.72rem; font-weight: 750; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.42); padding-bottom: 0.25rem; }
-  /* slow, single reveal — the climax gets time (slower than every other reveal) */
+  /* slow, single reveal – the climax gets time (slower than every other reveal) */
   .final.in-view .final-eyebrow { animation: lp-rise 0.7s var(--ease-emphasized) both; }
   .final.in-view .final-q { animation: lp-rise 1.1s 0.12s var(--ease-emphasized) both; }
   .final.in-view .final-desc { animation: lp-rise 0.8s 0.42s var(--ease-emphasized) both; }
@@ -385,7 +385,7 @@
     .truth-grid > div:first-child > p:last-child { margin-top: 1.25rem; line-height: 1.65; color: var(--muted); }
     .confidence { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 1.25rem; }
     .confidence .gauge { width: 92px; }
-    /* mobile: the three tiers read as ONE scale — compact horizontal rows (ring
+    /* mobile: the three tiers read as ONE scale – compact horizontal rows (ring
        left, text right), close together, so all three fit in one glance instead
        of floating far apart down the page. */
     .trust { grid-template-columns: 1fr; }

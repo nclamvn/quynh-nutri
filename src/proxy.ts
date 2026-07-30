@@ -12,7 +12,7 @@ function isPublic(pathname: string): boolean {
     pathname.startsWith("/spike/");
 }
 
-// E2E-only auth bypass — committed but env-gated and HARD-guarded off in production,
+// E2E-only auth bypass – committed but env-gated and HARD-guarded off in production,
 // so it can never weaken the live app. Replaces the old fragile "edit proxy.ts by
 // hand, remember to restore before commit" QA dance. The E2E harness sets this env.
 const E2E_BYPASS = process.env.E2E_BYPASS_AUTH === "1" && process.env.NODE_ENV !== "production";

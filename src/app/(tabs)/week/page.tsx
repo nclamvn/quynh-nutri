@@ -29,7 +29,7 @@ import { PrepAheadSheet } from "@/ui/components/PrepAheadSheet";
 const SLOT_ORDER: Slot[] = ["COM", "MAN", "RAU", "CANH", "TRANGMIENG"];
 const BUSY_INDEX: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
 
-const dishName = (d: Dish | undefined, lang: Lang) => (!d ? "—" : lang === "en" && d.enLabel ? d.enLabel : d.vnName);
+const dishName = (d: Dish | undefined, lang: Lang) => (!d ? "–" : lang === "en" && d.enLabel ? d.enLabel : d.vnName);
 
 export default function WeekPage() {
   const {

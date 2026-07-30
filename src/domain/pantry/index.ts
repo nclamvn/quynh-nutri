@@ -7,7 +7,7 @@ export interface PantryMatch {
 }
 
 /**
- * "What can I cook with what I have?" — ranks dishes by how much of their
+ * "What can I cook with what I have?" – ranks dishes by how much of their
  * ingredient mass the pantry already covers. Presence-based (any qty counts),
  * so it surfaces near-makeable dishes even when exact grams differ. Honest: a
  * dish with a missing staple simply ranks lower + lists what's missing.

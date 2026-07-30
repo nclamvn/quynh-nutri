@@ -10,7 +10,7 @@ const member = (over: Partial<Member>): Member => ({
   id: "m", role: "adult", activity: "moderate", ...over,
 });
 
-describe("activeStates — self-expiry", () => {
+describe("activeStates – self-expiry", () => {
   const now = "2026-07-10";
 
   it("keeps a state that started and hasn't expired", () => {
@@ -39,7 +39,7 @@ describe("activeStates — self-expiry", () => {
   });
 });
 
-describe("familySpace — one frame for the whole family", () => {
+describe("familySpace – one frame for the whole family", () => {
   const now = "2026-07-10";
 
   it("unions every member's allergens (hard-safety set)", () => {
@@ -58,7 +58,7 @@ describe("familySpace — one frame for the whole family", () => {
     expect(fs.needs[0].allergies).toContain("fish");
   });
 
-  it("shows only ACTIVE states — an expired 'ốm' does not leak into the frame", () => {
+  it("shows only ACTIVE states – an expired 'ốm' does not leak into the frame", () => {
     const m = member({
       id: "x",
       states: [

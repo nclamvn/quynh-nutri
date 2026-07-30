@@ -7,7 +7,7 @@ const b0: Dish[] = [
   { id: "ca_kho_to", vnName: "Cá kho tộ", proteinType: "ca", method: "kho", slot: "MAN", quick: false, baseServings: 4, lines: [{ commodityId: "ca_dieu_hong", qtyBase: 500, unit: "g" }], origin: "B0" },
 ];
 
-describe("dish tier override — B1 ⊳ B0", () => {
+describe("dish tier override – B1 ⊳ B0", () => {
   it("keeps B0 when the household has no forks", () => {
     expect(effectiveRepertoire(b0)).toHaveLength(2);
     expect(resolveDish("ga_luoc", b0)?.origin).toBe("B0");
@@ -34,7 +34,7 @@ describe("dish tier override — B1 ⊳ B0", () => {
   });
 });
 
-describe("ingredient tier override — B1 qty wins, macro stays in A", () => {
+describe("ingredient tier override – B1 qty wins, macro stays in A", () => {
   it("uses the household's adjusted quantity when present", () => {
     const b0Lines = b0[0].lines;
     expect(resolveLineQty("thit_ga", b0Lines, { thit_ga: 900 })).toBe(900);

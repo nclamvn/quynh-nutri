@@ -53,7 +53,7 @@ export function AddDishSheet({ open, onClose }: { open: boolean; onClose: () => 
     }
   };
 
-  // Build a real B1 Dish from the matched lines ONLY — nutrition is recomputed by
+  // Build a real B1 Dish from the matched lines ONLY – nutrition is recomputed by
   // the engine from mapped commodities, never trusted from the source recipe.
   const previewDish: Dish | null = useMemo(() => {
     if (!parsed) return null;

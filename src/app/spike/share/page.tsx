@@ -2,7 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 
-// TIP-P2-0 SPIKE — verify on a REAL phone (with Zalo) that navigator.share opens a
+// TIP-P2-0 SPIKE – verify on a REAL phone (with Zalo) that navigator.share opens a
 // sheet with Zalo as a target AND the order text arrives intact. This is a probe,
 // not a claim: the verdict comes from the device test, screenshotted. Public route.
 
@@ -20,7 +20,7 @@ const SAMPLE_ORDER = [
   "Giao chiều nay giúp em nhé, cảm ơn shop ạ!",
 ].join("\n");
 
-const ZALO_PHONE = "0900000000"; // sample — replace with a real shop when testing
+const ZALO_PHONE = "0900000000"; // sample – replace with a real shop when testing
 
 export default function ShareSpike() {
   const supported = useSyncExternalStore(
@@ -41,7 +41,7 @@ export default function ShareSpike() {
       const canText = !navigator.canShare || navigator.canShare({ text: SAMPLE_ORDER });
       add(`canShare({text}) = ${canText}`);
       await navigator.share({ text: SAMPLE_ORDER });
-      add("✅ share() resolved — bạn có thấy Zalo trong sheet không? Text tới nguyên vẹn không?");
+      add("✅ share() resolved – bạn có thấy Zalo trong sheet không? Text tới nguyên vẹn không?");
     } catch (e) {
       add(`share() bị huỷ/lỗi: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -55,7 +55,7 @@ export default function ShareSpike() {
       add("❌ clipboard.writeText thất bại");
     }
     window.open(`https://zalo.me/${ZALO_PHONE}`, "_blank");
-    add(`↗ mở zalo.me/${ZALO_PHONE} — thử dán đơn vào khung chat`);
+    add(`↗ mở zalo.me/${ZALO_PHONE} – thử dán đơn vào khung chat`);
   };
 
   return (
@@ -124,7 +124,7 @@ export default function ShareSpike() {
           Nhật ký <span className="text-tertiary">(chụp màn này gửi lại)</span>
         </p>
         <ul className="space-y-1.5 text-[12px] text-ink">
-          {log.length === 0 && <li className="text-tertiary">— chưa có —</li>}
+          {log.length === 0 && <li className="text-tertiary">– chưa có –</li>}
           {log.map((l, i) => (
             <li key={i} className="rounded-lg border border-hairline bg-surface/40 px-3 py-2">
               {l}

@@ -1,6 +1,6 @@
 import type { PurchaseRecord, PurchaseLine } from "@/domain/types";
 
-// Purchase-log provenance rules — the discipline wired into the foundation so Lane 3
+// Purchase-log provenance rules – the discipline wired into the foundation so Lane 3
 // can never build fake optimization on sparse data.
 // - a real logged price = B1 ground truth, overrides the B0 reference price
 // - no logged price = honest-null (never fabricated)
@@ -13,7 +13,7 @@ export const MIN_SAMPLES = 3;
 export type PriceSource = "B1" | "B0";
 export interface ResolvedPrice { vndPerKg: number; source: PriceSource; }
 
-/** Normalize a logged line to VND/kg — ONLY for mass units (g/kg). Non-mass units
+/** Normalize a logged line to VND/kg – ONLY for mass units (g/kg). Non-mass units
  *  (bìa, quả, …) can't be honestly converted → null. */
 export function lineUnitPriceVndPerKg(line: PurchaseLine): number | null {
   if (line.pricePaid == null || !(line.pricePaid > 0) || !(line.qty > 0)) return null;
@@ -69,7 +69,7 @@ export function supplierPurchaseCount(records: PurchaseRecord[], supplierId: str
 }
 
 /** Whether a supplier has enough real purchases to be reasoned about. Below this,
- *  the hub says "chưa đủ dữ liệu" instead of ranking — hub knows when it doesn't know. */
+ *  the hub says "chưa đủ dữ liệu" instead of ranking – hub knows when it doesn't know. */
 export function supplierReady(records: PurchaseRecord[], supplierId: string, min = MIN_SAMPLES): boolean {
   return supplierPurchaseCount(records, supplierId) >= min;
 }

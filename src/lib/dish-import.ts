@@ -5,7 +5,7 @@ import { COMMODITIES } from "@/data/seed/commodity";
 import { normalizeVn } from "./claude";
 
 // Extraction runs through the Vercel AI Gateway (OIDC auth in prod + dev), the
-// same path as the assistant + refinery — no separate ANTHROPIC_API_KEY needed.
+// same path as the assistant + refinery – no separate ANTHROPIC_API_KEY needed.
 // Uses the same model as the assistant: the Gateway free tier gates cheaper
 // models (haiku), but sonnet is available on this account.
 const EXTRACT_MODEL = "anthropic/claude-sonnet-4.6";
@@ -107,11 +107,11 @@ export async function importDish(text: string): Promise<ImportedDish> {
   } catch {
     extracted = extractMock(text);
     source = "mock";
-    notes.push("Không tách được bằng AI — dùng bản dự phòng theo từ khoá, hãy kiểm lại.");
+    notes.push("Không tách được bằng AI – dùng bản dự phòng theo từ khoá, hãy kiểm lại.");
   }
 
   const { lines, unmatched } = toLines(extracted.ingredients);
-  if (unmatched > 0) notes.push(`${unmatched} nguyên liệu chưa khớp kho commodity — cần xác nhận trước khi lưu (B1).`);
+  if (unmatched > 0) notes.push(`${unmatched} nguyên liệu chưa khớp kho commodity – cần xác nhận trước khi lưu (B1).`);
 
   return { vnName: extracted.vnName, slot: extracted.slot, method: extracted.method, proteinType: extracted.proteinType, lines, notes, source };
 }

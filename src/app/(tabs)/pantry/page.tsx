@@ -181,7 +181,7 @@ export default function PantryPage() {
             : "block"
         }
       >
-        {/* Left — add form + inventory */}
+        {/* Left – add form + inventory */}
         <div>
           <div className="card mb-4 flex gap-2 p-3">
             <select
@@ -315,7 +315,7 @@ export default function PantryPage() {
           </section>
         </div>
 
-        {/* Right — cook from pantry */}
+        {/* Right – cook from pantry */}
         {matches.length > 0 && (
           <aside className="h-fit lg:sticky lg:top-6">
             <h2 className="mb-2 text-sm font-semibold">{t("pantry.cookNow")}</h2>

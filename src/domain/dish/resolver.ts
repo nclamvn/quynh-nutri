@@ -3,7 +3,7 @@ import type { Dish, DishLine, Slot } from "@/domain/types";
 /**
  * Override invariant, dish tier (Blueprint §2): a household's B1 dish wins over
  * the B0 repertoire it was forked from; custom B1 dishes are added; untouched B0
- * dishes remain. This is the same shape as the ingredient-tier override below —
+ * dishes remain. This is the same shape as the ingredient-tier override below –
  * a low-provenance default is always superseded by the household's ground truth.
  */
 export function effectiveRepertoire(b0: Dish[], b1: Dish[] = []): Dish[] {
@@ -26,7 +26,7 @@ export function resolveSlot(slot: Slot, b0: Dish[], b1: Dish[] = []): Dish[] {
 
 /**
  * Override invariant, ingredient tier: a household's adjusted quantity for a
- * commodity wins over the B0 default. macro/100g is NEVER overridden here — it
+ * commodity wins over the B0 default. macro/100g is NEVER overridden here – it
  * always comes from commodity A, keeping numbers single-source.
  */
 export function resolveLineQty(

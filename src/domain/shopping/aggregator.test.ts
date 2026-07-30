@@ -17,7 +17,7 @@ function planWith(slots: Partial<PlannedSlot>[]): WeekPlan {
   };
 }
 
-describe("aggregateShopping — derive list from plan", () => {
+describe("aggregateShopping – derive list from plan", () => {
   it("aggregates the same commodity across dishes, grossed up by yield", () => {
     // tôm edible: tom_rang(352) + canh_bi_dao_tom(96) = 448; yield 0.6 → buy ~747g
     const plan = planWith([

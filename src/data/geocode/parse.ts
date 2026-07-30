@@ -1,4 +1,4 @@
-// Pure geocode helpers — no `server-only`, no fetch, so they're unit-testable.
+// Pure geocode helpers – no `server-only`, no fetch, so they're unit-testable.
 // The fetch providers + throttle/cache live in ./index (server-only).
 
 export interface GeocodeResult {
@@ -39,7 +39,7 @@ export function parseGoong(json: unknown): GeocodeResult | null {
 }
 
 /** Which provider to use: Goong when a key is present (better VN addresses), else
- *  the free, policy-compliant Nominatim default. Pure — selection only. */
+ *  the free, policy-compliant Nominatim default. Pure – selection only. */
 export function providerNameForEnv(env: Record<string, string | undefined>): GeocodeResult["source"] {
   return env.GOONG_API_KEY ? "goong" : "nominatim";
 }

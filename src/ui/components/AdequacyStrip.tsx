@@ -5,10 +5,10 @@ import { useI18n } from "@/i18n/context";
 import { pct } from "@/ui/format";
 
 /**
- * A neutral CONTRIBUTION bar — how much of the family's DAILY need this planned
+ * A neutral CONTRIBUTION bar – how much of the family's DAILY need this planned
  * meal supplies. The base is stated explicitly ("nhu cầu ngày") per the
  * denominator precedent: the app plans dinner, so a dinner is ~a third of the
- * day — showing a "thiếu" verdict against a full-day need would be a false
+ * day – showing a "thiếu" verdict against a full-day need would be a false
  * mẫu-số error. No đủ/thiếu verdict here, no red; the 4/4 groups signal carries
  * "đủ chất". (L-2/L-3 at the semantic tier.)
  */

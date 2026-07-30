@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Animate a number counting up to `target` on mount / when it changes. Purely a
- * display flourish — the value passed in is the already-computed honest number;
+ * display flourish – the value passed in is the already-computed honest number;
  * this never rounds, reformats, or invents it (caller formats the returned value).
  * Respects prefers-reduced-motion (jumps straight to target).
  */

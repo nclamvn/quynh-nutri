@@ -70,7 +70,7 @@ export function PurchaseLogSheet({
       <div className="space-y-4">
         {supplierName && <p className="text-sm font-medium">{supplierName}</p>}
         <p className="text-xs leading-relaxed text-muted">
-          Tuỳ chọn — giá thực trả giúp Báo cáo &amp; gợi ý sau này chính xác hơn. Để trống cũng được, không sao.
+          Tuỳ chọn – giá thực trả giúp Báo cáo &amp; gợi ý sau này chính xác hơn. Để trống cũng được, không sao.
         </p>
 
         <ul className="space-y-2">

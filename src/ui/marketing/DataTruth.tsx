@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// A coverage gauge — a ring drawn to the coverage %, the kcal number in the
+// A coverage gauge – a ring drawn to the coverage %, the kcal number in the
 // middle, tinted + softly lit by tier. "Độ chắc = độ phủ = độ sáng", made visual.
 // pathLength=100 normalizes the circle so the arc offset is just (100 − coverage).
 // Base state is the FILLED ring (visible with no JS / reduced-motion); .in-view
@@ -62,7 +62,7 @@ export function DataTruth() {
           <p>Một con số dinh dưỡng chỉ thực sự hữu ích khi bạn biết nó được tính từ đâu và còn bao nhiêu phần chưa chắc chắn.</p>
         </div>
         <div className="confidence">
-          {/* demo ring — fills up while morphing xám → xanh, to show "càng nhiều
+          {/* demo ring – fills up while morphing xám → xanh, to show "càng nhiều
               nguyên liệu đối chiếu, mức đối chiếu càng cao". */}
           <div className="gauge gauge-demo tier-ok" style={{ "--cov": 0.9 } as React.CSSProperties}>
             <svg viewBox="0 0 120 120" aria-hidden="true">

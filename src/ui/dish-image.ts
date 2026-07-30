@@ -3,7 +3,7 @@ import type { Dish, ProteinType, Slot } from "@/domain/types";
 // Dish → image. PRIMARY: a real food photo (public/dishes/photos/{category}.jpg,
 // self-hosted, tone-consistent Asian home cooking). FALLBACK: the internal SVG
 // (public/dishes/*.svg) if a photo is missing/broken. Decision (TIP-UI-8 +
-// polish): "nhất-quán-tông hơn khớp-đúng-món" — one on-tone photo per category
+// polish): "nhất-quán-tông hơn khớp-đúng-món" – one on-tone photo per category
 // beats an off-tone exact match; SVG guarantees no broken/empty cell.
 
 const PHOTO_BASE = "/dishes/photos";
@@ -20,7 +20,7 @@ function photoCategory(dish: Pick<Dish, "slot" | "method" | "proteinType">): str
   if (dish.slot === "TRANGMIENG") return "traicay";
   if (dish.slot === "CANH") return "canh";
   if (dish.slot === "RAU") return "rau";
-  // MAN — method wins for braise/grill (distinct look), else by protein
+  // MAN – method wins for braise/grill (distinct look), else by protein
   if (dish.method === "kho") return "kho";
   if (dish.method === "nuong") return "nuong";
   return PHOTO_BY_PROTEIN[dish.proteinType] ?? "man";

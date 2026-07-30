@@ -1,4 +1,4 @@
-/** Q's Kitchen mark — a 5-petal rose blossom. */
+/** Q's Kitchen mark – a 5-petal rose blossom. */
 export function FlowerLogo({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className} aria-hidden>

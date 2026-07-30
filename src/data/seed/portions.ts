@@ -1,6 +1,6 @@
 import type { Household, Member, Slot } from "@/domain/types";
 
-// PORTION MODEL (Refinery R2) — the sourced basis dish quantities derive from,
+// PORTION MODEL (Refinery R2) – the sourced basis dish quantities derive from,
 // so "định lượng từng món" is principled, not ad-hoc grams.
 //
 // Grounded in: Nhu cầu Dinh dưỡng Khuyến nghị 2016 (P2) meal-portion breakdown
@@ -43,7 +43,7 @@ export function slotTarget(slot: Slot, ae: number): number {
   return Math.round(PER_AE[slot] * ae);
 }
 
-/** Standard condiment amounts (grams) — NOT scaled by AE, they season the pot. */
+/** Standard condiment amounts (grams) – NOT scaled by AE, they season the pot. */
 export const CONDIMENT = {
   nuoc_mam: 25,
   duong: 20,

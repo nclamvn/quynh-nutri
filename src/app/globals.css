@@ -4,12 +4,12 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
-  Q's Kitchen design system v1.0 — ported to the app's Tailwind tokens.
+  Q's Kitchen design system v1.0 – ported to the app's Tailwind tokens.
   DNA split (the key contract):
     • ROSE  = brand / CTA / interactive chrome  → --brand
     • GREEN (botanical) = DATA semantics: corroborated · đủ · done → --accent
     • HONEY = estimate · thiếu · cần chú ý       → --amber
-  So a rose surface never means "good data", and a green button never appears —
+  So a rose surface never means "good data", and a green button never appears –
   colour carries meaning consistently.
 */
 :root {
@@ -22,21 +22,21 @@
   --tertiary: #989195;
   --hairline: #e2dade;
 
-  /* brand — rose (chrome/CTA only) */
+  /* brand – rose (chrome/CTA only) */
   --brand: #ef5775;
   --brand-hover: #d93f60;
   --brand-weak: #fff4f6;
   --brand-ink: #962840;
 
   /* data-semantic accents */
-  --accent: #469b75; /* botanical — corroborated / đủ */
+  --accent: #469b75; /* botanical – corroborated / đủ */
   --accent-weak: #eff9f4;
-  --amber: #c58a21; /* honey — estimated / thiếu (darker for AA on light) */
+  --amber: #c58a21; /* honey – estimated / thiếu (darker for AA on light) */
   --amber-weak: #fff8e8;
   --danger: #c4485d;
   --danger-weak: #fff0f2;
 
-  /* Elevation tiers (authority §3.6) — restraint: card=sm, hover/important=md,
+  /* Elevation tiers (authority §3.6) – restraint: card=sm, hover/important=md,
      floating CTA/modal=float (rose-tinted). No shadow on rows/tables. */
   --shadow-xs: 0 1px 2px rgba(45, 31, 38, 0.045);
   --shadow-sm: 0 3px 10px rgba(45, 31, 38, 0.055), 0 1px 2px rgba(45, 31, 38, 0.035);
@@ -45,7 +45,7 @@
   --shadow-card: var(--shadow-sm);
   --shadow-float: 0 18px 44px rgba(239, 87, 117, 0.19), 0 2px 8px rgba(55, 35, 44, 0.08);
 
-  /* Motion (authority §3.7) — "đặt nhẹ xuống", no bounce */
+  /* Motion (authority §3.7) – "đặt nhẹ xuống", no bounce */
   --dur-instant: 90ms;
   --dur-fast: 160ms;
   --dur-normal: 240ms;
@@ -53,7 +53,7 @@
   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* chart colours (design-tokens §charts) — for nutrition group bars */
+  /* chart colours (design-tokens §charts) – for nutrition group bars */
   --chart-protein: #6d8fe8;
   --chart-carb: #f07c67;
   --chart-fiber: #53b484;
@@ -62,7 +62,7 @@
 
   --radius-card: 16px;
 
-  /* Landing marketing palette (blueprint §18.1) — used ONLY by /ui/marketing.
+  /* Landing marketing palette (blueprint §18.1) – used ONLY by /ui/marketing.
      Section-by-section art direction, so these are explicit and do NOT follow the
      app's dark toggle: the landing renders identically in either theme. */
   --landing-ink: #171214;
@@ -76,7 +76,7 @@
 .dark {
   --bg: #141216;
   --surface: #211e24; /* insets/chips */
-  --raised: #2a262f; /* elevated cards — distinct from surface so insets keep contrast */
+  --raised: #2a262f; /* elevated cards – distinct from surface so insets keep contrast */
   --ink: #f4eff2;
   --muted: #c0b8bd;
   --tertiary: #8f878c;
@@ -149,7 +149,7 @@
 
 body {
   /* Canvas wash (WS-3): a whisper-soft warm depth so cards float, not sit flat.
-     ≤5% tints — neutral stays dominant (authority §3.2), no rose wallpaper. */
+     ≤5% tints – neutral stays dominant (authority §3.2), no rose wallpaper. */
   background-color: var(--bg);
   background-image:
     radial-gradient(1100px 620px at 100% -8%, color-mix(in srgb, var(--brand) 5%, transparent), transparent 58%),
@@ -162,20 +162,20 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Data numbers: Inter with tabular figures (design DNA — one typeface, soft). */
+/* Data numbers: Inter with tabular figures (design DNA – one typeface, soft). */
 .tnum {
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -0.025em;
 }
 
 /*
-  Card primitive — the shared bar. Every raised card uses this so polish is
+  Card primitive – the shared bar. Every raised card uses this so polish is
   inherited, not re-derived per screen (QA constraint #2). Variants via extra
   utilities (padding, radius overrides) but the surface/border/shadow are one
   source. Interactive cards add `.card-interactive` for the hover lift.
 */
 /* Liquid-glass material (iOS-26 direction). A translucent, blurred surface with a
-   specular top sheen + light rim — used for the floating/interactive layer
+   specular top sheen + light rim – used for the floating/interactive layer
    (buttons, chips, badges, sheets, FAB). Content text stays legible because the
    fill keeps a high raised-opacity and contrast is verified per surface. */
 /* One SINGLE thin edge (no crisp inset highlight → no "double border"); the gloss
@@ -194,7 +194,7 @@ body {
   border-color: color-mix(in srgb, #fff 12%, transparent);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
 }
-/* Modal/sheet glass — much more opaque + stronger blur so content stays readable
+/* Modal/sheet glass – much more opaque + stronger blur so content stays readable
    over a busy page (thin glass is only for small chrome, not big text panels). */
 .glass-modal {
   background-color: color-mix(in srgb, var(--raised) 92%, transparent);
@@ -262,7 +262,7 @@ body {
   box-shadow: 7px 0 18px color-mix(in srgb, var(--brand) 24%, transparent);
 }
 
-/* Primary hero CTA — liquid rose glass, single edge. */
+/* Primary hero CTA – liquid rose glass, single edge. */
 .cta-primary {
   background-color: color-mix(in srgb, var(--brand) 84%, transparent);
   background-image: linear-gradient(150deg, rgba(255, 255, 255, 0.3), transparent 58%);
@@ -282,7 +282,7 @@ body {
 }
 
 /*
-  Control rhythm — one height per job. Page-header actions are normalized here
+  Control rhythm – one height per job. Page-header actions are normalized here
   so visual priority changes colour/material, never the control's geometry.
 */
 .control-chip {
@@ -331,7 +331,7 @@ body {
 
 /* Premium-depth pass (art-director "max wow", motion-safe). */
 
-/* A · staggered entrance — grids/sections fade + rise on mount. Parent sets
+/* A · staggered entrance – grids/sections fade + rise on mount. Parent sets
    [data-stagger]; each child gets --i (its index) for a cascading delay. */
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(14px); }
@@ -366,12 +366,12 @@ body {
   animation: shimmer 1.4s var(--ease-standard) infinite;
 }
 
-/* B · ambient aurora — slow drift of soft colour blobs behind the whole app. */
+/* B · ambient aurora – slow drift of soft colour blobs behind the whole app. */
 @keyframes drift-a { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(6%, 4%, 0) scale(1.12); } }
 @keyframes drift-b { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(-5%, -6%, 0) scale(1.1); } }
 @keyframes drift-c { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(4%, -5%, 0) scale(1.15); } }
 
-/* B · fine grain texture — hero cards only (mix-blend, ~4%). */
+/* B · fine grain texture – hero cards only (mix-blend, ~4%). */
 .grain::after {
   content: "";
   position: absolute;
@@ -399,14 +399,14 @@ body {
 @keyframes soft-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 .animate-soft-pulse { animation: soft-pulse 2.4s var(--ease-standard) infinite; }
 
-/* Landing display type — Lora serif, only where the blueprint allows (hook/quote/headlines). */
+/* Landing display type – Lora serif, only where the blueprint allows (hook/quote/headlines). */
 .font-display { font-family: var(--font-serif); }
 
 h1, h2, h3 {
   letter-spacing: -0.022em;
 }
 
-/* Thin, refined horizontal scrollbar (chip rows) — sits away from the content
+/* Thin, refined horizontal scrollbar (chip rows) – sits away from the content
    and reads as a whisper, not a chunky native bar. */
 .scroll-x-thin {
   scrollbar-width: thin;
@@ -432,7 +432,7 @@ h1, h2, h3 {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 16%, transparent);
 }
 
-/* Respect reduced-motion — covers .card-interactive + any transition/animation
+/* Respect reduced-motion – covers .card-interactive + any transition/animation
    (QA constraint #3: micro-interaction must degrade for motion-sensitive users). */
 @media (prefers-reduced-motion: reduce) {
   *,

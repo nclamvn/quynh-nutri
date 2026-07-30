@@ -2,7 +2,7 @@ import type { ProvenanceLevel } from "@/domain/types";
 
 // Arbitration order for the refinery (INTAKE-SEED §5). Lower P wins when sources
 // disagree; a number reaches `corroborated` only with ≥2 independent agreeing
-// sources, else `disputed`/`honest_null` — never guessed.
+// sources, else `disputed`/`honest_null` – never guessed.
 export const SOURCE_REGISTRY: Record<
   ProvenanceLevel,
   { rank: number; name: string; role: string }

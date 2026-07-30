@@ -7,7 +7,7 @@ import { BottomSheet } from "./BottomSheet";
 import { NAV_GROUPS } from "@/ui/nav";
 
 /**
- * Mobile "More" — reaches every area the 4-tab bottom nav can't (Dinh dưỡng,
+ * Mobile "More" – reaches every area the 4-tab bottom nav can't (Dinh dưỡng,
  * Yêu thích, Ghi chú, Báo cáo, Kho, Cài đặt). Client-nav via <Link> preserves
  * React store state (no hard reload). Does NOT add a 5th tab.
  */

@@ -1,6 +1,6 @@
 import type { Commodity, Dish, Macro } from "@/domain/types";
 
-/** Resolve a commodity by id. Domain stays pure — the caller injects the source. */
+/** Resolve a commodity by id. Domain stays pure – the caller injects the source. */
 export type CommoditySource = (id: string) => Commodity | undefined;
 
 export const ZERO_MACRO: Macro = { kcal: 0, proteinG: 0, carbG: 0, fatG: 0, fiberG: 0 };

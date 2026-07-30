@@ -14,7 +14,7 @@ const TEXT: Record<ProvTone, string> = {
   muted: "text-muted",
 };
 
-/** The tiny confidence dot — same semantics everywhere a number appears. */
+/** The tiny confidence dot – same semantics everywhere a number appears. */
 export function ProvenanceDot({ tone }: { tone: ProvTone }) {
   return <span className={`inline-block h-1.5 w-1.5 rounded-full ${DOT[tone]}`} aria-hidden />;
 }

@@ -104,7 +104,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* VALUE STRIP — the landing's single, restrained marquee. */}
+      {/* VALUE STRIP – the landing's single, restrained marquee. */}
       <div className="ticker" aria-label={VALUE_STRIP.join(" · ")}>
         <div className="ticker-track">
           {[0, 1].map((copy) => (
@@ -115,7 +115,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* MANIFESTO — enriched (client island for reveal) */}
+      {/* MANIFESTO – enriched (client island for reveal) */}
       <Manifesto />
 
       {/* PRODUCT STAGE */}
@@ -147,19 +147,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* MEMORY — enriched (client island for reveal) */}
+      {/* MEMORY – enriched (client island for reveal) */}
       <Memory />
 
       {/* DATA TRUTH – cinematic (client island for scroll reveal) */}
       <DataTruth />
 
-      {/* QUOTE — brand statement */}
+      {/* QUOTE – brand statement */}
       <section className="quote">
         <blockquote>Ăn ngon không bắt đầu từ ý chí. Nó bắt đầu từ một kế hoạch đủ thực tế để cả nhà cùng theo.</blockquote>
         <div className="quote-meta"><span>Tinh thần Ăn Ngon</span><span>Cho gia đình Việt</span></div>
       </section>
 
-      {/* FINAL CTA — "Tối nay ăn gì?" climax (Step 2: tương phản khổ) */}
+      {/* FINAL CTA – "Tối nay ăn gì?" climax (Step 2: tương phản khổ) */}
       <FinalCTA />
 
       {/* FOOTER */}

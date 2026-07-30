@@ -45,7 +45,7 @@ import {
 
 const HH_ID = DEFAULT_HOUSEHOLD.id;
 
-// Resolve the signed-in user's household — creating one from the seed template
+// Resolve the signed-in user's household – creating one from the seed template
 // on first sign-in. Unauthenticated access fails closed; only the explicitly
 // isolated E2E adapter below may use the template id.
 export async function currentHouseholdId(): Promise<string> {
@@ -55,7 +55,7 @@ export async function currentHouseholdId(): Promise<string> {
   const existing = await db.household.findUnique({ where: { userId }, select: { id: true } });
   if (existing) return existing.id;
   const t = DEFAULT_HOUSEHOLD;
-  // "Bắt đầu trống": a brand-new household declares its OWN family — no generic
+  // "Bắt đầu trống": a brand-new household declares its OWN family – no generic
   // template members, size 0 until they add people (portions follow member count).
   const created = await db.household.create({
     data: {
@@ -1056,7 +1056,7 @@ export async function deleteInventoryLotRecord(lotId: string): Promise<void> {
   await getDb().inventoryLot.deleteMany({ where: { id: lotId, householdId } });
 }
 
-// ── Phase 2 — Supplier & Order persistence (household-owned) ────────────────
+// ── Phase 2 – Supplier & Order persistence (household-owned) ────────────────
 type SupplierRow = {
   id: string; householdId: string; name: string; type: string;
   channels: unknown; hours: string | null; shipFee: string | null; shipArea: string | null; handles: string[];
@@ -1247,7 +1247,7 @@ export async function saveMemberAllergies(memberId: string, allergies: Allergen[
   await db.member.updateMany({ where: { id: memberId, householdId }, data: { allergies } });
 }
 
-// ─── "Không gian gia đình sống" — Member base-layer CRUD + dynamic states ───
+// ─── "Không gian gia đình sống" – Member base-layer CRUD + dynamic states ───
 type MemberBase = Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes">;
 
 /** Create or update a member's BASE layer. Scoped to the current household. */

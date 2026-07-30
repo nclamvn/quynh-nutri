@@ -9,7 +9,7 @@ const src: CommoditySource = (id) => COMMODITY_BY_ID[id];
 const AE = 3.2; // baseServings 4 = 2 adults + 2 children
 const PROTEIN_GROUPS = new Set(["thịt", "cá", "hải sản", "trứng", "đậu"]);
 
-describe("refinery — every dish is principled & sourced", () => {
+describe("refinery – every dish is principled & sourced", () => {
   it("references only known commodities", () => {
     for (const d of REPERTOIRE) {
       for (const l of d.lines) {
@@ -25,7 +25,7 @@ describe("refinery — every dish is principled & sourced", () => {
       const proteinGrams = d.lines
         .filter((l) => PROTEIN_GROUPS.has(COMMODITY_BY_ID[l.commodityId]?.group))
         .reduce((s, l) => s + l.qtyBase, 0);
-      // within [0.65, 1.4] × anchor — derived from the model, not ad-hoc
+      // within [0.65, 1.4] × anchor – derived from the model, not ad-hoc
       expect(proteinGrams, d.id).toBeGreaterThanOrEqual(MAN * 0.65);
       expect(proteinGrams, d.id).toBeLessThanOrEqual(MAN * 1.4);
     }
@@ -55,13 +55,13 @@ describe("refinery — every dish is principled & sourced", () => {
   });
 });
 
-describe("refinery — D3 coverage report", () => {
+describe("refinery – D3 coverage report", () => {
   it("exercises all three display tiers across the repertoire", () => {
     const tiers = { number: 0, anchored: 0, range: 0 };
     for (const d of REPERTOIRE) {
       tiers[displayModeFor(dishCoverage(d, src))]++;
     }
-    // Log the distribution — this is the refinery's honesty readout.
+    // Log the distribution – this is the refinery's honesty readout.
     console.log(`D3 tiers → number:${tiers.number} anchored:${tiers.anchored} range:${tiers.range}`);
     expect(tiers.number).toBeGreaterThan(0);
     expect(tiers.anchored).toBeGreaterThan(0);

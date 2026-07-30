@@ -23,11 +23,11 @@ self.addEventListener("fetch", (e) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  // Cross-origin and the public marketing landing are never served by the SW —
+  // Cross-origin and the public marketing landing are never served by the SW –
   // let the browser/CDN deliver them so they're always the latest deploy.
   if (url.origin !== self.location.origin) return;
   if (url.pathname === "/") return;
-  // Immutable hashed build assets — let the browser cache them natively. The SW
+  // Immutable hashed build assets – let the browser cache them natively. The SW
   // must never mediate these, or a stale/mismatched chunk can break the whole page.
   if (url.pathname.startsWith("/_next/")) return;
 

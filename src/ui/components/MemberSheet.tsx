@@ -6,10 +6,10 @@ import { HealthDisclaimer } from "./HealthDisclaimer";
 import { useStore, type MemberBaseInput } from "@/ui/store";
 import type { Member, LifeStage, Allergen, MemberRole } from "@/domain/types";
 
-// The member DECLARATION editor — "kê khai một người trong nhà". Base layer:
+// The member DECLARATION editor – "kê khai một người trong nhà". Base layer:
 // name, role, sex/age, allergies (the hard-safety layer), standing conditions,
 // dislikes. Warm, machine-invisible (no tier/constraint jargon). Allergies show
-// HONEY/AMBER "cần tránh" — safety, never alarming red.
+// HONEY/AMBER "cần tránh" – safety, never alarming red.
 
 const ALLERGENS: Allergen[] = ["shellfish", "fish", "egg", "soy", "dairy", "gluten", "peanut"];
 const ALLERGEN_VN: Record<Allergen, string> = {
@@ -125,7 +125,7 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
               ))}
         </div>
 
-        {/* Allergies — the safety layer. Amber "cần tránh", never red. */}
+        {/* Allergies – the safety layer. Amber "cần tránh", never red. */}
         <div>
           <p className="mb-2 text-sm font-medium">Dị ứng · cần tránh</p>
           <div className="flex flex-wrap gap-1.5">
@@ -153,7 +153,7 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
           onAdd={() => addTag(disInput, setDislikes, () => setDisInput(""))}
           onRemove={(t) => setDislikes((xs) => xs.filter((x) => x !== t))} />
 
-        {/* Maternal life stage — adult females, edit mode (set after the person exists) */}
+        {/* Maternal life stage – adult females, edit mode (set after the person exists) */}
         {maternal && !isNew && (
           <div>
             <p className="mb-2 text-sm font-medium">Giai đoạn</p>

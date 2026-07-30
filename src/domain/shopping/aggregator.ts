@@ -18,7 +18,7 @@ const DRY_GROUPS = new Set(["gia vị", "ngũ cốc"]);
 const UNASSIGNED_VENDOR = "Chưa gán";
 
 function freshTripCount(household: Household): number {
-  // "2–3 chuyến đồ tươi + 1 chuyến đồ khô" — traditional shops most often,
+  // "2–3 chuyến đồ tươi + 1 chuyến đồ khô" – traditional shops most often,
   // supermarket does one big run. (INTAKE-SEED §2, R-SHOP-2)
   switch (household.marketMode) {
     case "traditional":
@@ -48,7 +48,7 @@ interface Acc {
 
 /**
  * Derive the shopping list from a week plan (R-SHOP-1/2). Aggregates ingredient
- * mass by (commodity, vendor) — NOT by dish — scaled to household size, then
+ * mass by (commodity, vendor) – NOT by dish – scaled to household size, then
  * splits fresh produce across trips (bought near use) and dry goods into one run.
  * `previous` carries checked ticks over: buying something already shouldn't be
  * undone by re-planning.
@@ -64,7 +64,7 @@ export function aggregateShopping(
 ): ShoppingItem[] {
   const freshTrips = freshTripCount(household);
   const acc = new Map<string, Acc>();
-  // Pantry stock to subtract (by commodity, gross grams — same basis as buy qty).
+  // Pantry stock to subtract (by commodity, gross grams – same basis as buy qty).
   const stock = new Map<string, number>();
   for (const p of pantry) {
     // Lots received for this week's shopping are represented by fulfilled lines.

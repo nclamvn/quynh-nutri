@@ -30,7 +30,7 @@ const GROUPS = ["thịt", "cá", "hải sản", "rau", "trái cây", "ngũ cốc
 const capNote: Record<string, string> = {
   push: "App soạn sẵn đơn, bạn gửi qua kênh này.",
   call: "App hiện đơn để bạn đọc khi gọi.",
-  open: "App chỉ mở app/web của họ — bạn tự chọn hàng, app không gửi đơn hộ.",
+  open: "App chỉ mở app/web của họ – bạn tự chọn hàng, app không gửi đơn hộ.",
 };
 
 export function SupplierSheet({ supplier, seed, onClose }: {
@@ -49,7 +49,7 @@ export function SupplierSheet({ supplier, seed, onClose }: {
   const [hours, setHours] = useState("");
   const [shipInfo, setShipInfo] = useState("");
   const [storeLocatorUrl, setStoreLocatorUrl] = useState("");
-  // Provenance carried through untouched — the sheet never fabricates or clears it.
+  // Provenance carried through untouched – the sheet never fabricates or clears it.
   const [prov, setProv] = useState<{ sources?: string[]; needsVerify?: boolean }>({});
   // Geocode: a machine-suggested pin (B0, amber) becomes ground truth (B1, rose)
   // once the household drags or the pin is otherwise confirmed.
@@ -63,7 +63,7 @@ export function SupplierSheet({ supplier, seed, onClose }: {
     const key = q.toLowerCase().replace(/\s+/g, " ");
     if (geoCache.current.has(key)) {
       const hit = geoCache.current.get(key);
-      if (hit) { setLocation(hit); setSuggested(true); } else { toast("Không tìm được địa chỉ — hãy đặt ghim tay.", "info"); }
+      if (hit) { setLocation(hit); setSuggested(true); } else { toast("Không tìm được địa chỉ – hãy đặt ghim tay.", "info"); }
       return;
     }
     setGeoLoading(true);
@@ -78,10 +78,10 @@ export function SupplierSheet({ supplier, seed, onClose }: {
         setSuggested(true);
       } else {
         geoCache.current.set(key, null);
-        toast("Không tìm được địa chỉ — hãy đặt ghim tay.", "info");
+        toast("Không tìm được địa chỉ – hãy đặt ghim tay.", "info");
       }
     } catch {
-      toast("Không tìm được địa chỉ — hãy đặt ghim tay.", "info");
+      toast("Không tìm được địa chỉ – hãy đặt ghim tay.", "info");
     } finally {
       setGeoLoading(false);
     }
@@ -244,7 +244,7 @@ export function SupplierSheet({ supplier, seed, onClose }: {
           )}
         </div>
 
-        {/* Map pin — household ground truth. Chains span many branches → skip. */}
+        {/* Map pin – household ground truth. Chains span many branches → skip. */}
         {(type === "cho" || type === "tiem") && (
           <div>
             <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -267,7 +267,7 @@ export function SupplierSheet({ supplier, seed, onClose }: {
             />
             <p className={`mt-1.5 text-[11px] ${suggested ? "text-amber" : "text-tertiary"}`}>
               {suggested
-                ? "Ghim gợi ý từ địa chỉ — kéo để xác nhận đúng vị trí (vị trí bạn chốt mới là chuẩn)."
+                ? "Ghim gợi ý từ địa chỉ – kéo để xác nhận đúng vị trí (vị trí bạn chốt mới là chuẩn)."
                 : location
                 ? "Kéo ghim để chỉnh vị trí."
                 : "Chạm lên bản đồ, hoặc nhập địa chỉ rồi bấm “Tìm từ địa chỉ”."}

@@ -1,5 +1,5 @@
 /**
- * Cherry-blossom motif — the emotional symbol (authority §2.3). ALLOWED zones
+ * Cherry-blossom motif – the emotional symbol (authority §2.3). ALLOWED zones
  * only: logo, empty state, hero, page/rail corners. Not scattered, not a
  * pattern. Low opacity so it whispers. Dark → line-art feel via low opacity.
  */

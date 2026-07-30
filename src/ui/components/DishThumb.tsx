@@ -10,7 +10,7 @@ type ThumbDish = Pick<Dish, "id" | "slot" | "proteinType" | "method">;
 /**
  * Rounded dish image. Real photo primary; falls back to the internal SVG on
  * error (missing photo) → never a broken/empty cell. `shape` = circle (grids,
- * rail) or rounded (cards, detail — shows more of the photo, more premium).
+ * rail) or rounded (cards, detail – shows more of the photo, more premium).
  */
 export function DishThumb({
   dish,

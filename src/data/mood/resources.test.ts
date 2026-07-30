@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { SUPPORT_RESOURCES } from "./resources";
 
-describe("support resources — verified only (§3.4)", () => {
+describe("support resources – verified only (§3.4)", () => {
   it("every resource has a name, a detail, and at least one source (no bare/fabricated number)", () => {
     expect(SUPPORT_RESOURCES.length).toBeGreaterThan(0);
     for (const r of SUPPORT_RESOURCES) {

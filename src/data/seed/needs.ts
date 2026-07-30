@@ -1,7 +1,7 @@
 import type { Member } from "@/domain/types";
 import { lifeStageUplift } from "./lifestage";
 
-// Nhu cầu Dinh dưỡng Khuyến nghị 2016 (QĐ 2615/QĐ-BYT) — P2 canonical.
+// Nhu cầu Dinh dưỡng Khuyến nghị 2016 (QĐ 2615/QĐ-BYT) – P2 canonical.
 // Daily requirement per member, keyed by role/sex/age-band/activity.
 // Representative seed values; the full RNI table is a data-seed refinery item.
 // Lactating members use HD 2017 (P3) uplift, applied in adequacy.
@@ -44,7 +44,7 @@ export function dailyNeed(member: Member, lactating = false): DailyNeed {
   let kcal = base.kcal * pal;
   let proteinG = base.proteinG;
 
-  // Life-stage uplift — per-member profile wins; household `lactating` flag is a
+  // Life-stage uplift – per-member profile wins; household `lactating` flag is a
   // legacy fallback. Only SOURCED stages add a number (lactating 0–6 = P3); an
   // unsourced stage (e.g. a pregnancy trimester) adds nothing here, and the UI
   // shows honest_null rather than a fabricated value.

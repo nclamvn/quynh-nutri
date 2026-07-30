@@ -1,13 +1,13 @@
 import type { Supplier } from "@/domain/types";
 
-// Chain registry — SEED ONLY (households own their own suppliers, B1-style, added
+// Chain registry – SEED ONLY (households own their own suppliers, B1-style, added
 // via the directory). These big chains are suggestions. Provenance discipline from
 // the supplier refinery (refinery/suppliers/REVIEW.md, 2026-07): a field is trusted
 // only with ≥2 independent current sources; single/stale/legacy → `needsVerify`
-// (UI shows "cần xác minh"). NO fabricated branch address/phone/coordinates — chains
+// (UI shows "cần xác minh"). NO fabricated branch address/phone/coordinates – chains
 // carry a `storeLocatorUrl` (official branch finder) instead of a fake single pin.
 //
-// Capability reality: chains are almost all `their_*` — the app can only OPEN their
+// Capability reality: chains are almost all `their_*` – the app can only OPEN their
 // channel, not push an order into their cart. The high-value `zalo_chat`
 // (neighbourhood shop) is added by the household, not seeded here.
 export const SUPPLIER_REGISTRY: Supplier[] = [
@@ -104,7 +104,7 @@ export const SUPPLIER_REGISTRY: Supplier[] = [
     storeLocatorUrl: "https://famima.vn/branches",
     handles: ["gia vị", "trái cây"],
     // needsVerify: locator + delivery-via-ShopeeFood/Grab corroborated, but the CSKH
-    // hotline and 24/7 hours are single-source — do NOT assert them.
+    // hotline and 24/7 hours are single-source – do NOT assert them.
     sources: ["famima.vn/branches", "shopeefood.vn (FamilyMart)", "USDA FAS 2024 retail report"],
   },
 ];

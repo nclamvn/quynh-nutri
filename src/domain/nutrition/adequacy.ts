@@ -27,7 +27,7 @@ export function householdNeed(household: Household): DailyNeed {
 /**
  * Adequacy for the whole household on a day: how much of the family's combined
  * need the day's food supplies. Framed as đủ/thiếu (adequacy), never vượt/kiêng
- * (restriction) — safe for a household that may include a lactating mother.
+ * (restriction) – safe for a household that may include a lactating mother.
  */
 export function householdAdequacy(dayMacro: Macro, household: Household): Adequacy {
   const need = householdNeed(household);

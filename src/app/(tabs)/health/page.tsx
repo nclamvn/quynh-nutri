@@ -21,7 +21,7 @@ export default function HealthPage() {
         <FamilySpaceView />
       </section>
 
-      {/* Clinical diets — visible but gated (execute, not prescribe) */}
+      {/* Clinical diets – visible but gated (execute, not prescribe) */}
       <section className="mb-6">
         <div className="card p-5">
           <div className="mb-2 flex items-center justify-between">

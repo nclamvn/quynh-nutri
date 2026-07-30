@@ -18,7 +18,7 @@ import { currentWeekStartIso } from "@/lib/week";
 import { getKitchenAgendaSnapshot } from "@/lib/assistant/kitchen-agenda";
 import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
 
-// Tools wrap the DETERMINISTIC engines — the LLM orchestrates + explains, the
+// Tools wrap the DETERMINISTIC engines – the LLM orchestrates + explains, the
 // engines compute the numbers (with provenance). This is the honesty moat: no
 // macro is ever produced by the model.
 
@@ -53,7 +53,7 @@ export const tools = {
   }),
 
   nutrition_report: tool({
-    description: "Báo cáo dinh dưỡng của một ngày cho cả hộ (0=Thứ2 … 6=CN). LUÔN nêu coverage (độ phủ). Nếu displayMode='range' thì phải đưa KHOẢNG kcal và nói 'ước lượng' — TUYỆT ĐỐI không bịa số điểm chính xác.",
+    description: "Báo cáo dinh dưỡng của một ngày cho cả hộ (0=Thứ2 … 6=CN). LUÔN nêu coverage (độ phủ). Nếu displayMode='range' thì phải đưa KHOẢNG kcal và nói 'ước lượng' – TUYỆT ĐỐI không bịa số điểm chính xác.",
     inputSchema: z.object({ day: z.number().int().min(0).max(6).default(0) }),
     execute: async ({ day }) => {
       const hh = await household();
@@ -105,7 +105,7 @@ export const tools = {
   }),
 
   grocery_cost: tool({
-    description: "Ước tính chi phí đi chợ cả tuần cho hộ. LUÔN nói đây là ước lượng theo giá tham khảo, LUÔN nêu coverage (độ phủ giá). Nếu coverage < 100% thì tổng là CẬN DƯỚI (còn mặt hàng chưa có giá) — không bịa số. Chỉ nói 'vượt ngân sách' khi cận-dưới đã vượt.",
+    description: "Ước tính chi phí đi chợ cả tuần cho hộ. LUÔN nói đây là ước lượng theo giá tham khảo, LUÔN nêu coverage (độ phủ giá). Nếu coverage < 100% thì tổng là CẬN DƯỚI (còn mặt hàng chưa có giá) – không bịa số. Chỉ nói 'vượt ngân sách' khi cận-dưới đã vượt.",
     inputSchema: z.object({ budgetVnd: z.number().int().positive().optional().describe("ngân sách tuần nếu người dùng nêu, VND") }),
     execute: async ({ budgetVnd }) => {
       const hh = await household();
