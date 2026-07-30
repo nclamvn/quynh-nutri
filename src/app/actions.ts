@@ -11,8 +11,10 @@ import { evaluateCoolingWindow } from "@/domain/kitchen-execution/leftover-safet
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
+  loadHouseholdDishLibrary,
   loadOrCreateCurrentWeekPlan,
   saveWeekPlan,
+  syncMissingHouseholdDishes,
   type WeekPlanEnvelope,
 } from "@/data/repo/week-plan";
 import type {
@@ -29,6 +31,25 @@ import {
 } from "@/data/repo/reminders";
 import { isValidTimeZone } from "@/domain/reminders/policy";
 import { vapidPublicKey } from "@/lib/reminders/web-push";
+import {
+  deleteKitchenSession,
+  loadKitchenSession,
+  saveKitchenSession,
+} from "@/data/repo/kitchen-session";
+import {
+  parseCookingSession,
+  type CookingSession,
+} from "@/domain/kitchen-execution/cooking";
+import {
+  parseMealRunSession,
+  type MealRunSession,
+} from "@/domain/kitchen-execution/meal-coordination";
+import { cookingGuideFor } from "@/data/seed/cooking-guides";
+import type {
+  DeleteKitchenSessionResult,
+  PersistedKitchenSession,
+  SaveKitchenSessionResult,
+} from "@/domain/kitchen-execution/persisted-session";
 
 const id = z.string().trim().min(1).max(128);
 const shortText = z.string().trim().max(500);
@@ -265,6 +286,59 @@ const confirmAssistantWeekPlanProposalSchema = z.object({
   slots: z.array(plannedSlotSchema).max(35),
   confirmedByUser: z.literal(true),
 }).strict();
+const sessionVersionSchema = z.number().int().positive().nullable();
+const cookingSessionSchema = z.object({
+  dishId: id,
+  guideId: id,
+  completedStepIds: z.array(id).max(100),
+  startedAt: z.string().datetime(),
+}).strict();
+const mealRunSessionSchema = z.object({
+  day: z.number().int().min(0).max(6),
+  targetServeAt: z.string().datetime(),
+  tasks: z.array(z.object({
+    dishId: id,
+    estimatedMin: z.number().int().min(5).max(240),
+    startedAt: z.string().datetime().optional(),
+    completedAt: z.string().datetime().optional(),
+  }).strict()).min(2).max(5),
+  createdAt: z.string().datetime(),
+}).strict();
+
+const validateCookingPayload = (raw: unknown): CookingSession => {
+  const input = cookingSessionSchema.parse(raw) as CookingSession;
+  const resolved = cookingGuideFor(input.dishId);
+  const parsed = resolved
+    ? parseCookingSession(JSON.stringify(input), resolved.guide)
+    : undefined;
+  if (!parsed) throw new Error("INVALID_COOKING_SESSION");
+  return parsed;
+};
+
+const validateMealRunPayload = async (
+  weekStart: string,
+  day: number,
+  raw: unknown,
+): Promise<MealRunSession> => {
+  if (weekStart !== currentWeekStartIso()) {
+    throw new Error("WEEK_OUTSIDE_CURRENT_SCOPE");
+  }
+  const input = mealRunSessionSchema.parse(raw) as MealRunSession;
+  if (input.day !== day) throw new Error("MEAL_RUN_DAY_MISMATCH");
+  const { plan } = await loadOrCreateCurrentWeekPlan();
+  const supportedDishIds = new Set(
+    plan.slots
+      .filter((slot) => slot.day === day && cookingGuideFor(slot.dishId))
+      .map((slot) => slot.dishId),
+  );
+  const parsed = parseMealRunSession(
+    JSON.stringify(input),
+    day,
+    supportedDishIds,
+  );
+  if (!parsed) throw new Error("INVALID_MEAL_RUN_SESSION");
+  return parsed;
+};
 
 // Server Action boundary — client store calls these to load/persist to Neon.
 export async function getHouseholdState(): Promise<HouseholdState> {
@@ -275,6 +349,115 @@ export async function getHouseholdState(): Promise<HouseholdState> {
 export async function getCanonicalWeekPlan(): Promise<WeekPlanEnvelope> {
   await requireUserId();
   return loadOrCreateCurrentWeekPlan();
+}
+
+export async function getHouseholdDishLibrary() {
+  await requireUserId();
+  return loadHouseholdDishLibrary();
+}
+
+export async function syncHouseholdDishLibrary(raw: unknown) {
+  await requireUserId();
+  const dishes = z.array(householdDishSchema).max(100).parse(raw);
+  return syncMissingHouseholdDishes(dishes);
+}
+
+export async function getCookingSession(
+  dishId: string,
+): Promise<PersistedKitchenSession<CookingSession> | undefined> {
+  await requireUserId();
+  const safeDishId = id.parse(dishId);
+  const session = await loadKitchenSession<CookingSession>(
+    "cooking",
+    safeDishId,
+  );
+  if (!session) return undefined;
+  return { ...session, payload: validateCookingPayload(session.payload) };
+}
+
+export async function persistCookingSession(
+  raw: unknown,
+  expectedVersion: number | null,
+): Promise<SaveKitchenSessionResult<CookingSession>> {
+  await requireUserId();
+  const input = validateCookingPayload(raw);
+  return saveKitchenSession(
+    "cooking",
+    input.dishId,
+    input,
+    sessionVersionSchema.parse(expectedVersion),
+  );
+}
+
+export async function clearCookingSession(
+  dishId: string,
+  expectedVersion: number,
+): Promise<DeleteKitchenSessionResult<CookingSession>> {
+  await requireUserId();
+  return deleteKitchenSession(
+    "cooking",
+    id.parse(dishId),
+    z.number().int().positive().parse(expectedVersion),
+  );
+}
+
+export async function getMealRunSession(
+  weekStart: string,
+  day: number,
+): Promise<PersistedKitchenSession<MealRunSession> | undefined> {
+  await requireUserId();
+  const safeWeek = z.iso.date().parse(weekStart);
+  const safeDay = z.number().int().min(0).max(6).parse(day);
+  const scopeKey = `${safeWeek}:${safeDay}`;
+  const session = await loadKitchenSession<MealRunSession>(
+    "meal-run",
+    scopeKey,
+  );
+  if (!session) return undefined;
+  return {
+    ...session,
+    payload: await validateMealRunPayload(
+      safeWeek,
+      safeDay,
+      session.payload,
+    ),
+  };
+}
+
+export async function persistMealRunSession(
+  weekStart: string,
+  day: number,
+  raw: unknown,
+  expectedVersion: number | null,
+): Promise<SaveKitchenSessionResult<MealRunSession>> {
+  await requireUserId();
+  const safeWeek = z.iso.date().parse(weekStart);
+  const safeDay = z.number().int().min(0).max(6).parse(day);
+  const input = await validateMealRunPayload(safeWeek, safeDay, raw);
+  return saveKitchenSession(
+    "meal-run",
+    `${safeWeek}:${safeDay}`,
+    input,
+    sessionVersionSchema.parse(expectedVersion),
+  );
+}
+
+export async function clearMealRunSession(
+  weekStart: string,
+  day: number,
+  expectedVersion: number,
+): Promise<DeleteKitchenSessionResult<MealRunSession>> {
+  await requireUserId();
+  const safeWeek = z.iso.date().parse(weekStart);
+  const safeDay = z.number().int().min(0).max(6).parse(day);
+  if (safeWeek !== currentWeekStartIso()) {
+    throw new Error("WEEK_OUTSIDE_CURRENT_SCOPE");
+  }
+  return deleteKitchenSession(
+    "meal-run",
+    `${safeWeek}:${safeDay}`,
+    z.number().int().positive().parse(expectedVersion),
+  );
 }
 
 export async function persistCanonicalWeekPlan(

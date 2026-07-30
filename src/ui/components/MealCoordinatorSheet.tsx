@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dish } from "@/domain/types";
 import {
   COOKING_GUIDES,
@@ -16,6 +16,12 @@ import { MealRunMode } from "@/ui/components/MealRunMode";
 import { LeftoverCaptureSheet } from "@/ui/components/LeftoverCaptureSheet";
 import { useI18n } from "@/i18n/context";
 import { useStore } from "@/ui/store";
+import {
+  clearMealRunSession,
+  getMealRunSession,
+  persistMealRunSession,
+} from "@/app/actions";
+import { toast } from "@/ui/toast";
 
 const toLocalDateTime = (date: Date) => {
   const offset = date.getTimezoneOffset() * 60_000;
@@ -43,6 +49,10 @@ export function MealCoordinatorSheet({
   );
   const supportedIds = useMemo(() => new Set(supported.map((dish) => dish.id)), [supported]);
   const storageKey = `qk-meal-run:${household.id}:${plan.weekStart}:${day}`;
+  const versionRef = useRef<number | null>(null);
+  const sessionRef = useRef<MealRunSession | undefined>(undefined);
+  const mutationRef = useRef<Promise<boolean>>(Promise.resolve(true));
+  const conflictEpochRef = useRef(0);
   const [target, setTarget] = useState(() => {
     const date = new Date();
     date.setMinutes(date.getMinutes() + 60);
@@ -77,6 +87,86 @@ export function MealCoordinatorSheet({
   const name = (dish: Dish) =>
     lang === "en" && dish.enLabel ? dish.enLabel : dish.vnName;
 
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
+  useEffect(() => {
+    mutationRef.current = (async () => {
+      try {
+        const canonical = await getMealRunSession(plan.weekStart, day);
+        if (canonical) {
+          versionRef.current = canonical.version;
+          sessionRef.current = canonical.payload;
+          setSession(canonical.payload);
+          setRunOpen(true);
+          sessionStorage.removeItem(storageKey);
+          return true;
+        }
+        const legacy = sessionRef.current;
+        if (!legacy) return true;
+        const result = await persistMealRunSession(
+          plan.weekStart,
+          day,
+          legacy,
+          null,
+        );
+        if (!result.ok) {
+          conflictEpochRef.current += 1;
+          versionRef.current = result.canonical.version;
+          sessionRef.current = result.canonical.payload;
+          setSession(result.canonical.payload);
+          setRunOpen(true);
+          toast("Phiên bữa ăn đã được cập nhật trên thiết bị khác.", "info");
+          return false;
+        }
+        versionRef.current = result.session.version;
+        sessionStorage.removeItem(storageKey);
+        return true;
+      } catch {
+        if (sessionRef.current) {
+          sessionStorage.setItem(
+            storageKey,
+            JSON.stringify(sessionRef.current),
+          );
+        }
+        toast("Phiên bữa ăn chưa đồng bộ; bản trên máy vẫn được giữ.", "error");
+        return false;
+      }
+    })();
+  }, [day, plan.weekStart, storageKey]);
+
+  const queueSave = (next: MealRunSession) => {
+    sessionStorage.setItem(storageKey, JSON.stringify(next));
+    const conflictEpoch = conflictEpochRef.current;
+    mutationRef.current = mutationRef.current.then(async () => {
+      if (conflictEpoch !== conflictEpochRef.current) return false;
+      try {
+        const result = await persistMealRunSession(
+          plan.weekStart,
+          day,
+          next,
+          versionRef.current,
+        );
+        if (!result.ok) {
+          conflictEpochRef.current += 1;
+          versionRef.current = result.canonical.version;
+          sessionRef.current = result.canonical.payload;
+          setSession(result.canonical.payload);
+          sessionStorage.removeItem(storageKey);
+          toast("Phiên bữa ăn đã được cập nhật trên thiết bị khác.", "info");
+          return false;
+        }
+        versionRef.current = result.session.version;
+        sessionStorage.removeItem(storageKey);
+        return true;
+      } catch {
+        toast("Phiên bữa ăn chưa đồng bộ; bản trên máy vẫn được giữ.", "error");
+        return false;
+      }
+    });
+  };
+
   const start = () => {
     if (!canStart) return;
     const targetIso = new Date(target).toISOString();
@@ -94,26 +184,61 @@ export function MealCoordinatorSheet({
       })),
       createdAt: new Date().toISOString(),
     };
-    sessionStorage.setItem(storageKey, JSON.stringify(next));
+    sessionRef.current = next;
     setSession(next);
     setRunOpen(true);
+    queueSave(next);
   };
 
   const updateSession = (next: MealRunSession) => {
-    sessionStorage.setItem(storageKey, JSON.stringify(next));
+    sessionRef.current = next;
     setSession(next);
+    queueSave(next);
   };
 
-  const clearSession = () => {
+  const deleteCanonicalSession = async () => {
+    const conflictEpoch = conflictEpochRef.current;
+    await mutationRef.current;
+    if (conflictEpoch !== conflictEpochRef.current) return false;
+    const version = versionRef.current;
+    if (version === null) return true;
+    try {
+      const result = await clearMealRunSession(
+        plan.weekStart,
+        day,
+        version,
+      );
+      if (!result.ok) {
+        conflictEpochRef.current += 1;
+        versionRef.current = result.canonical.version;
+        sessionRef.current = result.canonical.payload;
+        setSession(result.canonical.payload);
+        setRunOpen(true);
+        toast("Thiết bị khác vừa cập nhật; hãy kiểm tra trước khi kết thúc.", "info");
+        return false;
+      }
+      versionRef.current = null;
+      return true;
+    } catch {
+      toast("Chưa thể kết thúc phiên trên máy chủ. Hãy thử lại.", "error");
+      return false;
+    }
+  };
+
+  const clearSession = async () => {
+    if (!(await deleteCanonicalSession())) return;
     sessionStorage.removeItem(storageKey);
+    sessionRef.current = undefined;
     setSession(undefined);
     setRunOpen(false);
   };
 
-  const finishSession = () => {
-    if (!session) return;
+  const finishSession = async () => {
+    const completed = sessionRef.current;
+    if (!completed || !(await deleteCanonicalSession())) return;
     sessionStorage.removeItem(storageKey);
-    setFinishedSession(session);
+    setFinishedSession(completed);
+    sessionRef.current = undefined;
     setSession(undefined);
     setRunOpen(false);
   };

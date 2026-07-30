@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Dish } from "@/domain/types";
 import type {
   CookingSession,
@@ -15,6 +15,12 @@ import { localize } from "@/domain/kitchen-execution";
 import { useStore } from "@/ui/store";
 import { useI18n } from "@/i18n/context";
 import { fmt } from "@/ui/format";
+import {
+  clearCookingSession,
+  getCookingSession,
+  persistCookingSession,
+} from "@/app/actions";
+import { toast } from "@/ui/toast";
 
 export function CookingMode({
   dish,
@@ -31,6 +37,11 @@ export function CookingMode({
   const storageKey = `qk-cooking:${household.id}:${dish.id}`;
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const versionRef = useRef<number | null>(null);
+  const sessionRef = useRef<CookingSession | null>(null);
+  const mutationRef = useRef<Promise<boolean>>(Promise.resolve(true));
+  const conflictEpochRef = useRef(0);
+  const stepTouchedRef = useRef(false);
   const [session, setSession] = useState<CookingSession>(() => {
     const restored =
       typeof window === "undefined"
@@ -47,6 +58,18 @@ export function CookingMode({
   const [stepIndex, setStepIndex] = useState(() =>
     Math.max(0, initialStep ? guide.steps.findIndex((step) => step.id === initialStep.id) : guide.steps.length - 1),
   );
+  const adoptSession = useCallback((next: CookingSession, resetStep = true) => {
+    sessionRef.current = next;
+    setSession(next);
+    if (!resetStep) return;
+    const incomplete = nextIncompleteStep(guide, next.completedStepIds);
+    setStepIndex(Math.max(
+      0,
+      incomplete
+        ? guide.steps.findIndex((step) => step.id === incomplete.id)
+        : guide.steps.length - 1,
+    ));
+  }, [guide]);
   const completed = new Set(session.completedStepIds);
   const current = guide.steps[stepIndex];
   const allDone = session.completedStepIds.length === guide.steps.length;
@@ -56,8 +79,38 @@ export function CookingMode({
   );
 
   useEffect(() => {
-    sessionStorage.setItem(storageKey, JSON.stringify(session));
-  }, [session, storageKey]);
+    sessionRef.current = session;
+  }, [session]);
+
+  useEffect(() => {
+    mutationRef.current = (async () => {
+      try {
+        const canonical = await getCookingSession(dish.id);
+        if (canonical) {
+          versionRef.current = canonical.version;
+          adoptSession(canonical.payload, !stepTouchedRef.current);
+          sessionStorage.removeItem(storageKey);
+          return true;
+        }
+        const initial = sessionRef.current!;
+        const result = await persistCookingSession(initial, null);
+        if (!result.ok) {
+          conflictEpochRef.current += 1;
+          versionRef.current = result.canonical.version;
+          adoptSession(result.canonical.payload);
+          toast("Phiên nấu đã được cập nhật trên thiết bị khác.", "info");
+          return false;
+        }
+        versionRef.current = result.session.version;
+        sessionStorage.removeItem(storageKey);
+        return true;
+      } catch {
+        sessionStorage.setItem(storageKey, JSON.stringify(sessionRef.current));
+        toast("Tiến độ nấu đang giữ trên máy; chưa đồng bộ sang thiết bị khác.", "error");
+        return false;
+      }
+    })();
+  }, [adoptSession, dish.id, storageKey]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -96,19 +149,65 @@ export function CookingMode({
     };
   }, [onClose]);
 
-  const toggleCurrent = () => {
-    setSession((previous) => {
-      const has = previous.completedStepIds.includes(current.id);
-      return {
-        ...previous,
-        completedStepIds: has
-          ? previous.completedStepIds.filter((id) => id !== current.id)
-          : [...previous.completedStepIds, current.id],
-      };
+  const queueSave = (next: CookingSession) => {
+    sessionStorage.setItem(storageKey, JSON.stringify(next));
+    const conflictEpoch = conflictEpochRef.current;
+    mutationRef.current = mutationRef.current.then(async () => {
+      if (conflictEpoch !== conflictEpochRef.current) return false;
+      try {
+        const result = await persistCookingSession(next, versionRef.current);
+        if (!result.ok) {
+          conflictEpochRef.current += 1;
+          versionRef.current = result.canonical.version;
+          adoptSession(result.canonical.payload);
+          sessionStorage.removeItem(storageKey);
+          toast("Phiên nấu đã được cập nhật trên thiết bị khác.", "info");
+          return false;
+        }
+        versionRef.current = result.session.version;
+        sessionStorage.removeItem(storageKey);
+        return true;
+      } catch {
+        toast("Tiến độ nấu đang giữ trên máy; chưa đồng bộ sang thiết bị khác.", "error");
+        return false;
+      }
     });
   };
 
-  const clearAndClose = () => {
+  const toggleCurrent = () => {
+    const previous = sessionRef.current!;
+    const has = previous.completedStepIds.includes(current.id);
+    const next = {
+      ...previous,
+      completedStepIds: has
+        ? previous.completedStepIds.filter((id) => id !== current.id)
+        : [...previous.completedStepIds, current.id],
+    };
+    sessionRef.current = next;
+    setSession(next);
+    queueSave(next);
+  };
+
+  const clearAndClose = async () => {
+    const conflictEpoch = conflictEpochRef.current;
+    await mutationRef.current;
+    if (conflictEpoch !== conflictEpochRef.current) return;
+    const version = versionRef.current;
+    if (version !== null) {
+      try {
+        const result = await clearCookingSession(dish.id, version);
+        if (!result.ok) {
+          conflictEpochRef.current += 1;
+          versionRef.current = result.canonical.version;
+          adoptSession(result.canonical.payload);
+          toast("Thiết bị khác vừa cập nhật; hãy kiểm tra trước khi kết thúc.", "info");
+          return;
+        }
+      } catch {
+        toast("Chưa thể kết thúc phiên trên máy chủ. Hãy thử lại.", "error");
+        return;
+      }
+    }
     sessionStorage.removeItem(storageKey);
     onClose();
   };
@@ -202,7 +301,10 @@ export function CookingMode({
               <li key={recipeStep.id}>
                 <button
                   type="button"
-                  onClick={() => setStepIndex(index)}
+                  onClick={() => {
+                    stepTouchedRef.current = true;
+                    setStepIndex(index);
+                  }}
                   aria-label={t("cooking.goStep", { n: index + 1 })}
                   aria-current={stepIndex === index ? "step" : undefined}
                   className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border text-xs font-semibold ${
@@ -273,7 +375,10 @@ export function CookingMode({
             <button
               type="button"
               disabled={stepIndex === 0}
-              onClick={() => setStepIndex((index) => Math.max(0, index - 1))}
+              onClick={() => {
+                stepTouchedRef.current = true;
+                setStepIndex((index) => Math.max(0, index - 1));
+              }}
               className="rounded-full border border-hairline bg-surface px-4 py-2.5 text-sm disabled:opacity-35"
             >
               ← {t("cooking.previous")}
@@ -281,7 +386,10 @@ export function CookingMode({
             <button
               type="button"
               disabled={stepIndex === guide.steps.length - 1}
-              onClick={() => setStepIndex((index) => Math.min(guide.steps.length - 1, index + 1))}
+              onClick={() => {
+                stepTouchedRef.current = true;
+                setStepIndex((index) => Math.min(guide.steps.length - 1, index + 1));
+              }}
               className="rounded-full border border-hairline bg-surface px-4 py-2.5 text-sm disabled:opacity-35"
             >
               {t("cooking.next")} →

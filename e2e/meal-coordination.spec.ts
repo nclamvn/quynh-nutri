@@ -38,6 +38,11 @@ test("day plan → estimated timeline → manual progress → guide → restore 
 
   await run().getByRole("button", { name: "Bắt đầu món" }).first().click();
   await expect(run().getByText("Đang nấu")).toBeVisible();
+  await expect.poll(() =>
+    page.evaluate(() =>
+      Object.keys(sessionStorage).filter((key) => key.startsWith("qk-meal-run:")),
+    ),
+  ).toEqual([]);
   await run().getByRole("button", { name: "Mở hướng dẫn" }).first().click();
 
   const cookingBack = page.getByRole("button", { name: "Về chi tiết món" });

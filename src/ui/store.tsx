@@ -10,7 +10,7 @@ import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
 import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
 import { dishSafety, safetyReason } from "@/domain/constraints";
-import { getHouseholdState, getCanonicalWeekPlan, persistCanonicalWeekPlan, confirmAssistantWeekPlanProposal, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction } from "@/app/actions";
+import { getHouseholdState, getCanonicalWeekPlan, syncHouseholdDishLibrary, persistCanonicalWeekPlan, confirmAssistantWeekPlanProposal, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction } from "@/app/actions";
 import { toast } from "@/ui/toast";
 import { currentWeekStartIso } from "@/lib/week";
 import type {
@@ -137,7 +137,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
   const [fulfillments, setFulfillments] = useState<ShoppingFulfillment[]>([]);
-  const b1Scope = useRef<string | null>(null);
   const planRef = useRef(plan);
   const planVersionRef = useRef(1);
   const pendingPlanRef = useRef<PersistedWeekPlan | null>(null);
@@ -167,19 +166,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (!tp.purchases) setPurchases(s.purchases);
         if (!tp.fulfillments) setFulfillments(s.fulfillments);
         const key = `${B1_KEY}:${s.household.id}`;
-        if (!tp.b1) {
-          try {
-            const raw = localStorage.getItem(key);
-            const local = raw ? JSON.parse(raw) as Dish[] : [];
-            setB1((previous) => [
-              ...local.filter((dish) => !previous.some((item) => item.id === dish.id)),
-              ...previous,
-            ]);
-          } catch {
-            setB1([]);
-          }
+        let local: Dish[] = [];
+        try {
+          const parsed = JSON.parse(localStorage.getItem(key) ?? "[]");
+          if (Array.isArray(parsed)) local = parsed as Dish[];
+        } catch {
+          localStorage.removeItem(key);
         }
-        b1Scope.current = key;
+        if (local.length > 0) {
+          void syncHouseholdDishLibrary(local)
+          .then((synced) => {
+            localStorage.removeItem(key);
+            setB1((previous) => {
+              const serverIds = new Set(synced.map((dish) => dish.id));
+              return [
+                ...previous.filter((dish) => !serverIds.has(dish.id)),
+                ...synced,
+              ];
+            });
+          })
+          .catch(() => {
+            toast("Thư viện món nhà mình chưa đồng bộ; dữ liệu trên máy vẫn được giữ.", "error");
+          });
+        } else {
+          localStorage.removeItem(key);
+        }
       })
       .catch(() => toast(SYNC_FAIL_MSG, "error")) // surface, don't swallow
       .finally(() => setHydrated(true));
@@ -211,14 +222,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     queueMicrotask(loadCanonicalPlan);
   }, [loadCanonicalPlan]);
-
-  // B1 dishes persist on-device, isolated by household. The old unscoped key is
-  // intentionally not migrated because it may contain another account's data.
-  useEffect(() => {
-    const key = `${B1_KEY}:${household.id}`;
-    if (!hydrated || b1Scope.current !== key) return;
-    try { localStorage.setItem(key, JSON.stringify(b1)); } catch {}
-  }, [b1, hydrated, household.id]);
 
   // Dishes the household is actually allowed to eat (allergies + diet restrictions).
   const allowedRepertoire = useMemo(() => dietaryRepertoire(repertoire, household, commodities), [household]);
@@ -710,34 +713,63 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [favorites, resolve],
   );
 
+  const persistB1Creation = useCallback((dish: Dish) => {
+    void syncHouseholdDishLibrary([dish])
+      .then((canonical) => {
+        setB1((previous) => {
+          const serverIds = new Set(canonical.map((item) => item.id));
+          return [
+            ...previous.filter((item) => !serverIds.has(item.id)),
+            ...canonical,
+          ];
+        });
+      })
+      .catch(() => {
+        try {
+          const key = `${B1_KEY}:${household.id}`;
+          const parsed = JSON.parse(localStorage.getItem(key) ?? "[]");
+          const retained = Array.isArray(parsed) ? parsed as Dish[] : [];
+          localStorage.setItem(
+            key,
+            JSON.stringify([
+              ...retained.filter((item) => item.id !== dish.id),
+              dish,
+            ]),
+          );
+        } catch {}
+        toast("Món đã giữ trên máy nhưng chưa đồng bộ sang thiết bị khác.", "error");
+      });
+  }, [household.id]);
+
   // ── Fork (B1): copy-to-override. Same lines → macros/adequacy unchanged
   // (denominator precedent stays intact; fork never re-computes nutrition). ──
   const isForked = useCallback((id: string) => b1.some((d) => d.sourceRepertoireId === id || d.id === id), [b1]);
   const forkDish = useCallback((id: string) => {
     touched.current.b1 = true;
-    setB1((prev) => {
-      if (prev.some((d) => d.sourceRepertoireId === id)) return prev;
-      const base = REPERTOIRE_BY_ID[id];
-      if (!base) return prev;
-      const fork: Dish = {
-        ...base,
-        id: `hh_${id}`,
-        origin: "B1",
-        sourceRepertoireId: id,
-        isFavorite: base.isFavorite,
-        lines: base.lines.map((l) => ({ ...l })),
-      };
-      return [...prev, fork];
-    });
-  }, []);
+    if (b1.some((dish) => dish.sourceRepertoireId === id)) return;
+    const base = REPERTOIRE_BY_ID[id];
+    if (!base) return;
+    const fork: Dish = {
+      ...base,
+      id: `hh_${crypto.randomUUID()}`,
+      origin: "B1",
+      sourceRepertoireId: id,
+      isFavorite: base.isFavorite,
+      lines: base.lines.map((line) => ({ ...line })),
+    };
+    setB1((previous) => [...previous, fork]);
+    persistB1Creation(fork);
+  }, [b1, persistB1Creation]);
 
   // Add an imported dish as a B1 (household) dish. Nutrition is NOT taken on faith
   // from the source — it is computed downstream from the mapped commodity lines,
   // exactly like any B0 dish, so an import can never smuggle in a fabricated number.
   const addB1Dish = useCallback((dish: Dish) => {
     touched.current.b1 = true;
-    setB1((prev) => (prev.some((d) => d.id === dish.id) ? prev : [...prev, dish]));
-  }, []);
+    if (b1.some((item) => item.id === dish.id)) return;
+    setB1((previous) => [...previous, dish]);
+    persistB1Creation(dish);
+  }, [b1, persistB1Creation]);
 
   const value: StoreValue = {
     hydrated,

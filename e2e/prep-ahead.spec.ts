@@ -14,7 +14,9 @@ test("tomorrow prep opens reviewed, grouped, source-backed guidance without muta
 
   const trigger = page.getByRole("button", { name: /Chuẩn bị cho ngày mai/ });
   await expect(trigger).toBeVisible();
-  await expect.poll(async () => (await localStorageSnapshot(page))["qk-b1-dishes:hh_default"]).toBe("[]");
+  await expect.poll(async () =>
+    (await localStorageSnapshot(page))["qk-b1-dishes:hh_default"],
+  ).toBeUndefined();
   const before = await localStorageSnapshot(page);
   await trigger.click();
 

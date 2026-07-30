@@ -204,6 +204,24 @@ model Household {
   shoppingFulfillments    ShoppingFulfillment[]
   shoppingReceiveRequests ShoppingReceiveRequest[]
   pushSubscriptions       PushSubscription[]
+  kitchenSessions         KitchenSession[]
+}
+
+// Active, manually-driven kitchen execution only. Completion deletes the row;
+// this is not a generated task ledger or a historical "done" record.
+model KitchenSession {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  kind        String
+  scopeKey    String
+  payload     Json
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([householdId, kind, scopeKey])
+  @@index([householdId, updatedAt])
 }
 
 // Web Push is an explicitly enabled delivery channel around the derived

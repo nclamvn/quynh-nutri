@@ -78,7 +78,7 @@ export function AddDishSheet({ open, onClose }: { open: boolean; onClose: () => 
 
   const save = () => {
     if (!previewDish) return;
-    addB1Dish(previewDish);
+    addB1Dish({ ...previewDish, id: `imp_${crypto.randomUUID()}` });
     setSaved(true);
     setTimeout(() => { onClose(); setText(""); setParsed(null); setSaved(false); }, 700);
   };

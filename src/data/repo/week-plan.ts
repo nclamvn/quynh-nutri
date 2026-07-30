@@ -338,6 +338,62 @@ const persistB1InTransaction = async (
   }
 };
 
+export async function loadHouseholdDishLibrary(): Promise<Dish[]> {
+  await requireUserId();
+  const state = await loadHouseholdState();
+  if (isE2EMode()) {
+    return [...e2eDishes.values()]
+      .filter((entry) => entry.householdId === state.household.id)
+      .map((entry) => structuredClone(entry.dish));
+  }
+  return loadProductionHouseholdDishes(state.household.id);
+}
+
+/**
+ * Recover device-only dishes without allowing a stale device to overwrite the
+ * canonical same-ID dish. Normal B1 creation is immutable in the current UI,
+ * so create-missing is also the safe idempotent write path for new forks.
+ */
+export async function syncMissingHouseholdDishes(
+  rawDishes: readonly Dish[],
+): Promise<Dish[]> {
+  await requireUserId();
+  const state = await loadHouseholdState();
+  const householdId = state.household.id;
+  const dishes = rawDishes.map(validateHouseholdDish);
+  if (isE2EMode()) {
+    for (const dish of dishes) {
+      const existing = e2eDishes.get(dish.id);
+      if (existing && existing.householdId !== householdId) {
+        throw new WeekPlanValidationError("B1_OWNERSHIP_MISMATCH");
+      }
+      if (!existing) {
+        e2eDishes.set(dish.id, {
+          householdId,
+          dish: structuredClone(dish),
+        });
+      }
+    }
+    return loadHouseholdDishLibrary();
+  }
+  await getDb().$transaction(async (tx) => {
+    const existingIds = new Set(
+      (
+        await tx.householdDish.findMany({
+          where: { householdId, id: { in: dishes.map((dish) => dish.id) } },
+          select: { id: true },
+        })
+      ).map((dish) => dish.id),
+    );
+    await persistB1InTransaction(
+      tx,
+      householdId,
+      dishes.filter((dish) => !existingIds.has(dish.id)),
+    );
+  });
+  return loadProductionHouseholdDishes(householdId);
+}
+
 export async function saveWeekPlan(
   input: SaveWeekPlanInput,
 ): Promise<SaveWeekPlanResult> {

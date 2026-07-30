@@ -23,10 +23,12 @@ vi.mock("@/data/repo/household", () => ({
 }));
 
 import {
+  loadHouseholdDishLibrary,
   loadOrCreateWeekPlan,
   loadWeekPlan,
   resetE2EWeekPlansForTests,
   saveWeekPlan,
+  syncMissingHouseholdDishes,
 } from "./week-plan";
 
 const emptyState = (householdId: string): HouseholdState => ({
@@ -130,6 +132,28 @@ describe("canonical week plan repository E2E adapter", () => {
           : slot
       ),
     })).rejects.toThrow("UNKNOWN_OR_UNOWNED_DISH");
+  });
+
+  it("persists an unselected B1 library item and keeps canonical same-ID data", async () => {
+    const fork = {
+      ...structuredClone(REPERTOIRE_BY_ID.ga_kho_gung),
+      id: "hh-library-only",
+      origin: "B1" as const,
+      sourceRepertoireId: "ga_kho_gung",
+    };
+    expect(await syncMissingHouseholdDishes([fork])).toContainEqual(fork);
+    expect(await loadHouseholdDishLibrary()).toContainEqual(fork);
+
+    const staleDeviceCopy = { ...fork, vnName: "Tên cũ trên thiết bị" };
+    const reconciled = await syncMissingHouseholdDishes([staleDeviceCopy]);
+    expect(reconciled.find((dish) => dish.id === fork.id)?.vnName).toBe(
+      fork.vnName,
+    );
+
+    stateRef.current = emptyState("household-b");
+    await expect(
+      syncMissingHouseholdDishes([fork]),
+    ).rejects.toThrow("B1_OWNERSHIP_MISMATCH");
   });
 
   it("rechecks new household restrictions before saving", async () => {
