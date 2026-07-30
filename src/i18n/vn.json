@@ -295,6 +295,8 @@
   "allergen.gluten": "Gluten",
   "allergen.peanut": "Đậu phộng",
   "settings.diet": "Ăn kiêng của hộ",
+  "settings.householdRecipeNoteTitle": "Riêng cho nhà mình",
+  "settings.householdRecipeNote": "Chỉnh món và khẩu phần chỉ áp dụng cho nhà mình; công thức gốc luôn được giữ nguyên.",
   "settings.reminders": "Nhắc việc quản gia",
   "settings.remindersBody": "Nhận tối đa 3 việc bếp cần chú ý vào giờ bạn chọn, kể cả khi ứng dụng đang đóng.",
   "settings.remindersOn": "Đang bật",

@@ -295,6 +295,8 @@
   "allergen.gluten": "Gluten",
   "allergen.peanut": "Peanut",
   "settings.diet": "Household diet",
+  "settings.householdRecipeNoteTitle": "Just for this household",
+  "settings.householdRecipeNote": "Dish and portion changes stay in this household; original recipes remain unchanged.",
   "settings.reminders": "Housekeeper reminders",
   "settings.remindersBody": "Receive up to three kitchen items at your chosen time, even when the app is closed.",
   "settings.remindersOn": "On",

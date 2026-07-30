@@ -136,13 +136,17 @@ export default function SettingsPage() {
                 );
               })}
             </div>
+            <div className="border-t border-hairline pt-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-tertiary">
+                {t("settings.householdRecipeNoteTitle")}
+              </p>
+              <p className="mt-1 text-pretty text-xs leading-relaxed text-muted">
+                {t("settings.householdRecipeNote")}
+              </p>
+            </div>
           </Section>
           <ReminderSettingsCard />
         </div>
-
-        <p className="text-[11px] leading-relaxed text-muted xl:col-span-2">
-          Hộ này là một cụ thể hoá (instance) của repertoire chung (B0). Chỉnh ở đây tạo lớp B1 ghi đè khi bạn sửa món.
-        </p>
       </div>
 
       <MemberSheet subject={subject} onClose={() => setSubject(null)} />
