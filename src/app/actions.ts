@@ -1,9 +1,9 @@
 "use server";
 
-import { loadHouseholdState, saveHouseholdState, saveMemberHealthProfile, saveMemberAllergies, saveMember, deleteMember, addMemberState, deleteMemberState, saveSupplier, deleteSupplier, saveOrder, savePurchase, receiveShoppingItemRecord, createManualInventoryLotRecord, deleteInventoryLotRecord, recordInventoryMovementRecord, createLeftoverLotRecord, recordLeftoverMovementRecord, completeHouseholdOnboarding, type StatePatch, type HouseholdState } from "@/data/repo/household";
+import { currentHouseholdId, loadHouseholdState, saveHouseholdState, saveMemberHealthProfile, saveMemberAllergies, saveMember, deleteMember, addMemberState, deleteMemberState, saveSupplier, deleteSupplier, saveOrder, savePurchase, receiveShoppingItemRecord, createManualInventoryLotRecord, deleteInventoryLotRecord, recordInventoryMovementRecord, createLeftoverLotRecord, recordLeftoverMovementRecord, completeHouseholdOnboarding, type StatePatch, type HouseholdState } from "@/data/repo/household";
 import { semanticSearch } from "@/lib/search";
-import { requireUserId } from "@/lib/auth";
-import type { HealthProfile, Allergen, Member, MemberState, Supplier, Order, PurchaseRecord, ReceiveShoppingItemInput, ReceiveShoppingItemResult, RecordInventoryMovementInput, RecordInventoryMovementResult, CreateLeftoverLotInput, LeftoverLot, RecordLeftoverMovementInput, RecordLeftoverMovementResult } from "@/domain/types";
+import { isE2EMode, requireUserId } from "@/lib/auth";
+import type { HealthProfile, Allergen, Member, MemberState, Supplier, Order, PurchaseRecord, ReceiveShoppingItemInput, ReceiveShoppingItemResult, RecordInventoryMovementInput, RecordInventoryMovementResult, CreateLeftoverLotInput, LeftoverLot, RecordLeftoverMovementInput, RecordLeftoverMovementResult, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult } from "@/domain/types";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
 import { validateReceiptBusinessRules } from "@/domain/kitchen-execution/receipt";
@@ -55,6 +55,7 @@ import {
   type OnboardingResult,
 } from "@/domain/onboarding";
 import { recordProductEventSafely } from "@/data/repo/product-events";
+import { confirmMealCloseoutRecord } from "@/data/repo/meal-completion";
 
 const id = z.string().trim().min(1).max(128);
 const shortText = z.string().trim().max(500);
@@ -215,6 +216,7 @@ const createLeftoverLotSchema = z.object({
   storageLocation: z.enum(["fridge", "freezer"]),
   hotWeatherConfirmed: z.boolean(),
   sourceMealRunRef: z.string().trim().min(1).max(300).optional(),
+  mealCompletionId: id.optional(),
   note: z.string().trim().max(500).optional(),
 }).strict().superRefine((value, ctx) => {
   if (!REPERTOIRE_BY_ID[value.dishRef]) {
@@ -232,6 +234,25 @@ const createLeftoverLotSchema = z.object({
       path: result.reasonCode === "CHILLED_BEFORE_PREPARED" ? ["chilledAt"] : ["preparedAt"],
       message: result.reasonCode ?? "INVALID_TIMESTAMP",
     });
+  }
+});
+const confirmMealCloseoutSchema = z.object({
+  idempotencyKey: z.string().uuid(),
+  weekRef: z.iso.date(),
+  day: z.number().int().min(0).max(6),
+  expectedSessionVersion: z.number().int().positive(),
+  completedAt: z.string().datetime(),
+  consumptions: z.array(z.object({
+    lotId: id,
+    qty: z.number().positive().max(1_000_000),
+  }).strict()).max(100),
+}).strict().superRefine((value, ctx) => {
+  if (new Date(value.completedAt).getTime() > Date.now() + 5 * 60_000) {
+    ctx.addIssue({ code: "custom", path: ["completedAt"], message: "COMPLETED_AT_IN_FUTURE" });
+  }
+  const lotIds = value.consumptions.map((item) => item.lotId);
+  if (new Set(lotIds).size !== lotIds.length) {
+    ctx.addIssue({ code: "custom", path: ["consumptions"], message: "DUPLICATE_LOT" });
   }
 });
 const leftoverMovementSchema = z.object({
@@ -480,6 +501,53 @@ export async function clearMealRunSession(
     `${safeWeek}:${safeDay}`,
     z.number().int().positive().parse(expectedVersion),
   );
+}
+
+export async function confirmMealCloseout(
+  raw: ConfirmMealCloseoutInput,
+): Promise<ConfirmMealCloseoutResult> {
+  const userId = await requireUserId();
+  const input = confirmMealCloseoutSchema.parse(raw) as ConfirmMealCloseoutInput;
+  const { plan } = await loadOrCreateCurrentWeekPlan();
+  if (input.weekRef !== plan.weekStart || input.weekRef !== currentWeekStartIso()) {
+    throw new Error("WEEK_OUTSIDE_CURRENT_SCOPE");
+  }
+  const allowedDishIds = [...new Set(
+    plan.slots
+      .filter((slot) => slot.day === input.day && cookingGuideFor(slot.dishId))
+      .map((slot) => slot.dishId),
+  )];
+  if (allowedDishIds.length === 0) throw new Error("NO_REVIEWED_DISH");
+  const householdId = await currentHouseholdId();
+  const e2eState = isE2EMode() ? await loadHouseholdState() : undefined;
+  const e2eSession = isE2EMode()
+    ? await loadKitchenSession<MealRunSession>(
+      "meal-run",
+      `${input.weekRef}:${input.day}`,
+    )
+    : undefined;
+  const result = await confirmMealCloseoutRecord(
+    {
+      ...input,
+      householdId,
+      userId,
+      allowedDishIds,
+    },
+    e2eState
+      ? { pantry: e2eState.pantry, session: e2eSession }
+      : undefined,
+  );
+  if (isE2EMode() && result.ok) {
+    await deleteKitchenSession(
+      "meal-run",
+      `${input.weekRef}:${input.day}`,
+      input.expectedSessionVersion,
+    );
+  }
+  revalidatePath("/overview");
+  revalidatePath("/week");
+  revalidatePath("/pantry");
+  return result;
 }
 
 export async function persistCanonicalWeekPlan(

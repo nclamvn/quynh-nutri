@@ -15,7 +15,7 @@ import { normalizeVn } from "@/lib/claude";
 import { dayDishes, dayNutrition } from "@/ui/derive";
 import type { Household, Slot } from "@/domain/types";
 import { currentWeekStartIso } from "@/lib/week";
-import { getDailyHousekeeperBriefSnapshot } from "@/lib/assistant/kitchen-agenda";
+import { getDailyHousekeeperBriefSnapshot, getTodayMealReadinessSnapshot } from "@/lib/assistant/kitchen-agenda";
 import { getPrepAheadGuideSnapshot } from "@/lib/assistant/prep-ahead";
 
 // Tools wrap the DETERMINISTIC engines – the LLM orchestrates + explains, the
@@ -50,6 +50,12 @@ export const tools = {
     description: "Đọc bản tin bà quản gia tất định theo ba trạm chuẩn bị, đi chợ và dùng sớm. Đây là projection read-only theo dữ liệu hộ đã ghi nhận. Nếu các trạm rỗng, phải nói chưa có việc nào đủ căn cứ và không tự nghĩ thêm.",
     inputSchema: z.object({}),
     execute: async () => getDailyHousekeeperBriefSnapshot(),
+  }),
+
+  today_meal_readiness: tool({
+    description: "Đọc bữa hôm nay, món đã ghi nhận hoàn thành và sự hiện diện của nguyên liệu trong kho. Chỉ đọc dữ liệu thật. Trạng thái recorded chỉ có nghĩa là có một lô dương được ghi, tuyệt đối không diễn giải thành đủ dùng.",
+    inputSchema: z.object({}),
+    execute: async () => getTodayMealReadinessSnapshot(),
   }),
 
   nutrition_report: tool({

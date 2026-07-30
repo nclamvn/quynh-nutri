@@ -608,7 +608,7 @@
   ,"housekeeper.store.action": "Mở Kho & Tủ lạnh"
   ,"housekeeper.loading": "Đang đọc dữ liệu nhà mình…"
   ,"ov.openCookingPlan": "Mở điều phối nấu"
-  ,"coord.needsReviewed": "Cần ít nhất 2 món có hướng dẫn đã rà soát"
+  ,"coord.needsReviewed": "Cần ít nhất 1 món có hướng dẫn đã rà soát"
   ,"pantry.emptyTitle": "Kho chỉ ghi những gì gia đình thực sự cất"
   ,"pantry.emptyBody": "Xác nhận hàng đã mua ở trang Đi chợ để tạo từng lô với nơi cất và hạn trên nhãn. Ứng dụng không tự đoán trong tủ đang có gì."
   ,"pantry.emptyAction": "Sang Đi chợ"

@@ -72,6 +72,7 @@ const input = (overrides: Partial<KitchenAgendaInput> = {}): KitchenAgendaInput 
   shopping: [],
   pantry: [],
   leftovers: [],
+  completions: [],
   dish: (id) => dishes.get(id),
   reviewedCookingDishIds: new Set(["one", "two"]),
   prepAheadDishIds: new Set(["one", "two"]),
@@ -215,6 +216,30 @@ describe("kitchen agenda", () => {
       ]),
     }));
     expect(two.tasks.map((task) => task.kind)).toEqual(["coordinate-meal"]);
+  });
+
+  it("removes only dish refs recorded complete and keeps a newly changed dish actionable", () => {
+    const agenda = buildKitchenAgenda(input({
+      plan: plan([
+        { day: 2, slot: "MAN", dishId: "one", locked: false },
+        { day: 2, slot: "RAU", dishId: "two", locked: false },
+      ]),
+      completions: [{
+        id: "completion-a",
+        idempotencyKey: "key-a",
+        weekRef: "2026-07-27",
+        day: 2,
+        dishRefs: ["one"],
+        sourceSessionCreatedAt: "2026-07-29T04:00:00.000Z",
+        completedAt: "2026-07-29T05:00:00.000Z",
+        createdAt: "2026-07-29T05:00:00.000Z",
+        updatedAt: "2026-07-29T05:00:00.000Z",
+      }],
+    }));
+    expect(agenda.tasks).toMatchObject([{
+      kind: "cook",
+      evidence: { supported: 1, unsupported: 0 },
+    }]);
   });
 
   it("deduplicates stable IDs, sorts deterministically and never mutates inputs", () => {

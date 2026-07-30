@@ -16,7 +16,14 @@ import {
 } from "@/domain/kitchen-execution/daily-housekeeper-brief";
 import type { WeekPlan } from "@/domain/types";
 import type { Dish } from "@/domain/types";
-import { loadOrCreateCurrentWeekPlan } from "@/data/repo/week-plan";
+import {
+  loadHouseholdDishLibrary,
+  loadOrCreateCurrentWeekPlan,
+} from "@/data/repo/week-plan";
+import {
+  buildTodayMealReadiness,
+  type TodayMealReadiness,
+} from "@/domain/kitchen-execution/meal-readiness";
 
 export const KITCHEN_AGENDA_TIME_ZONE = "Asia/Ho_Chi_Minh";
 const REVIEWED_DISH_IDS = new Set(COOKING_GUIDES.map((guide) => guide.dishId));
@@ -49,6 +56,7 @@ export function buildAssistantKitchenAgenda(input: {
     shopping,
     pantry: input.state.pantry,
     leftovers: input.state.leftoverLots,
+    completions: input.state.mealCompletions,
     dish,
     reviewedCookingDishIds: REVIEWED_DISH_IDS,
     prepAheadDishIds: PREP_AHEAD_DISH_IDS,
@@ -66,4 +74,21 @@ export async function getKitchenAgendaSnapshot(): Promise<KitchenAgenda> {
 
 export async function getDailyHousekeeperBriefSnapshot(): Promise<DailyHousekeeperBrief> {
   return buildDailyHousekeeperBrief(await getKitchenAgendaSnapshot());
+}
+
+/** Read-only meal handoff. Ingredient presence is not a sufficiency claim. */
+export async function getTodayMealReadinessSnapshot(): Promise<TodayMealReadiness> {
+  const state = await loadHouseholdState();
+  const { plan } = await loadOrCreateCurrentWeekPlan();
+  const householdDishes = await loadHouseholdDishLibrary();
+  const householdDishById = new Map(householdDishes.map((item) => [item.id, item]));
+  return buildTodayMealReadiness({
+    now: new Date(),
+    timeZone: KITCHEN_AGENDA_TIME_ZONE,
+    plan,
+    pantry: state.pantry,
+    completions: state.mealCompletions,
+    dish: (id) => householdDishById.get(id) ?? REPERTOIRE_BY_ID[id],
+    reviewedCookingDishIds: REVIEWED_DISH_IDS,
+  });
 }

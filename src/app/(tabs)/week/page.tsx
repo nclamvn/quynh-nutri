@@ -279,16 +279,16 @@ export default function WeekPage() {
               </ul>
               <div className="mt-3 border-t border-hairline pt-3">
                 <button
-                  disabled={!planEditable || reviewedCount < 2}
+                  disabled={!planEditable || reviewedCount < 1}
                   type="button"
                   onClick={() => setCoordDay(day)}
-                  aria-describedby={reviewedCount < 2 ? `coord-reason-${day}` : undefined}
+                  aria-describedby={reviewedCount < 1 ? `coord-reason-${day}` : undefined}
                   className="w-full rounded-full border border-brand bg-brand-weak px-3 py-2 text-xs font-semibold text-brand disabled:cursor-not-allowed disabled:border-hairline disabled:bg-surface/60 disabled:text-muted disabled:opacity-75"
                 >
                   {t("coord.open")}
-                  {reviewedCount >= 2 ? ` · ${reviewedCount}` : ""}
+                  {reviewedCount >= 1 ? ` · ${reviewedCount}` : ""}
                 </button>
-                {reviewedCount < 2 && (
+                {reviewedCount < 1 && (
                   <p
                     id={`coord-reason-${day}`}
                     className="mt-1.5 text-center text-[10px] leading-relaxed text-muted"

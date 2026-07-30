@@ -20,6 +20,7 @@ export function useDailyHousekeeperBrief() {
     shopping,
     pantry,
     leftoverLots,
+    mealCompletions,
     dish,
   } = useStore();
   const [now, setNow] = useState(() => new Date());
@@ -38,11 +39,12 @@ export function useDailyHousekeeperBrief() {
       shopping,
       pantry,
       leftovers: leftoverLots,
+      completions: mealCompletions,
       dish,
       reviewedCookingDishIds: REVIEWED_DISH_IDS,
       prepAheadDishIds: PREP_AHEAD_DISH_IDS,
     }),
-    [dish, leftoverLots, now, pantry, plan, shopping],
+    [dish, leftoverLots, mealCompletions, now, pantry, plan, shopping],
   );
   const status: DailyBriefViewStatus =
     !hydrated || planSyncState === "loading"

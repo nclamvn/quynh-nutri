@@ -37,7 +37,9 @@ import type {
   PurchaseRecord,
   PurchaseLine,
   OnTime,
+  MealCompletion,
 } from "@/domain/types";
+import { mergeE2EMealCompletionState } from "@/data/repo/meal-completion";
 import {
   evaluateCoolingWindow,
   LEFTOVER_POLICY_VERSION,
@@ -93,6 +95,7 @@ export interface HouseholdState {
   inventoryMovements: InventoryMovement[];
   leftoverLots: LeftoverLot[];
   leftoverMovements: LeftoverMovement[];
+  mealCompletions: MealCompletion[];
 }
 
 const initialE2EHousehold = () => {
@@ -119,9 +122,11 @@ const e2eState: HouseholdState = {
   inventoryMovements: [],
   leftoverLots: [],
   leftoverMovements: [],
+  mealCompletions: [],
 };
 const e2eReceiveResults = new Map<string, ReceiveShoppingItemResult>();
-const cloneE2EState = (): HouseholdState => structuredClone(e2eState);
+const cloneE2EState = (): HouseholdState =>
+  mergeE2EMealCompletionState(HH_ID, structuredClone(e2eState));
 const e2eId = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 
 export async function loadHouseholdState(): Promise<HouseholdState> {
@@ -140,6 +145,7 @@ export async function loadHouseholdState(): Promise<HouseholdState> {
     inventoryMovements: [],
     leftoverLots: [],
     leftoverMovements: [],
+    mealCompletions: [],
   };
 }
 
@@ -171,6 +177,7 @@ export async function loadHouseholdStateForSystem(
         orderBy: { occurredAt: "desc" },
         take: 50,
       },
+      mealCompletions: { orderBy: { completedAt: "asc" } },
       shoppingFulfillments: { include: { inventoryLot: true } },
     },
   });
@@ -221,6 +228,7 @@ export async function loadHouseholdStateForSystem(
     inventoryMovements: row.inventoryMovements.map(rowToInventoryMovement),
     leftoverLots: row.leftoverLots.map(rowToLeftoverLot),
     leftoverMovements: row.leftoverMovements.map(rowToLeftoverMovement),
+    mealCompletions: row.mealCompletions.map(rowToMealCompletion),
   };
 }
 
@@ -262,6 +270,7 @@ type InventoryMovementRow = {
   qtyAfter: number;
   occurredAt: Date;
   note: string | null;
+  sourceMealCompletionId: string | null;
   createdAt: Date;
   inventoryLot: { commodityId: string };
 };
@@ -279,6 +288,7 @@ function rowToInventoryMovement(row: InventoryMovementRow): InventoryMovement {
     qtyAfter: row.qtyAfter,
     occurredAt: row.occurredAt.toISOString(),
     note: row.note ?? undefined,
+    sourceMealCompletionId: row.sourceMealCompletionId ?? undefined,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -295,6 +305,7 @@ type LeftoverLotRow = {
   hotWeatherConfirmed: boolean;
   policyVersion: string;
   sourceMealRunRef: string | null;
+  mealCompletionId: string | null;
   note: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -313,7 +324,34 @@ function rowToLeftoverLot(row: LeftoverLotRow): LeftoverLot {
     hotWeatherConfirmed: row.hotWeatherConfirmed,
     policyVersion: row.policyVersion,
     sourceMealRunRef: row.sourceMealRunRef ?? undefined,
+    mealCompletionId: row.mealCompletionId ?? undefined,
     note: row.note ?? undefined,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+type MealCompletionRow = {
+  id: string;
+  idempotencyKey: string;
+  weekRef: string;
+  day: number;
+  dishRefs: string[];
+  sourceSessionCreatedAt: Date;
+  completedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+function rowToMealCompletion(row: MealCompletionRow): MealCompletion {
+  return {
+    id: row.id,
+    idempotencyKey: row.idempotencyKey,
+    weekRef: row.weekRef,
+    day: row.day,
+    dishRefs: [...row.dishRefs],
+    sourceSessionCreatedAt: row.sourceSessionCreatedAt.toISOString(),
+    completedAt: row.completedAt.toISOString(),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -846,6 +884,7 @@ export async function createLeftoverLotRecord(
       hotWeatherConfirmed: input.hotWeatherConfirmed,
       policyVersion: LEFTOVER_POLICY_VERSION,
       sourceMealRunRef: input.sourceMealRunRef,
+      mealCompletionId: input.mealCompletionId,
       note: input.note,
       createdAt: now,
       updatedAt: now,
@@ -861,6 +900,13 @@ export async function createLeftoverLotRecord(
     where: { householdId_idempotencyKey: key },
   });
   if (replay) return rowToLeftoverLot(replay);
+  if (input.mealCompletionId) {
+    const completion = await db.mealCompletion.findFirst({
+      where: { id: input.mealCompletionId, householdId },
+      select: { id: true },
+    });
+    if (!completion) throw new Error("MEAL_COMPLETION_NOT_FOUND");
+  }
 
   try {
     const row = await db.$transaction(async (tx) => {
@@ -881,6 +927,7 @@ export async function createLeftoverLotRecord(
           hotWeatherConfirmed: input.hotWeatherConfirmed,
           policyVersion: LEFTOVER_POLICY_VERSION,
           sourceMealRunRef: input.sourceMealRunRef ?? null,
+          mealCompletionId: input.mealCompletionId ?? null,
           note: input.note ?? null,
           createdByUserId: userId,
         },

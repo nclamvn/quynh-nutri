@@ -26,6 +26,7 @@ const emptyState = (): HouseholdState => ({
   inventoryMovements: [],
   leftoverLots: [],
   leftoverMovements: [],
+  mealCompletions: [],
 });
 
 const { loadHouseholdState } = vi.hoisted(() => ({

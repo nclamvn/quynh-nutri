@@ -50,7 +50,8 @@ describe("server assistant week plan proposal", () => {
       fulfillments: [],
       inventoryMovements: [],
       leftoverLots: [],
-      leftoverMovements: [],
+    leftoverMovements: [],
+    mealCompletions: [],
     };
     refs.envelope.current = {
       plan: {

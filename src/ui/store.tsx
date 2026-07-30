@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from "react";
-import type { Dish, Household, PlannedSlot, Slot, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord, ShoppingFulfillment, ReceiveShoppingItemInput, ReceiveShoppingItemResult, InventoryMovement, RecordInventoryMovementInput, RecordInventoryMovementResult, LeftoverLot, LeftoverMovement, CreateLeftoverLotInput, RecordLeftoverMovementInput, RecordLeftoverMovementResult } from "@/domain/types";
+import type { Dish, Household, PlannedSlot, Slot, PantryItem, HealthProfile, Allergen, MemberState, Member, Activity, Supplier, Order, OrderStatus, ChannelKind, PurchaseRecord, ShoppingFulfillment, ReceiveShoppingItemInput, ReceiveShoppingItemResult, InventoryMovement, RecordInventoryMovementInput, RecordInventoryMovementResult, LeftoverLot, LeftoverMovement, CreateLeftoverLotInput, RecordLeftoverMovementInput, RecordLeftoverMovementResult, MealCompletion, ConfirmMealCloseoutInput, ConfirmMealCloseoutResult } from "@/domain/types";
 import { splitOrders, type OrderSplit } from "@/domain/order";
 import { COMMODITY_BY_ID } from "@/data/seed/commodity";
 import { REPERTOIRE, REPERTOIRE_BY_ID } from "@/data/seed/repertoire";
@@ -10,7 +10,7 @@ import { generateWeek } from "@/domain/rotation";
 import { aggregateShopping, type ShoppingItem } from "@/domain/shopping";
 import { resolveSlot, resolveDish, dietaryRepertoire, dishAllowed } from "@/domain/dish";
 import { dishSafety, safetyReason } from "@/domain/constraints";
-import { getHouseholdState, getCanonicalWeekPlan, syncHouseholdDishLibrary, persistCanonicalWeekPlan, confirmAssistantWeekPlanProposal, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction } from "@/app/actions";
+import { getHouseholdState, getCanonicalWeekPlan, syncHouseholdDishLibrary, persistCanonicalWeekPlan, confirmAssistantWeekPlanProposal, persistState, receiveShoppingItem as receiveShoppingItemAction, createManualInventoryLot, deleteInventoryLot, recordInventoryMovement as recordInventoryMovementAction, createLeftoverLot as createLeftoverLotAction, recordLeftoverMovement as recordLeftoverMovementAction, confirmMealCloseout as confirmMealCloseoutAction } from "@/app/actions";
 import { toast } from "@/ui/toast";
 import { currentWeekStartIso } from "@/lib/week";
 import type {
@@ -80,6 +80,8 @@ interface StoreValue {
   // PA-Pantry
   pantry: PantryItem[];
   inventoryMovements: InventoryMovement[];
+  mealCompletions: MealCompletion[];
+  confirmMealCloseout: (input: ConfirmMealCloseoutInput) => Promise<ConfirmMealCloseoutResult>;
   addPantry: (commodityId: string, qty: number, unit: string) => void;
   removePantry: (lotId: string) => void;
   recordInventoryMovement: (input: RecordInventoryMovementInput) => Promise<RecordInventoryMovementResult>;
@@ -112,7 +114,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [household, setHousehold] = useState<Household>(DEFAULT_HOUSEHOLD);
   // Per-piece "touched" flags so late-arriving DB hydration never clobbers an
   // optimistic edit the user made before it resolved.
-  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, inventoryMovements: false, leftoverLots: false, leftoverMovements: false, suppliers: false, orders: false, purchases: false, fulfillments: false, b1: false });
+  const touched = useRef({ household: false, favorites: false, notes: false, pantry: false, inventoryMovements: false, mealCompletions: false, leftoverLots: false, leftoverMovements: false, suppliers: false, orders: false, purchases: false, fulfillments: false, b1: false });
   const [hydrated, setHydrated] = useState(false);
   const [plan, setPlan] = useState<PersistedWeekPlan>(() => ({
     id: "",
@@ -132,6 +134,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const noteId = useRef(1);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
   const [inventoryMovements, setInventoryMovements] = useState<InventoryMovement[]>([]);
+  const [mealCompletions, setMealCompletions] = useState<MealCompletion[]>([]);
   const [leftoverLots, setLeftoverLots] = useState<LeftoverLot[]>([]);
   const [leftoverMovements, setLeftoverMovements] = useState<LeftoverMovement[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -160,6 +163,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }
         if (!tp.pantry) setPantry(s.pantry);
         if (!tp.inventoryMovements) setInventoryMovements(s.inventoryMovements);
+        if (!tp.mealCompletions) setMealCompletions(s.mealCompletions);
         if (!tp.leftoverLots) setLeftoverLots(s.leftoverLots);
         if (!tp.leftoverMovements) setLeftoverMovements(s.leftoverMovements);
         if (!tp.suppliers) setSuppliers(s.suppliers);
@@ -450,6 +454,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
     toast("Đã ghi nhận món còn thừa.");
     return lot;
+  }, []);
+
+  const confirmMealCloseout = useCallback(async (
+    input: ConfirmMealCloseoutInput,
+  ): Promise<ConfirmMealCloseoutResult> => {
+    const result = await confirmMealCloseoutAction(input);
+    if (!result.ok) return result;
+    touched.current.mealCompletions = true;
+    touched.current.pantry = true;
+    touched.current.inventoryMovements = true;
+    setMealCompletions((previous) => [
+      ...previous.filter((item) => item.id !== result.completion.id),
+      result.completion,
+    ]);
+    const lotById = new Map(result.lots.map((lot) => [lot.id, lot]));
+    setPantry((previous) =>
+      previous.map((lot) => lot.id && lotById.has(lot.id) ? lotById.get(lot.id)! : lot),
+    );
+    setInventoryMovements((previous) => [
+      ...result.movements,
+      ...previous.filter(
+        (movement) => !result.movements.some((item) => item.id === movement.id),
+      ),
+    ]);
+    return result;
   }, []);
 
   const recordLeftoverMovement = useCallback(async (
@@ -811,6 +840,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     deleteNote,
     pantry,
     inventoryMovements,
+    mealCompletions,
+    confirmMealCloseout,
     addPantry,
     removePantry,
     recordInventoryMovement,

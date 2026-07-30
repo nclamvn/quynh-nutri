@@ -19,6 +19,10 @@ test("finished meal → cooling guard → confirmed leftover → partial use per
     await run.getByRole("button", { name: "Đánh dấu món xong" }).first().click();
   }
   await run.getByRole("button", { name: "Hoàn tất bữa nấu" }).click();
+  const closeout = page.getByRole("dialog", { name: "Xác nhận bữa ăn" });
+  await expect(closeout).toBeVisible();
+  await expect(closeout.locator('input[type="checkbox"]:checked')).toHaveCount(0);
+  await closeout.getByRole("button", { name: "Xác nhận" }).click();
 
   const capture = page.getByRole("dialog", { name: "Có món còn thừa?" });
   await expect(capture).toBeVisible();

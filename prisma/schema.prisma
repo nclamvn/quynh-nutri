@@ -205,6 +205,7 @@ model Household {
   shoppingReceiveRequests ShoppingReceiveRequest[]
   pushSubscriptions       PushSubscription[]
   kitchenSessions         KitchenSession[]
+  mealCompletions         MealCompletion[]
   productEvents           ProductEvent[]
 }
 
@@ -240,6 +241,31 @@ model KitchenSession {
 
   @@unique([householdId, kind, scopeKey])
   @@index([householdId, updatedAt])
+}
+
+// Immutable household confirmation that a reviewed kitchen session was
+// actually completed. This is execution evidence, never a generated task or a
+// generic mutable "done" ledger.
+model MealCompletion {
+  id                     String              @id @default(cuid())
+  householdId            String
+  household              Household           @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  idempotencyKey         String
+  weekRef                String
+  day                    Int
+  dishRefs               String[]
+  sourceSessionCreatedAt DateTime
+  completedAt            DateTime
+  createdByUserId        String
+  inventoryMovements     InventoryMovement[]
+  leftoverLots           LeftoverLot[]
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  @@unique([householdId, idempotencyKey])
+  @@unique([householdId, weekRef, day, sourceSessionCreatedAt])
+  @@index([householdId, weekRef, day])
+  @@index([householdId, completedAt])
 }
 
 // Web Push is an explicitly enabled delivery channel around the derived
@@ -348,10 +374,13 @@ model InventoryMovement {
   qtyAfter       Float
   occurredAt     DateTime
   note           String?
+  sourceMealCompletionId String?
+  sourceMealCompletion   MealCompletion?       @relation(fields: [sourceMealCompletionId], references: [id], onDelete: SetNull)
   createdAt      DateTime              @default(now())
 
   @@index([householdId, occurredAt])
   @@index([inventoryLotId, occurredAt])
+  @@index([sourceMealCompletionId])
 }
 
 model ShoppingReceiveRequest {
@@ -380,6 +409,8 @@ model LeftoverLot {
   hotWeatherConfirmed Boolean                 @default(false)
   policyVersion       String
   sourceMealRunRef    String?
+  mealCompletionId    String?
+  mealCompletion      MealCompletion?          @relation(fields: [mealCompletionId], references: [id], onDelete: SetNull)
   note                String?
   createdByUserId     String
   movements           LeftoverMovement[]
@@ -388,6 +419,7 @@ model LeftoverLot {
 
   @@unique([householdId, idempotencyKey])
   @@index([householdId, chilledAt])
+  @@index([mealCompletionId])
 }
 
 model LeftoverMovement {

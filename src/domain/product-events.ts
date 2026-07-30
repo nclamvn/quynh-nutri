@@ -7,6 +7,7 @@ export const PRODUCT_EVENT_NAMES = [
   "shopping_item_received",
   "cooking_started",
   "meal_run_started",
+  "meal_completed",
   "leftover_recorded",
 ] as const;
 
@@ -31,7 +32,12 @@ const schemas = {
   }).strict(),
   cooking_started: emptyProperties,
   meal_run_started: z.object({
-    dishCount: z.number().int().min(2).max(5),
+    dishCount: z.number().int().min(1).max(5),
+  }).strict(),
+  meal_completed: z.object({
+    dishCount: z.number().int().min(1).max(5),
+    inventoryMovementCount: z.number().int().min(0).max(100),
+    openedLeftoverCapture: z.boolean(),
   }).strict(),
   leftover_recorded: z.object({
     storageLocation: z.enum(["fridge", "freezer"]),
@@ -56,4 +62,3 @@ export function parseProductEvent(input: unknown): ProductEventInput {
     properties: schemas[envelope.name].parse(envelope.properties),
   };
 }
-

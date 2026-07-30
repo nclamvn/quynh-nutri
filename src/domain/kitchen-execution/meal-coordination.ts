@@ -94,7 +94,8 @@ export function parseMealRunSession(
       !validIso(value.targetServeAt) ||
       !validIso(value.createdAt) ||
       !Array.isArray(value.tasks) ||
-      value.tasks.length < 2
+      value.tasks.length < 1 ||
+      value.tasks.length > 5
     ) {
       return undefined;
     }

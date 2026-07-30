@@ -14,6 +14,7 @@ import {
 import { BottomSheet } from "@/ui/components/BottomSheet";
 import { MealRunMode } from "@/ui/components/MealRunMode";
 import { LeftoverCaptureSheet } from "@/ui/components/LeftoverCaptureSheet";
+import { MealCloseoutSheet } from "@/ui/components/MealCloseoutSheet";
 import { useI18n } from "@/i18n/context";
 import { useStore } from "@/ui/store";
 import {
@@ -77,13 +78,15 @@ export function MealCoordinatorSheet({
   });
   const [runOpen, setRunOpen] = useState(Boolean(session));
   const [finishedSession, setFinishedSession] = useState<MealRunSession>();
+  const [closeoutVersion, setCloseoutVersion] = useState<number>();
+  const [mealCompletionId, setMealCompletionId] = useState<string>();
   const targetMs = target ? new Date(target).getTime() : Number.NaN;
   const validTarget = Number.isFinite(targetMs) && targetMs > openedAt;
   const validDurations = supported.every((dish) => {
     const duration = durations[dish.id];
     return Number.isInteger(duration) && duration >= 5 && duration <= 240;
   });
-  const canStart = supported.length >= 2 && validTarget && validDurations;
+  const canStart = supported.length >= 1 && supported.length <= 5 && validTarget && validDurations;
   const name = (dish: Dish) =>
     lang === "en" && dish.enLabel ? dish.enLabel : dish.vnName;
 
@@ -235,12 +238,30 @@ export function MealCoordinatorSheet({
 
   const finishSession = async () => {
     const completed = sessionRef.current;
-    if (!completed || !(await deleteCanonicalSession())) return;
-    sessionStorage.removeItem(storageKey);
+    if (!completed) return;
+    if (!(await mutationRef.current)) return;
+    if (versionRef.current === null) {
+      toast("Phiên bữa ăn chưa đồng bộ. Hãy thử lại.", "error");
+      return;
+    }
     setFinishedSession(completed);
+    setCloseoutVersion(versionRef.current);
+    setRunOpen(false);
+  };
+
+  const cancelCloseout = () => {
+    setFinishedSession(undefined);
+    setCloseoutVersion(undefined);
+    setRunOpen(true);
+  };
+
+  const confirmedCloseout = (completionId: string) => {
+    sessionStorage.removeItem(storageKey);
+    versionRef.current = null;
     sessionRef.current = undefined;
     setSession(undefined);
-    setRunOpen(false);
+    setMealCompletionId(completionId);
+    setCloseoutVersion(undefined);
   };
 
   return (
@@ -333,12 +354,27 @@ export function MealCoordinatorSheet({
           onCancel={clearSession}
         />
       )}
-      {finishedSession && (
+      {finishedSession && !mealCompletionId && closeoutVersion !== undefined && (
+        <MealCloseoutSheet
+          day={day}
+          session={finishedSession}
+          dishes={supported}
+          expectedSessionVersion={closeoutVersion}
+          onCancel={cancelCloseout}
+          onConfirmed={(completion) => confirmedCloseout(completion.id)}
+        />
+      )}
+      {finishedSession && mealCompletionId && (
         <LeftoverCaptureSheet
           session={finishedSession}
           dishes={supported}
           sourceMealRunRef={`${household.id}:${plan.weekStart}:${day}:${finishedSession.createdAt}`}
-          onClose={() => setFinishedSession(undefined)}
+          mealCompletionId={mealCompletionId}
+          onClose={() => {
+            setFinishedSession(undefined);
+            setMealCompletionId(undefined);
+            onClose();
+          }}
         />
       )}
     </>

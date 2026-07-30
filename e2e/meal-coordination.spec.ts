@@ -68,5 +68,16 @@ test("day plan → estimated timeline → manual progress → guide → restore 
   await expect(finish).toBeEnabled();
   await finish.click();
   await expect(run()).toHaveCount(0);
+  const closeout = page.getByRole("dialog", { name: "Xác nhận bữa ăn" });
+  await expect(closeout).toBeVisible();
+  await expect(closeout.getByText("Không chọn sẵn")).toBeVisible();
+  await closeout.getByRole("button", { name: "Quay lại" }).click();
+  await expect(run()).toBeVisible();
+  await run().getByRole("button", { name: "Hoàn tất bữa nấu" }).click();
+  await expect(closeout).toBeVisible();
+  await closeout.getByRole("button", { name: "Xác nhận" }).click();
+  const capture = page.getByRole("dialog", { name: "Có món còn thừa?" });
+  await expect(capture).toBeVisible();
+  await capture.getByRole("button", { name: "Không có hoặc để sau" }).click();
   await expect(page.getByRole("button", { name: "Tiếp tục phiên đang nấu" })).toHaveCount(0);
 });

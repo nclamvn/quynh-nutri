@@ -20,6 +20,7 @@ import type { FoodGroup } from "@/domain/nutrition";
 import { useDailyHousekeeperBrief } from "@/ui/hooks/useKitchenAgenda";
 import { KitchenAgendaCard } from "@/ui/components/KitchenAgendaCard";
 import { HousekeeperPathCard } from "@/ui/components/HousekeeperPathCard";
+import { TodayMealCard } from "@/ui/components/TodayMealCard";
 
 const GROUP_COLORS: [FoodGroup, string][] = [
   ["đạm", "var(--chart-protein)"],
@@ -93,6 +94,7 @@ export default function OverviewPage() {
         brief={dailyBrief.brief}
         status={dailyBrief.status}
       />
+      <TodayMealCard />
 
       {plan.slots.length === 0 ? (
         <div className="card grid min-h-[40vh] place-content-center p-10 text-center">

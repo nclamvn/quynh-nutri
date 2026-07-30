@@ -262,6 +262,18 @@ export interface ReceiveShoppingItemResult {
 
 export type InventoryMovementKind = "consumed" | "discarded";
 
+export interface MealCompletion {
+  id: string;
+  idempotencyKey: string;
+  weekRef: string;
+  day: number;
+  dishRefs: string[];
+  sourceSessionCreatedAt: string;
+  completedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface InventoryMovement {
   id: string;
   idempotencyKey: string;
@@ -274,6 +286,7 @@ export interface InventoryMovement {
   qtyAfter: number;
   occurredAt: string;
   note?: string;
+  sourceMealCompletionId?: string;
   createdAt: string;
 }
 
@@ -290,6 +303,33 @@ export interface RecordInventoryMovementResult {
   movement: InventoryMovement;
   lot: InventoryLot;
 }
+
+export interface MealConsumptionSelection {
+  lotId: string;
+  qty: number;
+}
+
+export interface ConfirmMealCloseoutInput {
+  idempotencyKey: string;
+  weekRef: string;
+  day: number;
+  expectedSessionVersion: number;
+  completedAt: string;
+  consumptions: MealConsumptionSelection[];
+}
+
+export type ConfirmMealCloseoutResult =
+  | {
+      ok: true;
+      completion: MealCompletion;
+      movements: InventoryMovement[];
+      lots: InventoryLot[];
+    }
+  | {
+      ok: false;
+      kind: "conflict";
+      completion: MealCompletion;
+    };
 
 export type LeftoverStorageLocation = "fridge" | "freezer";
 export type LeftoverMovementKind = "consumed" | "discarded" | "corrected";
@@ -308,6 +348,7 @@ export interface LeftoverLot {
   hotWeatherConfirmed: boolean;
   policyVersion: string;
   sourceMealRunRef?: string;
+  mealCompletionId?: string;
   note?: string;
   createdAt: string;
   updatedAt: string;
@@ -336,6 +377,7 @@ export interface CreateLeftoverLotInput {
   storageLocation: LeftoverStorageLocation;
   hotWeatherConfirmed: boolean;
   sourceMealRunRef?: string;
+  mealCompletionId?: string;
   note?: string;
 }
 

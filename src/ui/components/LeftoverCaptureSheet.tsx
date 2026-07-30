@@ -21,11 +21,13 @@ export function LeftoverCaptureSheet({
   session,
   dishes,
   sourceMealRunRef,
+  mealCompletionId,
   onClose,
 }: {
   session: MealRunSession;
   dishes: Dish[];
   sourceMealRunRef: string;
+  mealCompletionId?: string;
   onClose: () => void;
 }) {
   const { createLeftoverLot } = useStore();
@@ -93,6 +95,7 @@ export function LeftoverCaptureSheet({
         storageLocation,
         hotWeatherConfirmed,
         sourceMealRunRef,
+        mealCompletionId,
         note: note.trim() || undefined,
       });
       const nextIds = remainingIds.filter((id) => id !== selected.dish.id);

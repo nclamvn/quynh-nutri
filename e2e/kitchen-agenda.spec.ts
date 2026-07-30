@@ -17,6 +17,9 @@ test("derived agenda → leftover source flow → agenda updates without local d
     await run.getByRole("button", { name: "Đánh dấu món xong" }).first().click();
   }
   await run.getByRole("button", { name: "Hoàn tất bữa nấu" }).click();
+  const closeout = page.getByRole("dialog", { name: "Xác nhận bữa ăn" });
+  await expect(closeout).toBeVisible();
+  await closeout.getByRole("button", { name: "Xác nhận" }).click();
 
   const capture = page.getByRole("dialog", { name: "Có món còn thừa?" });
   const chilledAt = new Date(Date.now() - 80 * 60 * 60_000);

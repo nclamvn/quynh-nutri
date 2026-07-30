@@ -608,7 +608,7 @@
   ,"housekeeper.store.action": "Open Pantry & Fridge"
   ,"housekeeper.loading": "Reading household data…"
   ,"ov.openCookingPlan": "Open cooking coordination"
-  ,"coord.needsReviewed": "At least 2 dishes need reviewed cooking guides"
+  ,"coord.needsReviewed": "At least 1 dish needs a reviewed cooking guide"
   ,"pantry.emptyTitle": "The pantry only records what your household actually stored"
   ,"pantry.emptyBody": "Confirm purchased items from the Market page to create individual lots with storage location and label date. The app never guesses what is in your kitchen."
   ,"pantry.emptyAction": "Go to Market"

@@ -1,6 +1,7 @@
 import type {
   Dish,
   LeftoverLot,
+  MealCompletion,
   PantryItem,
   WeekPlan,
 } from "@/domain/types";
@@ -60,6 +61,7 @@ export interface KitchenAgendaInput {
   shopping: readonly ShoppingItem[];
   pantry: readonly PantryItem[];
   leftovers: readonly LeftoverLot[];
+  completions: readonly MealCompletion[];
   dish: (id: string) => Dish | undefined;
   reviewedCookingDishIds: ReadonlySet<string>;
   prepAheadDishIds: ReadonlySet<string>;
@@ -270,11 +272,20 @@ export function buildKitchenAgenda(input: KitchenAgendaInput): KitchenAgenda {
   }
 
   if (today !== undefined) {
+    const completedDishIds = new Set(
+      input.completions
+        .filter(
+          (completion) =>
+            completion.weekRef === input.plan.weekStart
+            && completion.day === today,
+        )
+        .flatMap((completion) => completion.dishRefs),
+    );
     const plannedIds = [...new Set(
       input.plan.slots
         .filter((slot) => slot.day === today)
         .map((slot) => slot.dishId),
-    )];
+    )].filter((dishId) => !completedDishIds.has(dishId));
     const supportedIds: string[] = [];
     for (const dishId of plannedIds) {
       const dish = input.dish(dishId);

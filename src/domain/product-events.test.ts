@@ -44,5 +44,26 @@ describe("product event privacy contract", () => {
       properties: { dishCount: 100 },
     })).toThrow();
   });
-});
 
+  it("keeps meal completion measurement aggregate and privacy-minimal", () => {
+    expect(parseProductEvent({
+      name: "meal_completed",
+      dedupeKey: "meal_completed:1",
+      properties: {
+        dishCount: 3,
+        inventoryMovementCount: 2,
+        openedLeftoverCapture: true,
+      },
+    })).toMatchObject({ name: "meal_completed" });
+    expect(() => parseProductEvent({
+      name: "meal_completed",
+      dedupeKey: "meal_completed:2",
+      properties: {
+        dishCount: 3,
+        inventoryMovementCount: 2,
+        openedLeftoverCapture: true,
+        dishName: "Cá kho",
+      },
+    })).toThrow();
+  });
+});

@@ -43,6 +43,7 @@ const emptyState = (householdId: string): HouseholdState => ({
   inventoryMovements: [],
   leftoverLots: [],
   leftoverMovements: [],
+  mealCompletions: [],
 });
 
 describe("canonical week plan repository E2E adapter", () => {
