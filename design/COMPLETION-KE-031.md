@@ -158,7 +158,7 @@ Acceptance criteria tested: 24/24 passed.
 | Temporary Neon query plan | PASS – slowest measured server execution 9.251 ms |
 | Temporary Neon retention dry run | PASS – zero eligible, no deletion |
 | 90-day aggregate p95 below 500 ms | PASS – 255.1 ms over 20 authenticated warm preview runs |
-| Branch-backed page p95 below 1.5 s | FAIL – Vercel Observability measured 3.7 s p95 across 58 hot invocations |
+| Branch-backed page p95 below 1.5 s | PASS – replacement preview measured 299 ms p95 across 29 hot invocations |
 
 ### Performance details
 
@@ -187,7 +187,13 @@ Acceptance criteria tested: 24/24 passed.
   Asia/Ho_Chi_Minh measurement window.
 - The 20 authenticated warm reloads produced 58 hot function invocations.
   Observed TTFB was 50 ms p50, 3.57 s p90, and 3.7 s p95. The approved p95
-  limit is 1.5 s, so the gate failed.
+  limit is 1.5 s, so the initial preview failed.
+- KE-031-PERF-01 then streamed a private shell after operator authorization
+  while keeping the aggregate report and `ke031-v1` contract unchanged.
+- Replacement deployment `dpl_BesLLvCN9gkXcRkYTg1DavFirz2N` produced 29 hot
+  invocations in the exact 09:37:40–09:38:20 Asia/Ho_Chi_Minh window,
+  including 20 authenticated warm reloads. Vercel Observability measured
+  69 ms p50, 277 ms p90, and 299 ms p95. The replacement gate passed.
 
 ### Marketing and stress details
 
@@ -220,13 +226,10 @@ Acceptance criteria tested: 24/24 passed.
 
 ## ISSUES DISCOVERED
 
-1. **Release gate – high:** the authenticated preview passed the approved
-   aggregation target, but isolated Vercel TTFB was 3.7 s p95 against the
-   approved 1.5 s limit.
-2. **Deployment prerequisite – high:** production must receive a deliberate
+1. **Deployment prerequisite – high:** production must receive a deliberate
    server-only `OPS_USER_IDS` value containing the Homeowner's exact Clerk user
    ID. Without it, the route correctly returns not found.
-3. **Environment coverage – low:** runtime exception rate, API p95,
+2. **Environment coverage – low:** runtime exception rate, API p95,
    AI-provider failures, Vercel health, and Neon incidents are not measured by
    ProductEvent and remain explicitly unavailable.
 
@@ -248,16 +251,16 @@ before connecting to the database. The full suite then passed with 354 tests.
    than modified in place so it can import the typed shared contract directly.
 3. Retention logic has its own repository and tests to keep destructive scope
    isolated from read-only reporting.
-4. The protected, branch-backed preview passed the aggregation p95 gate.
-   Vercel Observability subsequently isolated server TTFB and the
-   page-response p95 gate failed at 3.7 s.
+4. The protected, branch-backed preview passed the aggregation p95 gate. Its
+   first server TTFB measurement failed at 3.7 s p95. KE-031-PERF-01 then
+   released a replacement preview that passed the same gate at 299 ms p95.
 
 ## BUILDER HANDOVER TO CONTRACTOR
 
-The implementation passed independent functional and security review and is
-available on the protected preview branch. Production release remains closed
-until a narrow performance refinement brings isolated hot TTFB p95 below 1.5
-seconds and the same Observability query passes on a replacement preview.
+The implementation passed independent functional, security, and performance
+review and is available on the protected preview branch. Isolated hot TTFB p95
+is 299 ms on the replacement preview.
 
-No Neon main maintenance or production deployment is included in this
-handover.
+Production release remains closed until the Homeowner deliberately configures
+the production operator allowlist and grants production release. No Neon main
+maintenance or production deployment is included in this handover.

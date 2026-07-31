@@ -7,11 +7,11 @@
 - Date: 2026-07-31
 - Reviewed blueprint: `design/TIP-KE-031.md`
 - Reviewed completion: `design/COMPLETION-KE-031.md`
-- Overall status: NEEDS FIXES
+- Overall status: PREVIEW GATES PASSED
 
-“Needs fixes” here means the release evidence is incomplete. The second audit
-found no remaining functional, privacy, authorization, retention, build, or
-responsive-layout defect after the CLI parsing fix.
+The replacement-preview audit found no remaining functional, privacy,
+authorization, retention, build, responsive-layout, or preview-performance
+defect after the CLI parsing and TTFB refinements.
 
 ## REQUIREMENT COVERAGE
 
@@ -173,20 +173,33 @@ Observed TTFB:
 - p95: 3.7 s;
 - required p95: below 1.5 s.
 
-Result: failed.
+Initial result: failed.
+
+The KE-031-PERF-01 replacement preview moved the authorized aggregate report
+behind a private Suspense boundary without changing `ke031-v1`. The same
+Vercel Observability query then isolated deployment
+`dpl_BesLLvCN9gkXcRkYTg1DavFirz2N`, preview environment, route
+`/ops/activation`, and hot starts in the exact 09:37:40–09:38:20
+Asia/Ho_Chi_Minh window:
+
+- sample: 29 hot invocations, including 20 authenticated warm reloads;
+- p50: 69 ms;
+- p90: 277 ms;
+- p95: 299 ms;
+- required p95: below 1.5 s.
+
+Replacement result: passed.
 
 ## CRITICAL ISSUES
 
-1. **Performance gate failed:** G-031-02 exceeded its p95 limit by 2.2 seconds.
-2. **Operator identity not configured:** production access will remain closed
+1. **Operator identity not configured:** production access will remain closed
    until the exact Homeowner Clerk user ID is deliberately set in the
    server-only `OPS_USER_IDS` environment variable.
 
 ## REQUIRED REFINEMENT
 
-Keep production closed. Prepare a narrow performance TIP that reduces the
-slow TTFB tail without changing the `ke031-v1` contract, then repeat the same
-Observability query on a replacement preview.
+Keep production closed until the Homeowner deliberately configures the
+server-only operator allowlist for production and grants a production release.
 
 ## RELEASE VERDICT
 
@@ -194,8 +207,9 @@ Observability query on a replacement preview.
 Functional implementation: READY
 Privacy and security: READY
 Neon main safety: READY
+Protected preview: READY
 Production release: NOT READY
-Overall: NEEDS FIXES
+Overall: PREVIEW GATES PASSED
 ```
 
 The protected preview is approved. Neon main maintenance and production
@@ -208,6 +222,7 @@ The Homeowner subsequently authorized the preferred preview action. Commit
 `dpl_9wL2rrVaHgsTmpa5kBH6PvCaiqjM` passed signed-out smoke testing against the
 temporary Neon branch. See `design/RELEASE-KE-031-PREVIEW.md`.
 
-This addendum does not change the production verdict. The two authenticated
-p95 gates were then measured: aggregation passed at 255.1 ms p95; isolated hot
-server TTFB failed at 3.7 s p95.
+This addendum does not change the production verdict. The original preview's
+isolated hot TTFB failed at 3.7 s p95. KE-031-PERF-01 then released replacement
+deployment `dpl_BesLLvCN9gkXcRkYTg1DavFirz2N`; the same query passed at 299 ms
+p95 over 29 hot invocations.

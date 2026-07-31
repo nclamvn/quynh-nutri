@@ -6,14 +6,14 @@
 - Release type: Protected Vercel preview
 - Date: 2026-07-31
 - Git branch: `codex/ke-031-preview`
-- Commit: `d68f19e`
+- Commit: `fe18a5f`
 - Status: READY FOR HOMEOWNER REVIEW
 
 ## DEPLOYMENT
 
 - Preview:
-  `https://quynh-nutri-qwq1r288g-nclamvn-gmailcoms-projects.vercel.app`
-- Vercel deployment: `dpl_9wL2rrVaHgsTmpa5kBH6PvCaiqjM`
+  `https://quynh-nutri-7h5ixge35-nclamvn-gmailcoms-projects.vercel.app`
+- Vercel deployment: `dpl_BesLLvCN9gkXcRkYTg1DavFirz2N`
 - Runtime region: `iad1`
 - Target: preview
 - Deployment protection: enabled
@@ -52,7 +52,7 @@ copy-on-write branch. It does not use Neon main for operator measurements.
 | Public landing through protection bypass | PASS – HTTP 200 |
 | Signed-out `/ops/activation?window=90` | PASS – HTTP 307 to same-origin sign-in |
 | Retention route without `CRON_SECRET` | PASS – HTTP 503, no repository call |
-| Runtime error log after corrected deployment | PASS – no errors found |
+| Runtime error log | PASS WITH NOTE – one cold-branch transaction timeout, then recovered |
 | Production alias unchanged | PASS |
 | Neon main untouched | PASS |
 
@@ -76,7 +76,7 @@ privacy suppression intact.
 - Result: PASS.
 - All measured requests returned the console rather than an unavailable state.
 
-### Failed TTFB gate
+### Superseded TTFB failure
 
 The browser's full reload p95 was 5,499 ms, but this combines Vercel Deployment
 Protection, document transfer, CSS and JavaScript loading, and browser work. It
@@ -98,6 +98,30 @@ First Byte` for the exact 09:06–09:07 Asia/Ho_Chi_Minh warm measurement window
 
 Production remains closed pending a narrow performance refinement and a passing
 replacement-preview measurement.
+
+### Passing replacement-preview TTFB gate
+
+KE-031-PERF-01 introduced a private, data-free streamed shell after page-level
+operator authorization. The metric contract, repository authorization, Neon
+reads, aggregation, and final report remained unchanged.
+
+Vercel Observability isolated the replacement deployment for the exact
+09:37:40–09:38:20 Asia/Ho_Chi_Minh window:
+
+- deployment: `dpl_BesLLvCN9gkXcRkYTg1DavFirz2N`;
+- environment: preview;
+- route: `/ops/activation`;
+- function start type: hot;
+- sample: 29 hot invocations, including 20 authenticated warm reloads;
+- p50: 69 ms;
+- p90: 277 ms;
+- p95: 299 ms;
+- required p95: below 1.5 s;
+- result: PASS.
+
+One earlier cold-branch request reached the existing 2.5-second repository
+transaction ceiling and rendered the honest unavailable state. The subsequent
+authenticated smoke rendered the aggregate report with 504 households.
 
 ### Deferred warning
 

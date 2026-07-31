@@ -2,7 +2,7 @@
 
 ## STATUS
 
-READY FOR REPLACEMENT PREVIEW
+COMPLETE – REPLACEMENT PREVIEW RELEASED
 
 ## IMPLEMENTATION
 
@@ -46,6 +46,40 @@ isolated port and passed. The full suite was also run on an isolated port.
 
 ## PENDING
 
-- Commit and push.
-- Deploy a replacement protected preview.
-- Repeat the exact Vercel Observability p95 query.
+None for the approved preview scope.
+
+## REPLACEMENT PREVIEW
+
+- Commit: `fe18a5f`.
+- Deployment:
+  `https://quynh-nutri-7h5ixge35-nclamvn-gmailcoms-projects.vercel.app`.
+- Vercel deployment: `dpl_BesLLvCN9gkXcRkYTg1DavFirz2N`.
+- Runtime region: `iad1`.
+- Target: preview.
+- Database: temporary Neon branch `br-snowy-bar-augegw53`.
+- Production aliases and Neon main: unchanged.
+
+The signed-in operator route first streamed the private, data-free loading
+shell and then rendered the aggregate report with 504 households. One earlier
+request hit the repository's existing 2.5-second transaction ceiling while
+the temporary branch was cold and returned the honest unavailable state. A
+subsequent request completed with the aggregate report; no household
+identifier was exposed.
+
+## VERCEL OBSERVABILITY RECHECK
+
+The approved query isolated `Function Invocations → Time to First Byte` with:
+
+- deployment `dpl_BesLLvCN9gkXcRkYTg1DavFirz2N`;
+- environment `preview`;
+- route `/ops/activation`;
+- function start type `hot`;
+- window 09:37:40–09:38:20 Asia/Ho_Chi_Minh on 2026-07-31;
+- 29 hot invocations, including the 20 authenticated warm reloads;
+- p50 69 ms;
+- p90 277 ms;
+- p95 299 ms.
+
+Required p95: below 1.5 seconds.
+
+Result: PASS.
