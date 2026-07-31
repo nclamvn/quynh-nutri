@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import {
   buildOpsMetrics,
   OPS_INTERACTIVE_WINDOWS,
@@ -114,17 +115,43 @@ function MetricCard({
   );
 }
 
-export default async function OperatorActivationPage({
+function OperatorActivationFallback() {
+  return (
+    <main className={styles.shell} aria-busy="true">
+      <div className={styles.frame}>
+        <header className={styles.header}>
+          <div>
+            <Link href="/" className={styles.brand}>
+              <span aria-hidden>✿</span>
+              Ăn Ngon
+            </Link>
+            <p className={styles.eyebrow}>Phòng điều hành · KE-031</p>
+            <h1>Nhịp kích hoạt</h1>
+            <p className={styles.lead}>Đang đọc bằng chứng vận hành đã xác nhận.</p>
+          </div>
+          <div className={styles.loadingMeta} role="status" aria-live="polite">
+            <span className={styles.loadingDot} aria-hidden />
+            Đang tổng hợp
+          </div>
+        </header>
+        <div className={styles.loadingGrid} aria-hidden>
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+    </main>
+  );
+}
+
+async function OperatorActivationReport({
   searchParams,
 }: {
   searchParams: Promise<{ window?: string | string[] }>;
 }) {
-  try {
-    await requireOperatorUserId();
-  } catch {
-    notFound();
-  }
-
   const params = await searchParams;
   const windowDays = parseInteractiveWindow(params.window);
   const now = new Date();
@@ -433,5 +460,23 @@ export default async function OperatorActivationPage({
         </footer>
       </div>
     </main>
+  );
+}
+
+export default async function OperatorActivationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ window?: string | string[] }>;
+}) {
+  try {
+    await requireOperatorUserId();
+  } catch {
+    notFound();
+  }
+
+  return (
+    <Suspense fallback={<OperatorActivationFallback />}>
+      <OperatorActivationReport searchParams={searchParams} />
+    </Suspense>
   );
 }

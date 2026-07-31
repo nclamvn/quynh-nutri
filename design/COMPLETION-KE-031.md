@@ -158,7 +158,7 @@ Acceptance criteria tested: 24/24 passed.
 | Temporary Neon query plan | PASS – slowest measured server execution 9.251 ms |
 | Temporary Neon retention dry run | PASS – zero eligible, no deletion |
 | 90-day aggregate p95 below 500 ms | PASS – 255.1 ms over 20 authenticated warm preview runs |
-| Branch-backed page p95 below 1.5 s | NOT CERTIFIED – available tooling does not isolate server TTFB |
+| Branch-backed page p95 below 1.5 s | FAIL – Vercel Observability measured 3.7 s p95 across 58 hot invocations |
 
 ### Performance details
 
@@ -181,6 +181,13 @@ Acceptance criteria tested: 24/24 passed.
 - Browser reload p95 was 5,499 ms through Vercel Deployment Protection and the
   client loading path. It is not substituted for the blueprint's server
   response metric.
+- Vercel Observability isolated `Function Invocations → Time to First Byte` for
+  deployment `dpl_9wL2rrVaHgsTmpa5kBH6PvCaiqjM`, preview environment, route
+  `/ops/activation`, and `hot` function starts during the exact 09:06–09:07
+  Asia/Ho_Chi_Minh measurement window.
+- The 20 authenticated warm reloads produced 58 hot function invocations.
+  Observed TTFB was 50 ms p50, 3.57 s p90, and 3.7 s p95. The approved p95
+  limit is 1.5 s, so the gate failed.
 
 ### Marketing and stress details
 
@@ -213,9 +220,9 @@ Acceptance criteria tested: 24/24 passed.
 
 ## ISSUES DISCOVERED
 
-1. **Release gate – medium:** the authenticated preview passed the approved
-   aggregation target, but available browser and Vercel log instrumentation
-   does not isolate server TTFB for the page-response gate.
+1. **Release gate – high:** the authenticated preview passed the approved
+   aggregation target, but isolated Vercel TTFB was 3.7 s p95 against the
+   approved 1.5 s limit.
 2. **Deployment prerequisite – high:** production must receive a deliberate
    server-only `OPS_USER_IDS` value containing the Homeowner's exact Clerk user
    ID. Without it, the route correctly returns not found.
@@ -241,16 +248,16 @@ before connecting to the database. The full suite then passed with 354 tests.
    than modified in place so it can import the typed shared contract directly.
 3. Retention logic has its own repository and tests to keep destructive scope
    isolated from read-only reporting.
-4. The protected, branch-backed preview passed the aggregation p95 gate. The
-   page-response p95 gate remains uncertified because the available timing
-   combines Vercel Deployment Protection, transfer, and client loading.
+4. The protected, branch-backed preview passed the aggregation p95 gate.
+   Vercel Observability subsequently isolated server TTFB and the
+   page-response p95 gate failed at 3.7 s.
 
 ## BUILDER HANDOVER TO CONTRACTOR
 
 The implementation passed independent functional and security review and is
 available on the protected preview branch. Production release remains closed
-until the Contractor obtains an isolated 20-run server TTFB measurement below
-1.5 seconds or the Homeowner approves a revised measurement gate.
+until a narrow performance refinement brings isolated hot TTFB p95 below 1.5
+seconds and the same Observability query passes on a replacement preview.
 
 No Neon main maintenance or production deployment is included in this
 handover.

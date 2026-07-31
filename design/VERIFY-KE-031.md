@@ -35,8 +35,8 @@ Failed: 0
 Untestable in the approved local environment: 0
 ```
 
-The 24 functional acceptance criteria are satisfied. Two additional
-performance quality gates remain uncertified and are listed separately below.
+The 24 functional acceptance criteria are satisfied. Of the two additional
+performance quality gates, one passed and one failed as listed below.
 
 ## INDEPENDENT AUDIT
 
@@ -160,25 +160,33 @@ Result: passed.
 
 Required: below 1.5 seconds over 20 warm authenticated requests.
 
-The authenticated preview is running in `iad1` beside the Neon region, and all
-20 measured reports returned successfully. The page's aggregate timer passed,
-but the available browser instrumentation combines Vercel Deployment
-Protection, document transfer, and client load. It cannot isolate server TTFB.
+Vercel Observability isolated `Function Invocations → Time to First Byte` for
+deployment `dpl_9wL2rrVaHgsTmpa5kBH6PvCaiqjM`, preview environment, route
+`/ops/activation`, and `hot` function starts. The exact 09:06–09:07
+Asia/Ho_Chi_Minh window covers the 20 authenticated warm reloads and contains
+58 hot function invocations with no cold invocation.
 
-Result: not certified.
+Observed TTFB:
+
+- p50: 50 ms;
+- p90: 3.57 s;
+- p95: 3.7 s;
+- required p95: below 1.5 s.
+
+Result: failed.
 
 ## CRITICAL ISSUES
 
-1. **Release evidence incomplete:** production readiness cannot be signed while
-   G-031-02 is uncertified.
+1. **Performance gate failed:** G-031-02 exceeded its p95 limit by 2.2 seconds.
 2. **Operator identity not configured:** production access will remain closed
    until the exact Homeowner Clerk user ID is deliberately set in the
    server-only `OPS_USER_IDS` environment variable.
 
-## REMAINING DECISION
+## REQUIRED REFINEMENT
 
-Before production release, obtain an isolated 20-run server TTFB measurement
-below 1.5 seconds or ask the Homeowner to approve a revised measurement gate.
+Keep production closed. Prepare a narrow performance TIP that reduces the
+slow TTFB tail without changing the `ke031-v1` contract, then repeat the same
+Observability query on a replacement preview.
 
 ## RELEASE VERDICT
 
@@ -201,5 +209,5 @@ The Homeowner subsequently authorized the preferred preview action. Commit
 temporary Neon branch. See `design/RELEASE-KE-031-PREVIEW.md`.
 
 This addendum does not change the production verdict. The two authenticated
-p95 gates were then measured: aggregation passed at 255.1 ms p95; isolated
-server-response p95 remains pending.
+p95 gates were then measured: aggregation passed at 255.1 ms p95; isolated hot
+server TTFB failed at 3.7 s p95.

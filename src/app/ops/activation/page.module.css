@@ -79,6 +79,70 @@
   font-variant-numeric: tabular-nums;
 }
 
+.loadingMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.loadingDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand);
+  animation: loadingPulse 1.2s ease-in-out infinite;
+}
+
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  padding-top: 20px;
+}
+
+.loadingGrid span {
+  min-height: 180px;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--raised) 88%, transparent) 25%,
+      color-mix(in srgb, var(--surface) 92%, transparent) 50%,
+      color-mix(in srgb, var(--raised) 88%, transparent) 75%
+    );
+  background-size: 200% 100%;
+  animation: loadingSweep 1.8s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes loadingSweep {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
 .healthBadge {
   display: inline-flex;
   align-items: center;
@@ -531,6 +595,10 @@
 }
 
 @media (max-width: 960px) {
+  .loadingGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .twoColumn {
     grid-template-columns: 1fr;
   }
@@ -569,6 +637,20 @@
     top: 14px;
     right: 0;
     justify-items: end;
+  }
+
+  .loadingMeta {
+    position: absolute;
+    top: 14px;
+    right: 0;
+  }
+
+  .loadingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .loadingGrid span {
+    min-height: 132px;
   }
 
   .headerMeta > p {
@@ -689,6 +771,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loadingDot,
+  .loadingGrid span {
+    animation: none;
+  }
+
   .windowNav a {
     scroll-behavior: auto;
   }

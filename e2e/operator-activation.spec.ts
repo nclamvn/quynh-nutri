@@ -38,3 +38,17 @@ test("operator console is private, responsive and dark-theme safe", async ({
     /noindex/,
   );
 });
+
+test("operator console emits a private loading shell before the aggregate report", async ({
+  request,
+}) => {
+  const response = await request.get("/ops/activation?window=90", {
+    headers: { "Accept-Encoding": "identity" },
+  });
+  expect(response.status()).toBe(200);
+
+  const body = await response.text();
+  expect(body).toContain("Đang tổng hợp");
+  expect(body).toContain("Thang bằng chứng");
+  expect(body).not.toContain("e2e-household");
+});
