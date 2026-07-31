@@ -13,7 +13,9 @@ import { isE2EMode } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { requireOperatorUserId } from "@/lib/operator-auth";
 
-const QUERY_TIMEOUT_MS = 1_500;
+const STATEMENT_TIMEOUT_MS = 1_500;
+const TRANSACTION_MAX_WAIT_MS = 2_000;
+const TRANSACTION_TIMEOUT_MS = 10_000;
 
 type LoadedMetricInput = {
   events: OpsEventRow[];
@@ -119,7 +121,7 @@ async function loadMetricInput(
   const db = getDb();
   return db.$transaction(async (tx) => {
     await tx.$queryRaw(
-      Prisma.sql`SELECT set_config('statement_timeout', ${String(QUERY_TIMEOUT_MS)}, true)`,
+      Prisma.sql`SELECT set_config('statement_timeout', ${String(STATEMENT_TIMEOUT_MS)}, true)`,
     );
     const eventRows = await tx.productEvent.findMany({
       where: {
@@ -179,7 +181,8 @@ async function loadMetricInput(
       },
     };
   }, {
-    timeout: QUERY_TIMEOUT_MS + 1_000,
+    maxWait: TRANSACTION_MAX_WAIT_MS,
+    timeout: TRANSACTION_TIMEOUT_MS,
   });
 }
 
