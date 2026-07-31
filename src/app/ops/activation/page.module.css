@@ -1,0 +1,695 @@
+.shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 3%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--ink) 3%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  padding: 24px;
+}
+
+.frame {
+  width: min(100%, 1480px);
+  margin-inline: auto;
+}
+
+.header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 28px 0 30px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  color: var(--ink);
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.brand span {
+  color: var(--brand);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 20px;
+}
+
+.eyebrow,
+.kicker {
+  color: var(--brand-ink);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  margin-top: 28px;
+}
+
+.header h1 {
+  margin-top: 7px;
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: clamp(36px, 5vw, 68px);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+.lead {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.headerMeta {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  flex: none;
+  color: var(--tertiary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.healthBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  margin-bottom: 5px;
+  padding: 0 13px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--raised) 86%, transparent);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--tertiary);
+}
+
+.healthy .statusDot {
+  background: var(--accent);
+}
+
+.attention .statusDot {
+  background: var(--amber);
+}
+
+.unavailable .statusDot {
+  background: var(--danger);
+}
+
+.controlBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.periodText {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.windowNav {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+}
+
+.windowNav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.windowNav a:hover,
+.windowNav a:focus-visible {
+  color: var(--ink);
+}
+
+.windowNav .windowActive {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.section,
+.healthSection {
+  margin-top: 20px;
+  padding: 24px;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--raised) 84%, transparent);
+  box-shadow: var(--shadow-xs);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.sectionHeading h2 {
+  margin-top: 5px;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.sectionHeading > p {
+  max-width: 520px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.milestoneRail {
+  position: relative;
+  display: grid;
+}
+
+.milestoneRail::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 16px;
+  width: 1px;
+  background: var(--hairline);
+  content: "";
+}
+
+.milestone {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.milestoneIndex {
+  z-index: 1;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: var(--raised);
+  color: var(--brand-ink);
+  font-size: 9px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.milestoneBody {
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.milestoneTopline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.milestoneTopline h3 {
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.milestoneTopline p {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: none;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.milestoneTopline strong {
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.milestoneTopline span,
+.delta {
+  color: var(--tertiary);
+}
+
+.bar {
+  height: 3px;
+  margin-top: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+}
+
+.delta {
+  margin-top: 4px;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.twoColumn {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 20px;
+}
+
+.metricGrid,
+.metricGridFour {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--hairline);
+}
+
+.metricGridFour {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metricCard {
+  min-width: 0;
+  padding: 17px;
+  background: var(--raised);
+}
+
+.metricValue {
+  margin-top: 10px;
+  font-size: 27px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.metricDetail {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.ttvList {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--hairline);
+}
+
+.ttvList > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 16px;
+  background: var(--raised);
+}
+
+.ttvList p {
+  font-size: 11px;
+  font-weight: 620;
+}
+
+.ttvList strong {
+  grid-row: span 2;
+  font-size: 20px;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+}
+
+.ttvList span {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+}
+
+.occasionTable {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.occasionTable th,
+.occasionTable td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+}
+
+.occasionTable thead th {
+  background: var(--surface);
+  color: var(--tertiary);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.occasionTable tbody th {
+  font-weight: 650;
+}
+
+.occasionTable tr:last-child th,
+.occasionTable tr:last-child td {
+  border-bottom: 0;
+}
+
+.occasionTable td {
+  color: var(--muted);
+}
+
+.healthSection {
+  border-color: color-mix(in srgb, var(--ink) 18%, var(--hairline));
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.healthSection .kicker {
+  color: var(--brand);
+}
+
+.healthSection .sectionHeading > p {
+  color: color-mix(in srgb, var(--bg) 62%, transparent);
+}
+
+.healthGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  gap: 28px;
+}
+
+.healthGrid dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--bg) 16%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 15%, transparent);
+}
+
+.healthGrid dl > div {
+  padding: 14px;
+  background: color-mix(in srgb, var(--ink) 94%, var(--bg));
+}
+
+.healthGrid dt {
+  color: color-mix(in srgb, var(--bg) 58%, transparent);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.healthGrid dd {
+  margin-top: 7px;
+  font-size: 15px;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+}
+
+.healthNotes {
+  align-self: center;
+}
+
+.healthNotes ul {
+  display: grid;
+  gap: 8px;
+  color: color-mix(in srgb, var(--bg) 66%, transparent);
+  font-size: 10px;
+  line-height: 1.55;
+  list-style: none;
+}
+
+.healthNotes li {
+  position: relative;
+  padding-left: 14px;
+}
+
+.healthNotes li::before {
+  position: absolute;
+  top: 0.6em;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--tertiary);
+  content: "";
+}
+
+.guardrails {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.guardrails p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--amber) 12%, transparent);
+  color: color-mix(in srgb, var(--amber) 78%, white);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.guardrails span {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 2px 10px;
+  color: var(--tertiary);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+@media (max-width: 960px) {
+  .twoColumn {
+    grid-template-columns: 1fr;
+  }
+
+  .metricGridFour {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .healthGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell {
+    padding: 14px;
+    background-size: 24px 24px;
+  }
+
+  .header {
+    position: relative;
+    align-items: start;
+    padding: 14px 0 22px;
+  }
+
+  .header > div:first-child {
+    width: 100%;
+  }
+
+  .header h1 {
+    white-space: nowrap;
+  }
+
+  .headerMeta {
+    position: absolute;
+    top: 14px;
+    right: 0;
+    justify-items: end;
+  }
+
+  .headerMeta > p {
+    display: none;
+  }
+
+  .healthBadge {
+    min-height: 34px;
+    padding-inline: 10px;
+  }
+
+  .eyebrow {
+    margin-top: 20px;
+  }
+
+  .lead {
+    max-width: 290px;
+    font-size: 12px;
+  }
+
+  .controlBar {
+    align-items: end;
+    gap: 12px;
+  }
+
+  .periodText {
+    max-width: 130px;
+  }
+
+  .windowNav a {
+    min-width: 48px;
+    min-height: 40px;
+    padding-inline: 9px;
+  }
+
+  .section,
+  .healthSection {
+    padding: 18px;
+  }
+
+  .sectionHeading {
+    display: block;
+    margin-bottom: 18px;
+  }
+
+  .sectionHeading > p {
+    margin-top: 8px;
+    max-width: none;
+    text-align: left;
+  }
+
+  .milestone {
+    gap: 12px;
+  }
+
+  .milestoneTopline {
+    gap: 8px;
+  }
+
+  .milestoneTopline p {
+    gap: 6px;
+  }
+
+  .milestoneTopline h3 {
+    font-size: 12px;
+  }
+
+  .milestoneTopline strong {
+    font-size: 16px;
+  }
+
+  .milestoneTopline span {
+    font-size: 10px;
+  }
+
+  .metricGrid,
+  .metricGridFour {
+    grid-template-columns: 1fr;
+  }
+
+  .metricCard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 4px 14px;
+  }
+
+  .metricCard .metricValue {
+    grid-row: span 2;
+    margin: 0;
+  }
+
+  .metricDetail {
+    margin-top: 0;
+  }
+
+  .ttvList > div {
+    grid-template-columns: 1fr;
+  }
+
+  .ttvList strong {
+    grid-row: auto;
+    margin-top: 5px;
+  }
+
+  .tableWrap {
+    box-shadow: inset -18px 0 18px -20px color-mix(in srgb, var(--ink) 72%, transparent);
+  }
+
+  .healthGrid dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer {
+    display: grid;
+    gap: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .windowNav a {
+    scroll-behavior: auto;
+  }
+}

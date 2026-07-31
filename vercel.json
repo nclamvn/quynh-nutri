@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/reminders",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/product-event-retention",
+      "schedule": "15 3 * * *"
     }
   ]
 }

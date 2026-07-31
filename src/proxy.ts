@@ -9,6 +9,7 @@ function isPublic(pathname: string): boolean {
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
     pathname === "/api/cron/reminders" ||
+    pathname === "/api/cron/product-event-retention" ||
     pathname.startsWith("/spike/");
 }
 

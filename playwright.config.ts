@@ -29,6 +29,7 @@ export default defineConfig({
       E2E_BYPASS_AUTH: "1",
       E2E_MOCK_AI: "1",
       E2E_MOCK_GEOCODE: "1",
+      OPS_USER_IDS: "e2e-user",
       NODE_ENV: "development",
     },
   },

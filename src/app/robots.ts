@@ -7,6 +7,7 @@ const PRIVATE_ROUTES = [
   "/health",
   "/notes",
   "/nutrition",
+  "/ops/",
   "/overview",
   "/pantry",
   "/reports",
