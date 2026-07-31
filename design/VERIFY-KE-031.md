@@ -140,48 +140,45 @@ collided with an unrelated process on the default port.
 - Retention dry run: zero eligible rows and zero writes.
 - Neon main received no fixture, schema change, migration, or retention write.
 
-## UNCERTIFIED RELEASE GATES
+## RELEASE PERFORMANCE GATES
 
 ### G-031-01 – 90-day aggregation p95
 
 Required: below 500 ms over 20 warm runs, excluding connection establishment.
 
-Observed:
+Authenticated `iad1` preview result:
 
-- server-side SQL plan below 10 ms;
-- local Vietnam-to-Neon-US raw-row transfer approximately 2.7–3.8 seconds;
-- no valid 20-run colocated measurement.
+- minimum: 108.6 ms;
+- median: 145.5 ms;
+- p95: 255.1 ms;
+- maximum: 985.5 ms;
+- sample: 20 warm, branch-backed 90-day reports.
 
-Result: not certified.
+Result: passed.
 
 ### G-031-02 – branch-backed operator response p95
 
 Required: below 1.5 seconds over 20 warm authenticated requests.
 
-The local E2E bypass uses deterministic in-process metrics and therefore cannot
-be represented as branch-backed performance evidence. A production-like
-colocated preview has not been authorized.
+The authenticated preview is running in `iad1` beside the Neon region, and all
+20 measured reports returned successfully. The page's aggregate timer passed,
+but the available browser instrumentation combines Vercel Deployment
+Protection, document transfer, and client load. It cannot isolate server TTFB.
 
 Result: not certified.
 
 ## CRITICAL ISSUES
 
 1. **Release evidence incomplete:** production readiness cannot be signed while
-   G-031-01 and G-031-02 are uncertified.
+   G-031-02 is uncertified.
 2. **Operator identity not configured:** production access will remain closed
    until the exact Homeowner Clerk user ID is deliberately set in the
    server-only `OPS_USER_IDS` environment variable.
 
-## DECISION NEEDED FROM HOMEOWNER
+## REMAINING DECISION
 
-Authorize one of these next actions:
-
-1. preferred – commit and push KE-031, create a protected Vercel preview
-   colocated with Neon, configure the operator Clerk ID there, and run the two
-   pending p95 measurements before production release;
-2. if the colocated preview misses either limit – keep production closed and
-   approve a narrow KE-031 performance amendment for a compact server-side
-   metric facts projection.
+Before production release, obtain an isolated 20-run server TTFB measurement
+below 1.5 seconds or ask the Homeowner to approve a revised measurement gate.
 
 ## RELEASE VERDICT
 
@@ -193,8 +190,8 @@ Production release: NOT READY
 Overall: NEEDS FIXES
 ```
 
-No commit, push, Vercel deployment, Neon main maintenance, or production
-release is approved by this report.
+The protected preview is approved. Neon main maintenance and production
+release are not approved by this report.
 
 ## POST-VERIFY PREVIEW ADDENDUM
 
@@ -204,4 +201,5 @@ The Homeowner subsequently authorized the preferred preview action. Commit
 temporary Neon branch. See `design/RELEASE-KE-031-PREVIEW.md`.
 
 This addendum does not change the production verdict. The two authenticated
-p95 gates remain pending.
+p95 gates were then measured: aggregation passed at 255.1 ms p95; isolated
+server-response p95 remains pending.

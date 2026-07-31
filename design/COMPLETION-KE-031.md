@@ -157,8 +157,8 @@ Acceptance criteria tested: 24/24 passed.
 | Temporary Neon fixture volume | PASS – 500 households, 10,000 ProductEvents, 1,500 MealCompletions |
 | Temporary Neon query plan | PASS – slowest measured server execution 9.251 ms |
 | Temporary Neon retention dry run | PASS – zero eligible, no deletion |
-| 90-day aggregate p95 below 500 ms | NOT CERTIFIED – local raw-row transfer is 2.7–3.8 s |
-| Branch-backed page p95 below 1.5 s | NOT CERTIFIED – requires an authenticated colocated preview |
+| 90-day aggregate p95 below 500 ms | PASS – 255.1 ms over 20 authenticated warm preview runs |
+| Branch-backed page p95 below 1.5 s | NOT CERTIFIED – available tooling does not isolate server TTFB |
 
 ### Performance details
 
@@ -175,6 +175,12 @@ Acceptance criteria tested: 24/24 passed.
   remote branch.
 - A 20-run E2E-fixture page probe is intentionally not reported as branch
   evidence because E2E mode uses deterministic in-process fixtures.
+- The authenticated `iad1` preview subsequently measured 20 branch-backed
+  90-day aggregations: 108.6 ms minimum, 145.5 ms median, 255.1 ms p95, and
+  985.5 ms maximum.
+- Browser reload p95 was 5,499 ms through Vercel Deployment Protection and the
+  client loading path. It is not substituted for the blueprint's server
+  response metric.
 
 ### Marketing and stress details
 
@@ -207,10 +213,9 @@ Acceptance criteria tested: 24/24 passed.
 
 ## ISSUES DISCOVERED
 
-1. **Release gate – medium:** the current repository intentionally reads raw,
-   bounded event rows and aggregates in application memory. Database work is
-   fast, but a geographically remote local runtime cannot meet the approved
-   end-to-end latency target at the 10,000-row fixture volume.
+1. **Release gate – medium:** the authenticated preview passed the approved
+   aggregation target, but available browser and Vercel log instrumentation
+   does not isolate server TTFB for the page-response gate.
 2. **Deployment prerequisite – high:** production must receive a deliberate
    server-only `OPS_USER_IDS` value containing the Homeowner's exact Clerk user
    ID. Without it, the route correctly returns not found.
@@ -236,18 +241,16 @@ before connecting to the database. The full suite then passed with 354 tests.
    than modified in place so it can import the typed shared contract directly.
 3. Retention logic has its own repository and tests to keep destructive scope
    isolated from read-only reporting.
-4. The branch-backed latency gates remain uncertified pending a colocated
-   runtime. No result is marked passed from fixture-only E2E timing.
+4. The protected, branch-backed preview passed the aggregation p95 gate. The
+   page-response p95 gate remains uncertified because the available timing
+   combines Vercel Deployment Protection, transfer, and client loading.
 
 ## BUILDER HANDOVER TO CONTRACTOR
 
-The implementation is ready for independent functional and security review.
-Release must remain closed until the Contractor either:
+The implementation passed independent functional and security review and is
+available on the protected preview branch. Production release remains closed
+until the Contractor obtains an isolated 20-run server TTFB measurement below
+1.5 seconds or the Homeowner approves a revised measurement gate.
 
-1. verifies the temporary Neon branch through a Vercel preview colocated with
-   the database and records both p95 gates; or
-2. issues a new approved optimization TIP for a compact server-side facts
-   projection if the colocated preview still misses either target.
-
-No commit, push, Neon main maintenance, or production deployment is included
-in this handover.
+No Neon main maintenance or production deployment is included in this
+handover.

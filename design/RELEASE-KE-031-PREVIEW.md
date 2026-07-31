@@ -61,20 +61,37 @@ from middleware. It was superseded by the deployment listed above, which
 received the required Clerk keys only at deployment scope and passed smoke
 testing.
 
-## PENDING RELEASE EVIDENCE
+## AUTHENTICATED RELEASE EVIDENCE
 
-The following approved KE-031 gates still require an authenticated browser
-session:
+The Homeowner completed both Vercel and Clerk authentication. The protected
+preview returned the real operator console with 504 aggregate households and
+privacy suppression intact.
 
-1. 20 warm requests to the branch-backed 90-day operator report with p95 below
-   1.5 seconds;
-2. confirmation that the authenticated operator DTO completes its 90-day
-   aggregation without an unavailable state.
+### Passed authenticated gate
 
-The public preview is protected by Vercel authentication before Clerk
-authentication. The Homeowner must open the preview while signed in to Vercel,
-then sign in to Q's Kitchen with the allowlisted Clerk account. Production
-release remains closed until these measurements are recorded.
+- 20 warm branch-backed 90-day reports completed.
+- Aggregate duration: minimum 108.6 ms, median 145.5 ms, p95 255.1 ms, maximum
+  985.5 ms.
+- Required aggregate p95: below 500 ms.
+- Result: PASS.
+- All measured requests returned the console rather than an unavailable state.
+
+### Remaining gate
+
+The browser's full reload p95 was 5,499 ms, but this combines Vercel Deployment
+Protection, document transfer, CSS and JavaScript loading, and browser work. It
+is not the approved server-response metric and is not presented as one.
+
+Available Vercel logs confirm successful HTTP 200 operator requests but do not
+include an isolated request-duration field. Server TTFB p95 below 1.5 seconds
+therefore remains uncertified.
+
+### Deferred warning
+
+The current `pg` version logs that `sslmode=require` is presently treated as
+`verify-full`, but this alias will change in its next major version. Requests
+remain successful. Before upgrading to `pg` 9, connection strings should be
+made explicit with `sslmode=verify-full`.
 
 ## RELEASE VERDICT
 
