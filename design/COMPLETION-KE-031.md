@@ -189,7 +189,8 @@ Acceptance criteria tested: 24/24 passed.
 - Strategy: temporary copy-on-write branch only.
 - Branch: `codex-ke031-verify-20260731`
 - Branch ID: `br-snowy-bar-augegw53`
-- Scheduled expiry: 2026-08-01 18:00 UTC.
+- Scheduled expiry: 2026-08-07 18:00 UTC after the Homeowner authorized a
+  protected preview release.
 - Neon main remained selected in the project context and received no schema
   change, synthetic fixture, or retention write.
 - The initial synthetic transaction failed on a missing fixture timestamp and

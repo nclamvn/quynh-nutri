@@ -195,3 +195,13 @@ Overall: NEEDS FIXES
 
 No commit, push, Vercel deployment, Neon main maintenance, or production
 release is approved by this report.
+
+## POST-VERIFY PREVIEW ADDENDUM
+
+The Homeowner subsequently authorized the preferred preview action. Commit
+`d68f19e` was pushed on `codex/ke-031-preview`, and protected Vercel deployment
+`dpl_9wL2rrVaHgsTmpa5kBH6PvCaiqjM` passed signed-out smoke testing against the
+temporary Neon branch. See `design/RELEASE-KE-031-PREVIEW.md`.
+
+This addendum does not change the production verdict. The two authenticated
+p95 gates remain pending.
