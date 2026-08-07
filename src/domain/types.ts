@@ -95,6 +95,21 @@ export interface HealthProfile {
   expertSet?: { by: string; at: string; ref: string };
 }
 
+/**
+ * Everyday context the household chooses to keep beside a member. It is
+ * descriptive only: the planner must never turn these free notes into medical
+ * advice or an automatic restriction.
+ */
+export interface MemberContextProfile {
+  ageYears?: number;
+  ageMonths?: number;
+  heightCm?: number;
+  weightKg?: number;
+  routine?: string[];
+  foodNotes?: string[];
+  wellbeingNotes?: string[];
+}
+
 /** One ingredient line inside a dish, qty for `baseServings`. */
 export interface DishLine {
   commodityId: string;
@@ -174,6 +189,8 @@ export interface Member {
   dislikes?: string[];
   /** Life-stage / health profile (T1: pregnancy & postpartum, wellness mode). */
   healthProfile?: HealthProfile;
+  /** Optional human context: measurements, routines and descriptive notes. */
+  contextProfile?: MemberContextProfile;
   // ── STATE layer (dynamic, self-expiring) ──
   states?: MemberState[];
 }

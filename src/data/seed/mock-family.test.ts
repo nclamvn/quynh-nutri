@@ -22,6 +22,8 @@ describe("mock family Nhà Lâm – Quỳnh", () => {
     expect(household.members.find((member) => member.id === "com")?.ageBand).toBe("0-2");
     expect(MOCK_FAMILY_LAM_QUYNH.memberContexts.find((context) => context.memberId === "lam"))
       .toMatchObject({ ageYears: 41, heightCm: 173, weightKg: 59 });
+    expect(household.members.find((member) => member.id === "lam")?.contextProfile)
+      .toMatchObject({ ageYears: 41, heightCm: 173, weightKg: 59 });
   });
 
   it("keeps preferences soft and does not create medical or allergy constraints", () => {

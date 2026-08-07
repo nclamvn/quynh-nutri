@@ -110,7 +110,7 @@ interface StoreValue {
 }
 
 export type SupplierInput = Omit<Supplier, "householdId" | "seed">;
-export type MemberBaseInput = Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes">;
+export type MemberBaseInput = Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes" | "contextProfile">;
 
 const StoreContext = createContext<StoreValue | null>(null);
 
