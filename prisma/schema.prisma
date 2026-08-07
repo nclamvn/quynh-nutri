@@ -528,6 +528,7 @@ model Member {
   conditions    String[] // standing conditions — MEDICAL tier (execute-not-prescribe)
   dislikes      String[] // disliked dishes/ingredients — PREFERENCE tier
   healthProfile Json? // { lifeStage, mode } — T1 special diets (wellness only)
+  contextProfile Json? // descriptive profile: measurements, routines, food notes
   // ── STATE layer (dynamic, self-expiring) ──
   states        MemberState[]
 }

@@ -26,6 +26,7 @@ import type {
   MemberRole,
   DayName,
   HealthProfile,
+  MemberContextProfile,
   Member,
   MemberState,
   Supplier,
@@ -221,6 +222,7 @@ export async function loadHouseholdStateForSystem(
       conditions: m.conditions ?? [],
       dislikes: m.dislikes ?? [],
       healthProfile: (m.healthProfile as unknown as HealthProfile) ?? undefined,
+      contextProfile: (m.contextProfile as unknown as MemberContextProfile) ?? undefined,
       states: m.states.map((s) => ({
         id: s.id,
         kind: s.kind as MemberState["kind"],
@@ -1432,7 +1434,7 @@ export async function saveMemberAllergies(memberId: string, allergies: Allergen[
 }
 
 // ─── "Không gian gia đình sống" – Member base-layer CRUD + dynamic states ───
-type MemberBase = Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes">;
+type MemberBase = Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes" | "contextProfile">;
 
 /** Create or update a member's BASE layer. Scoped to the current household. */
 export async function saveMember(input: MemberBase & { id?: string }): Promise<string> {
@@ -1449,6 +1451,7 @@ export async function saveMember(input: MemberBase & { id?: string }): Promise<s
     habits: input.habits ?? [],
     conditions: input.conditions ?? [],
     dislikes: input.dislikes ?? [],
+    contextProfile: (input.contextProfile ?? undefined) as never,
   };
   if (input.id) {
     await db.member.updateMany({ where: { id: input.id, householdId }, data });

@@ -33,6 +33,18 @@ const DURATIONS: { label: string; days: number }[] = [
 
 const roleMark = (m: Member) => (m.role === "adult" ? (m.sex === "M" ? "B" : "M") : "T");
 const displayName = (m: Member) => m.name?.trim() || (m.role === "child" ? "Bé" : m.sex === "M" ? "Bố" : "Mẹ");
+const profileFacts = (m: Member) => {
+  const profile = m.contextProfile;
+  if (!profile) return [];
+  const age = profile.ageYears == null
+    ? null
+    : `${profile.ageYears} tuổi${profile.ageMonths == null ? "" : ` ${profile.ageMonths} tháng`}`;
+  return [
+    age,
+    profile.heightCm == null ? null : `${profile.heightCm} cm`,
+    profile.weightKg == null ? null : `${profile.weightKg} kg`,
+  ].filter((value): value is string => value != null);
+};
 
 export function FamilySpaceView() {
   const { household, addMemberState, removeMemberState } = useStore();
@@ -94,6 +106,9 @@ export function FamilySpaceView() {
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-weak text-sm font-medium text-brand-ink">{roleMark(m)}</span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{displayName(m)}</p>
+                  {profileFacts(m).length > 0 && (
+                    <p className="mt-0.5 text-[11px] text-tertiary">{profileFacts(m).join(" · ")}</p>
+                  )}
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {/* Allergies – the safety layer. Honey/amber "cần tránh", never
                         alarming red (một-màu-một-nghĩa). */}
@@ -105,13 +120,33 @@ export function FamilySpaceView() {
                     {need.conditions.map((c) => (
                       <span key={c} className="rounded-full border border-hairline px-2 py-0.5 text-[10px] text-muted">{c}</span>
                     ))}
-                    {need.allergies.length === 0 && need.conditions.length === 0 && (
+                    {need.dislikes.map((d) => (
+                      <span key={d} className="rounded-full border border-hairline px-2 py-0.5 text-[10px] text-muted">Không thích: {d}</span>
+                    ))}
+                    {need.allergies.length === 0 && need.conditions.length === 0 && need.dislikes.length === 0 && (
                       <span className="text-[11px] text-tertiary">Không có gì cần tránh</span>
                     )}
                   </div>
                 </div>
                 <span aria-hidden className="shrink-0 text-[11px] font-medium text-brand">Sửa</span>
               </button>
+
+              {(m.habits?.length || m.contextProfile?.routine?.length || m.contextProfile?.foodNotes?.length || m.contextProfile?.wellbeingNotes?.length) ? (
+                <div className="mt-3 flex flex-wrap gap-1.5 border-t border-hairline pt-3">
+                  {m.habits?.map((habit) => (
+                    <span key={habit} className="rounded-full bg-brand-weak px-2 py-0.5 text-[10px] text-brand-ink">{habit}</span>
+                  ))}
+                  {m.contextProfile?.routine?.map((note) => (
+                    <span key={note} className="rounded-full border border-hairline px-2 py-0.5 text-[10px] text-muted">{note}</span>
+                  ))}
+                  {m.contextProfile?.foodNotes?.map((note) => (
+                    <span key={note} className="rounded-full border border-hairline px-2 py-0.5 text-[10px] text-muted">{note}</span>
+                  ))}
+                  {m.contextProfile?.wellbeingNotes?.map((note) => (
+                    <span key={note} className="rounded-full border border-amber/25 bg-amber-weak px-2 py-0.5 text-[10px] text-amber">{note}</span>
+                  ))}
+                </div>
+              ) : null}
 
               {/* Today's states – self-expiring; each removable ("khỏi rồi"). */}
               {need.activeStates.length > 0 && (

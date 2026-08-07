@@ -36,6 +36,14 @@ const members: Member[] = [
     conditions: [],
     dislikes: ["mắm tôm", "mắm tép", "món nhiều dầu mỡ", "món chế biến cầu kỳ"],
     allergies: [],
+    contextProfile: {
+      ageYears: 41,
+      heightCm: 173,
+      weightKg: 59,
+      routine: ["văn phòng, công việc trí não", "ít ăn sáng"],
+      foodNotes: ["vẫn ăn nước mắm", "không thích mắm tôm và mắm tép"],
+      wellbeingNotes: ["không bệnh nền", "sức khỏe bình thường"],
+    },
   },
   {
     id: "quynh",
@@ -55,6 +63,12 @@ const members: Member[] = [
     conditions: [],
     dislikes: ["lá dấp cá", "nguyên liệu không tươi", "món sai vị"],
     allergies: [],
+    contextProfile: {
+      ageYears: 39,
+      routine: ["chăm sóc bữa ăn và dinh dưỡng gia đình"],
+      foodNotes: ["ăn được hầu hết món", "không thích món không tươi hoặc sai vị"],
+      wellbeingNotes: ["quan tâm dinh dưỡng cá nhân"],
+    },
   },
   {
     id: "cherry",
@@ -66,6 +80,11 @@ const members: Member[] = [
     conditions: [],
     dislikes: ["hải sản", "sầu riêng"],
     allergies: [],
+    contextProfile: {
+      ageYears: 14,
+      foodNotes: ["không kiêng món nào ngoài sầu riêng", "không chuộng hải sản"],
+      wellbeingNotes: ["đang trong giai đoạn dậy thì"],
+    },
   },
   {
     id: "com",
@@ -77,6 +96,12 @@ const members: Member[] = [
     conditions: [],
     dislikes: [],
     allergies: [],
+    contextProfile: {
+      ageYears: 2,
+      ageMonths: 10,
+      foodNotes: ["không có món kiêng"],
+      wellbeingNotes: ["ăn uống khỏe mạnh"],
+    },
   },
   {
     id: "ba-noi",
@@ -88,6 +113,11 @@ const members: Member[] = [
     conditions: [],
     dislikes: [],
     allergies: [],
+    contextProfile: {
+      ageYears: 65,
+      foodNotes: ["thích ăn rau", "không kiêng món nào"],
+      wellbeingNotes: ["sức khỏe tốt", "đau chân và đau lưng thỉnh thoảng"],
+    },
   },
 ];
 

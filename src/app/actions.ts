@@ -91,6 +91,15 @@ const healthProfileSchema = z.object({
   lifeStage: z.enum(["none", "pregnant_t1", "pregnant_t2", "pregnant_t3", "lactating_0_6", "lactating_7_12"]),
   mode: z.literal("wellness"),
 }).strict();
+const memberContextProfileSchema = z.object({
+  ageYears: z.number().int().min(0).max(130).optional(),
+  ageMonths: z.number().int().min(0).max(11).optional(),
+  heightCm: z.number().int().min(30).max(260).optional(),
+  weightKg: z.number().positive().max(400).optional(),
+  routine: z.array(shortText).max(20).optional(),
+  foodNotes: z.array(shortText).max(30).optional(),
+  wellbeingNotes: z.array(shortText).max(20).optional(),
+}).strict();
 const allergenSchema = z.enum(["shellfish", "fish", "egg", "soy", "dairy", "gluten", "peanut"]);
 const memberSchema = z.object({
   id: id.optional(),
@@ -102,6 +111,7 @@ const memberSchema = z.object({
   habits: z.array(shortText).max(30).optional(),
   conditions: z.array(shortText).max(30).optional(),
   dislikes: z.array(shortText).max(50).optional(),
+  contextProfile: memberContextProfileSchema.optional(),
 }).strict();
 const memberStateSchema = z.object({
   kind: z.enum(["illness", "mood", "context"]),
@@ -768,7 +778,7 @@ export async function persistMemberAllergies(memberId: string, allergies: Allerg
 
 // ── "Không gian gia đình sống" – member base CRUD + dynamic states ──
 export async function persistMember(
-  input: Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes"> & { id?: string },
+  input: Pick<Member, "name" | "role" | "sex" | "ageBand" | "allergies" | "habits" | "conditions" | "dislikes" | "contextProfile"> & { id?: string },
 ): Promise<string> {
   await requireUserId();
   return saveMember(memberSchema.parse(input) as typeof input);

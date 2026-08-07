@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { BottomSheet } from "./BottomSheet";
 import { HealthDisclaimer } from "./HealthDisclaimer";
 import { useStore, type MemberBaseInput } from "@/ui/store";
-import type { Member, LifeStage, Allergen, MemberRole } from "@/domain/types";
+import type { Member, LifeStage, Allergen, MemberRole, MemberContextProfile } from "@/domain/types";
 
 // The member DECLARATION editor – "kê khai một người trong nhà". Base layer:
 // name, role, sex/age, allergies (the hard-safety layer), standing conditions,
@@ -37,11 +37,23 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
   const [sex, setSex] = useState<"M" | "F">("F");
   const [ageBand, setAgeBand] = useState("6-10");
   const [allergies, setAllergies] = useState<Allergen[]>([]);
+  const [habits, setHabits] = useState<string[]>([]);
   const [conditions, setConditions] = useState<string[]>([]);
   const [dislikes, setDislikes] = useState<string[]>([]);
+  const [routine, setRoutine] = useState<string[]>([]);
+  const [foodNotes, setFoodNotes] = useState<string[]>([]);
+  const [wellbeingNotes, setWellbeingNotes] = useState<string[]>([]);
   const [stage, setStage] = useState<LifeStage>("none");
+  const [ageYears, setAgeYears] = useState("");
+  const [ageMonths, setAgeMonths] = useState("");
+  const [heightCm, setHeightCm] = useState("");
+  const [weightKg, setWeightKg] = useState("");
+  const [habitInput, setHabitInput] = useState("");
   const [condInput, setCondInput] = useState("");
   const [disInput, setDisInput] = useState("");
+  const [routineInput, setRoutineInput] = useState("");
+  const [foodNoteInput, setFoodNoteInput] = useState("");
+  const [wellbeingNoteInput, setWellbeingNoteInput] = useState("");
 
   useEffect(() => {
     if (!subject) return;
@@ -53,10 +65,19 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
     setSex(s?.sex ?? "F");
     setAgeBand(s?.ageBand ?? "6-10");
     setAllergies(s?.allergies ?? []);
+    setHabits(s?.habits ?? []);
     setConditions(s?.conditions ?? []);
     setDislikes(s?.dislikes ?? []);
+    setRoutine(s?.contextProfile?.routine ?? []);
+    setFoodNotes(s?.contextProfile?.foodNotes ?? []);
+    setWellbeingNotes(s?.contextProfile?.wellbeingNotes ?? []);
+    setAgeYears(s?.contextProfile?.ageYears?.toString() ?? "");
+    setAgeMonths(s?.contextProfile?.ageMonths?.toString() ?? "");
+    setHeightCm(s?.contextProfile?.heightCm?.toString() ?? "");
+    setWeightKg(s?.contextProfile?.weightKg?.toString() ?? "");
     setStage(s?.healthProfile?.lifeStage ?? "none");
-    setCondInput(""); setDisInput("");
+    setHabitInput(""); setCondInput(""); setDisInput("");
+    setRoutineInput(""); setFoodNoteInput(""); setWellbeingNoteInput("");
   }, [subject]);
 
   if (!subject) return null;
@@ -67,14 +88,35 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
     set((xs) => (xs.includes(t) ? xs : [...xs, t])); clear();
   };
 
+  const toOptionalNumber = (value: string) => {
+    const parsed = Number(value);
+    return value.trim() !== "" && Number.isFinite(parsed) ? parsed : undefined;
+  };
+  const contextProfile: MemberContextProfile | undefined = (() => {
+    const profile: MemberContextProfile = {
+      ageYears: toOptionalNumber(ageYears),
+      ageMonths: toOptionalNumber(ageMonths),
+      heightCm: toOptionalNumber(heightCm),
+      weightKg: toOptionalNumber(weightKg),
+      routine,
+      foodNotes,
+      wellbeingNotes,
+    };
+    return Object.values(profile).some((value) => Array.isArray(value) ? value.length > 0 : value !== undefined)
+      ? profile
+      : undefined;
+  })();
+
   const base: MemberBaseInput = {
     name: name.trim() || undefined,
     role,
     sex: role === "adult" ? sex : undefined,
     ageBand: role === "child" ? ageBand : undefined,
     allergies,
+    habits,
     conditions,
     dislikes,
+    contextProfile,
   };
 
   const save = () => {
@@ -141,6 +183,11 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
           </div>
         </div>
 
+        <TagField label="Thói quen ăn uống" placeholder="ít ăn sáng, thích món luộc…"
+          tags={habits} input={habitInput} setInput={setHabitInput}
+          onAdd={() => addTag(habitInput, setHabits, () => setHabitInput(""))}
+          onRemove={(t) => setHabits((xs) => xs.filter((x) => x !== t))} />
+
         {/* Conditions (free chips) */}
         <TagField label="Bệnh nền (nếu có)" placeholder="tiểu đường, cao huyết áp…"
           tags={conditions} input={condInput} setInput={setCondInput}
@@ -152,6 +199,31 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
           tags={dislikes} input={disInput} setInput={setDisInput}
           onAdd={() => addTag(disInput, setDislikes, () => setDisInput(""))}
           onRemove={(t) => setDislikes((xs) => xs.filter((x) => x !== t))} />
+
+        <div className="space-y-3 border-t border-hairline pt-5">
+          <div>
+            <p className="text-sm font-medium">Hồ sơ bữa ăn</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-tertiary">Ghi nhận để cả nhà hiểu nhau hơn. Ứng dụng không tự suy diễn thành chỉ định y khoa.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <NumberField label="Tuổi" value={ageYears} onChange={setAgeYears} suffix="tuổi" min={0} max={130} />
+            <NumberField label="Tháng lẻ" value={ageMonths} onChange={setAgeMonths} suffix="tháng" min={0} max={11} />
+            <NumberField label="Chiều cao" value={heightCm} onChange={setHeightCm} suffix="cm" min={30} max={260} />
+            <NumberField label="Cân nặng" value={weightKg} onChange={setWeightKg} suffix="kg" min={1} max={400} />
+          </div>
+          <TagField label="Nhịp sống" placeholder="văn phòng, ít ăn sáng…"
+            tags={routine} input={routineInput} setInput={setRoutineInput}
+            onAdd={() => addTag(routineInput, setRoutine, () => setRoutineInput(""))}
+            onRemove={(t) => setRoutine((xs) => xs.filter((x) => x !== t))} />
+          <TagField label="Ghi chú món ăn" placeholder="ưu tiên đồ tươi, kinh nghiệm phở…"
+            tags={foodNotes} input={foodNoteInput} setInput={setFoodNoteInput}
+            onAdd={() => addTag(foodNoteInput, setFoodNotes, () => setFoodNoteInput(""))}
+            onRemove={(t) => setFoodNotes((xs) => xs.filter((x) => x !== t))} />
+          <TagField label="Lưu ý cơ thể" placeholder="đau lưng thỉnh thoảng…"
+            tags={wellbeingNotes} input={wellbeingNoteInput} setInput={setWellbeingNoteInput}
+            onAdd={() => addTag(wellbeingNoteInput, setWellbeingNotes, () => setWellbeingNoteInput(""))}
+            onRemove={(t) => setWellbeingNotes((xs) => xs.filter((x) => x !== t))} />
+        </div>
 
         {/* Maternal life stage – adult females, edit mode (set after the person exists) */}
         {maternal && !isNew && (
@@ -179,6 +251,21 @@ export function MemberSheet({ subject, onClose }: { subject: MemberSubject; onCl
         )}
       </div>
     </BottomSheet>
+  );
+}
+
+function NumberField({ label, value, onChange, suffix, min, max }: {
+  label: string; value: string; onChange: (value: string) => void; suffix: string; min: number; max: number;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-[11px] text-tertiary">{label}</span>
+      <span className="flex items-center rounded-[12px] border border-hairline bg-surface/40 px-3">
+        <input value={value} onChange={(event) => onChange(event.target.value)} type="number" min={min} max={max}
+          className="min-w-0 flex-1 bg-transparent py-2 text-sm outline-none" />
+        <span className="text-xs text-tertiary">{suffix}</span>
+      </span>
+    </label>
   );
 }
 
