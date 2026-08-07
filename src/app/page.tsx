@@ -97,7 +97,11 @@ export default function LandingPage() {
             <p>Một hệ thống lập bữa cho gia đình Việt, biết xoay món, cân lượng, gộp chợ và nói thật độ chắc của từng con số.</p>
             <div className="actions">
               <Link className="btn" href="/sign-up">Lập tuần đầu tiên <span>→</span></Link>
-              <Link className="text-link" href="/overview">Mở ứng dụng</Link>
+              <Link className="text-link app-entry" href="/overview">
+                <span className="app-entry-signal" aria-hidden="true" />
+                <span>Mở ứng dụng</span>
+                <span className="app-entry-arrow" aria-hidden="true">↗</span>
+              </Link>
             </div>
           </div>
           <div className="orbital"><span>7 ngày được sắp sẵn</span><span>Khẩu phần theo số người</span><span>Danh sách chợ tự gộp</span></div>

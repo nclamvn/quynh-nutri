@@ -26,6 +26,7 @@ export function dailyNeed(member: Member, lactating = false): DailyNeed {
   } else {
     // child by age band
     switch (member.ageBand) {
+      case "0-2":
       case "1-3":
         base = { kcal: 1180, proteinG: 20 };
         break;
