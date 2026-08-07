@@ -9,6 +9,23 @@
 @keyframes lp-rail { 0%, 100% { transform: scaleX(0.35); opacity: 0.35; } 50% { transform: scaleX(1); opacity: 1; } }
 @keyframes lp-spin { to { transform: rotate(360deg); } }
 @keyframes lp-rise { from { opacity: 1; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes app-entry-ring {
+  0% { opacity: 0; transform: scale(0.92); }
+  18% { opacity: 0.72; }
+  58%, 100% { opacity: 0; transform: scale(1.08); }
+}
+@keyframes app-entry-signal {
+  0%, 100% { opacity: 0.72; transform: scale(0.92); box-shadow: 0 0 0 0 rgba(243, 93, 125, 0.42); }
+  46% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 7px rgba(243, 93, 125, 0.08), 0 0 22px rgba(243, 93, 125, 0.48); }
+}
+@keyframes app-entry-attention {
+  0%, 100% { box-shadow: 0 8px 30px rgba(243, 93, 125, 0.08); }
+  16%, 34% { box-shadow: 0 12px 42px rgba(243, 93, 125, 0.26); }
+}
+@keyframes app-entry-sheen {
+  from { transform: translateX(-135%) skewX(-18deg); }
+  to { transform: translateX(190%) skewX(-18deg); }
+}
 /* coverage-gauge keyframes – MUST live at top level (never nested inside .lp,
    which is invalid CSS and can make strict parsers drop the whole .lp block). */
 @keyframes g-fill { from { stroke-dashoffset: 100; } }
@@ -97,6 +114,53 @@
   .btn { display: inline-flex; min-height: 48px; align-items: center; justify-content: space-between; gap: 2.5rem; padding: 0.86rem 1.2rem 0.86rem 1.4rem; border-radius: 999px; background: var(--rose); color: #fff; text-decoration: none; font-size: 0.78rem; font-weight: 780; box-shadow: 0 18px 50px rgba(243, 93, 125, 0.26); transition: 0.2s; }
   .btn:hover { background: #ff6c8a; transform: translateY(-3px); }
   .text-link { font-size: 0.78rem; font-weight: 750; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.48); padding-bottom: 0.25rem; }
+  /* The app entry is the gateway for returning visitors. Its signal is a quiet,
+     editorial pulse rather than a loud button so the hero keeps its restraint. */
+  .app-entry {
+    position: relative;
+    z-index: 0;
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    gap: 0.58rem;
+    overflow: visible;
+    padding: 0.72rem 0.9rem;
+    border: 1px solid rgba(255, 250, 244, 0.36);
+    border-radius: 999px;
+    background: rgba(23, 18, 20, 0.2);
+    box-shadow: 0 8px 30px rgba(243, 93, 125, 0.08);
+    backdrop-filter: blur(14px) saturate(130%);
+    transition: border-color 0.24s ease, background 0.24s ease, box-shadow 0.24s ease, transform 0.24s ease;
+    animation: app-entry-attention 5.2s 0.7s ease-out 2;
+  }
+  .app-entry::before {
+    position: absolute;
+    z-index: -1;
+    inset: -5px;
+    border: 1px solid rgba(243, 93, 125, 0.5);
+    border-radius: inherit;
+    content: "";
+    opacity: 0;
+    animation: app-entry-ring 5.2s 0.7s ease-out 2;
+    pointer-events: none;
+  }
+  .app-entry > * { position: relative; z-index: 1; }
+  .app-entry::after {
+    position: absolute;
+    inset: 1px;
+    width: 34%;
+    border-radius: inherit;
+    background: linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    content: "";
+    opacity: 0;
+    pointer-events: none;
+  }
+  .app-entry-signal { width: 0.46rem; height: 0.46rem; flex: 0 0 auto; border-radius: 50%; background: var(--rose); animation: app-entry-signal 2.4s ease-in-out infinite; }
+  .app-entry-arrow { font-size: 0.95rem; line-height: 1; opacity: 0.76; transition: transform 0.24s ease, opacity 0.24s ease; }
+  .app-entry:hover, .app-entry:focus-visible { border-color: rgba(255, 250, 244, 0.72); background: rgba(243, 93, 125, 0.16); box-shadow: 0 14px 38px rgba(243, 93, 125, 0.2); transform: translateY(-2px); }
+  .app-entry:hover::after, .app-entry:focus-visible::after { opacity: 1; animation: app-entry-sheen 0.75s ease-out both; }
+  .app-entry:hover .app-entry-arrow, .app-entry:focus-visible .app-entry-arrow { opacity: 1; transform: translate(2px, -2px); }
+  .app-entry:active { transform: translateY(0); }
   .proof, .media-caption, .rail { position: absolute; z-index: 4; }
   /* Stat strip – now an in-flow horizontal caption under the hero CTAs (was a
      cramped floating corner block that fought the eyebrow). */
@@ -346,6 +410,7 @@
     .hero-intro { margin: 2rem 0 0; gap: 1.6rem; }
     .actions { align-items: flex-start; flex-direction: column; }
     .btn { width: 100%; }
+    .app-entry { min-height: 46px; padding-inline: 0.95rem; }
     .proof { display: none; }
     .media-caption { left: var(--lp-gutter); right: auto; bottom: 1.2rem; }
     .display { font-size: clamp(3.2rem, 16vw, 5rem); }

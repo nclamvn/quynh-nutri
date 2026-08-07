@@ -2,6 +2,7 @@ import "server-only";
 import { getDb } from "@/lib/db";
 import { isE2EMode, requireUserId } from "@/lib/auth";
 import { DEFAULT_HOUSEHOLD } from "@/data/seed/household";
+import { cloneMockFamilyHousehold } from "@/data/seed/mock-family";
 import { normalizeLegacyPantry } from "@/domain/pantry/legacy";
 import type {
   Household,
@@ -106,6 +107,10 @@ export interface HouseholdState {
 
 const initialE2EHousehold = () => {
   if (process.env.E2E_EMPTY_HOUSEHOLD !== "1") {
+    // Opt-in only. This fixture is never selected by production auth or Neon.
+    if (process.env.NODE_ENV !== "production" && process.env.E2E_FAMILY_MOCK === "lam-quynh") {
+      return cloneMockFamilyHousehold();
+    }
     return structuredClone(DEFAULT_HOUSEHOLD);
   }
   return {
